@@ -1,7 +1,6 @@
-from typing import Generic, TypeVar
+from typing import Any, Generic, Type, Dict
 
-from ast import Dict
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABC,  abstractmethod
 
 from schema import InputType, OutputType
 
@@ -13,27 +12,10 @@ OUTPUT_SCHEMA_PATH = "/io/output_schema.json"
 
 
 class IOValidator(ABC):
-    def __init__(self, path: str = ".") -> None:
+    def __init__(self) -> None:
         # work with input schema
-        input = loadSchema(path + INPUT_SCHEMA_PATH)
-        self.inputSchema =  parseInputSchema(input)
+        pass
 
-        # work with output schema 
-        output = loadSchema(path + OUTPUT_SCHEMA_PATH)
-        self.outputSchema = SchemaparseInputSchema(input)
-    def loadSchema(self, path: str =".") -> str:
-        with open(path, "r") as file:
-            content = file.read()
-            self.parse(content)
-    def parse(self, content: str):
-        # Implement parsing logic
-        pass
-    def parseInputSchema(self):
-        self.parse()
-        pass
-    def parseOutputSchema(self):
-        self.parse()
-        pass
     @abstractmethod
     def isValidInput(self) -> bool:
         pass
@@ -44,24 +26,26 @@ class IOValidator(ABC):
 
 
 class Executable(Generic[InputType, OutputType], ABC):
-    def __init__(self, isValidatoring: bool, validator: IOValidator):
-        self.validator = validator
-        self.isValidating = isValidatoring # ?
-
-
-    def execute(self, input_data: InputType) -> OutputType:
-        if  self.isValidating:
-            if not self.validator.isValidInput(input_data):
-                raise ValueError("Invalid input") # shoul be rised by validator probably
-            result = self.invoke(input_data)
-            if not self.validator.isValidOutput(result):
-                raise ValueError("Invalid output") # shoul be rised by validator probably
-            return result
-        else:
-            result = self.invoke(input_data)
-        return result
-
+    input_class: Type[InputType]
+    output_class: Type[OutputType]
+    def __init__(self):
+        pass
+        
     @abstractmethod
-    def invoke(self, input_data: InputType) -> OutputType:
+    def invoke(self, input_data: InputType) -> Dict[str, Any]:
         pass
 
+    def validate_input(self, input_data: Dict[str, Any]) -> InputType:
+        return self.input_class(**input_data)
+
+    def validate_output(self, output_data: Dict[str, Any]) -> OutputType:
+        return self.output_class(**output_data)
+
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            validated_input = self.validate_input(input_data)
+            result = self.invoke(validated_input)
+            self.validate_output(result)
+            return result
+        except Exception as e:
+            raise ValueError(f"Validation error: {e}")
