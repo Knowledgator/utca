@@ -1,6 +1,9 @@
-from ast import Dict
-from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 
+from ast import Dict
+from abc import ABC, ABCMeta, abstractmethod
+
+from schema import InputType, OutputType
 
 INPUT_SCHEMA_PATH = "/io/input_schema.json"
 OUTPUT_SCHEMA_PATH = "/io/output_schema.json"
@@ -40,26 +43,25 @@ class IOValidator(ABC):
 
 
 
-# потом дженерик можно заменить на что то subtyped
-class Executable(ABC):
-
+class Executable(Generic[InputType, OutputType], ABC):
     def __init__(self, isValidatoring: bool, validator: IOValidator):
         self.validator = validator
-        self.isValidating = isValidatoring
-    def execute(self, input_data: Dict) -> OutputType:
-        if  self.isValidating:
+        self.isValidating = isValidatoring # ?
 
+
+    def execute(self, input_data: InputType) -> OutputType:
+        if  self.isValidating:
             if not self.validator.isValidInput(input_data):
-                raise ValueError("Invalid input")
+                raise ValueError("Invalid input") # shoul be rised by validator probably
             result = self.invoke(input_data)
             if not self.validator.isValidOutput(result):
-                raise ValueError("Invalid output")
+                raise ValueError("Invalid output") # shoul be rised by validator probably
             return result
         else:
-            result = invoke(input_data)
+            result = self.invoke(input_data)
         return result
 
     @abstractmethod
-    def invoke(self, input_data: Dict) -> Dict:
+    def invoke(self, input_data: InputType) -> OutputType:
         pass
 
