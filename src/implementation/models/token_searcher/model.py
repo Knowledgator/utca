@@ -1,6 +1,3 @@
-# from typing import Union
-import logging
-
 from transformers import ( # type: ignore
     pipeline, AutoTokenizer, AutoModelForTokenClassification # type: ignore
 ) 
@@ -9,8 +6,16 @@ from pydantic import BaseModel
 from src.model_level_2.model import Model, ModelConfigs
 from src.model_level_2.schema import Prompt
 
-class TokenSearcherOutput(BaseModel):
-    outputs: list[str]
+class Entity(BaseModel):
+    entity_group: str 
+    score: float
+    word: str
+    start: int
+    end: int
+
+
+class TokenSearcherOutputs(BaseModel):
+    outputs: list[list[Entity]]
 
 
 class TokenSearcherConfigs(ModelConfigs):
@@ -19,7 +24,7 @@ class TokenSearcherConfigs(ModelConfigs):
     batch_size: int=12
 
 
-class TokenSearcher(Model[Prompt, TokenSearcherOutput]):
+class TokenSearcher(Model[Prompt, TokenSearcherOutputs]):
     def __init__(self, cfg: TokenSearcherConfigs) -> None:
         super().__init__(cfg)
 
@@ -39,6 +44,7 @@ class TokenSearcher(Model[Prompt, TokenSearcherOutput]):
             raise ValueError(e)
 
     
-    def invoke(self, input_data: Prompt) -> TokenSearcherOutput:
-        logging.error(self.pipeline([input_data.prompt])) # type: ignore
-        return TokenSearcherOutput.parse_obj({'outputs': ['hi']})
+    def invoke(self, input_data: Prompt) -> TokenSearcherOutputs:
+        return TokenSearcherOutputs.parse_obj({
+            'outputs': self.pipeline([input_data.prompt])
+        })
