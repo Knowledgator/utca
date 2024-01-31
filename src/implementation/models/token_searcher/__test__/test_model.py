@@ -12,4 +12,13 @@ def test_tokensearcher():
     )
 
     model = TokenSearcher(cfg)
-    logging.error(model.invoke(BasicPrompt("Identify organizations mentioned in the text: The National Aeronautics and Space Administration (NASA) is an independent agency of the U.S. federal government responsible for the civilian space program, as well as aeronautics and space research.")))
+    logging.error(model.invoke(
+        BasicPrompt(
+            prompt=(
+                "Identify organizations mentioned in the text:"
+                " The National Aeronautics and Space Administration"
+                " (NASA) is an independent agency of the U.S. federal"
+                " government responsible for the civilian space program,"
+                " as well as aeronautics and space research."
+            )
+        )))
