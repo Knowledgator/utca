@@ -1,9 +1,15 @@
 from __future__ import annotations
-# from executable_level_1.schema import InputType
+from core.executable_level_1.schema import Input
 
-class Prompt:
-    def __init__(self) -> None:
-        pass
+class BasicPrompt(Input):
+    _prompt: str
+
+    def __init__(self, prompt: str) -> None:
+        self._prompt = prompt
+
+    @property
+    def prompt(self) -> str:
+        return self._prompt
 
 
 class PromptTemplate:

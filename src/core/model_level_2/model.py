@@ -26,7 +26,6 @@ from core.executable_level_1.schema import InputType
 
 class ModelConfigs(BaseModel, ABC): # TODO: Check for more suitable pydantic type (no issue)
     # TODO: add basic parameters
-    name: str
     
     # def set_config_value(self, key: str, val: Any) -> None:
     #     # Optionally, add validation logic here
