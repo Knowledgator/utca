@@ -1,4 +1,4 @@
-from core.model_level_2.schema import BasicPrompt, PromptTemplate
+from core.model_level_2.schema import BasicPrompt
 from implementation.models.token_searcher.model import (
     TokenSearcher, TokenSearcherConfigs
 )
@@ -22,7 +22,3 @@ def test_tokensearcher():
         expected_ouput['outputs'][0][0]['word'] 
         == actual_ouput['outputs'][0][0]['word']
     )
-
-
-def test_ner_task():
-    PromptTemplate(12454)
