@@ -37,13 +37,18 @@ class Executable(Generic[InputType, OutputType], ABC):
     def invoke(self, input_data: InputType) -> Dict[str, Any]:
         pass
 
+
     def validate_input(self, input_data: Dict[str, Any]) -> InputType:
         return self.input_class(**input_data)
+
 
     def validate_output(self, output_data: Dict[str, Any]) -> OutputType:
         return self.output_class(**output_data)
 
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+
+    def execute(
+        self, input_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         try:
             validated_input = self.validate_input(input_data)
             result = self.invoke(validated_input)

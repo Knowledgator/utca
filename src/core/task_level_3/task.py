@@ -1,22 +1,31 @@
-from abc import ABC
+from typing import Dict, Any
+from abc import ABC, abstractmethod
 
-from src.model_level_2.model import Model
+from core.executable_level_1.executable import Executable
+from core.executable_level_1.schema import InputType, OutputType
+from core.model_level_2.model import Model
 
 # Add abstraction, different tasks per one model
 # Maybe push it inside model
-class Task(Model, ABC):
-    def __init__(self, model: Model, taskName: str) -> None:
+class Task(Executable[InputType, OutputType], ABC):
+    def __init__(self, model: Model[InputType], taskName: str) -> None:
         self.taks = taskName
         self.model = model
     prompt: str
     prompt_len: int
-    def preprocess(self):
+
+    @abstractmethod
+    def preprocess(self, input_data: InputType) -> InputType:
         # add prompt
         pass
-
-    def postprocess(self):
+    
+    
+    @abstractmethod
+    def postprocess(self, output_data: Dict[str, Any]) -> Dict[str, Any]:
         pass
-    def process(self):
-        self.preprocess()
-        self.invoke()
-        self.postprocess()
+
+
+    @abstractmethod
+    def invoke(self, input_data: InputType) -> Dict[str, Any]:
+        self.postprocess(self.model.invoke(self.preprocess(input_data)))
+        
