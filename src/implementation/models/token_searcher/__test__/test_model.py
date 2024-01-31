@@ -1,6 +1,4 @@
-import logging
-
-from core.model_level_2.schema import BasicPrompt
+from core.model_level_2.schema import BasicPrompt, PromptTemplate
 from implementation.models.token_searcher.model import (
     TokenSearcher, TokenSearcherConfigs
 )
@@ -12,13 +10,19 @@ def test_tokensearcher():
     )
 
     model = TokenSearcher(cfg)
-    logging.error(model.invoke(
-        BasicPrompt(
-            prompt=(
-                "Identify organizations mentioned in the text:"
-                " The National Aeronautics and Space Administration"
-                " (NASA) is an independent agency of the U.S. federal"
-                " government responsible for the civilian space program,"
-                " as well as aeronautics and space research."
-            )
-        )))
+    actual_ouput = model.invoke(BasicPrompt(prompt=(
+        "Identify organizations mentioned in the text:"
+        " The National Aeronautics and Space Administration"
+        " (NASA) is an independent agency of the U.S. federal"
+        " government responsible for the civilian space program,"
+        " as well as aeronautics and space research."
+    )))
+    expected_ouput = {'outputs': [[{'entity_group': 'ENT', 'score': 0.793671, 'word': 'NationalAeronauticsandSpaceAdministration', 'start': 49, 'end': 95}]]}
+    assert (
+        expected_ouput['outputs'][0][0]['word'] 
+        == actual_ouput['outputs'][0][0]['word']
+    )
+
+
+def test_ner_task():
+    PromptTemplate(12454)

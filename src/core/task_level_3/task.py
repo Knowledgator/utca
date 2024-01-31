@@ -11,8 +11,7 @@ class Task(Executable[InputType, OutputType], ABC):
     def __init__(self, model: Model[InputType], taskName: str) -> None:
         self.taks = taskName
         self.model = model
-    prompt: str
-    prompt_len: int
+        
 
     @abstractmethod
     def preprocess(self, input_data: InputType) -> InputType:
