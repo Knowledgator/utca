@@ -9,3 +9,11 @@ class OutputSchemaNotFound(Exception):
     def __init__(self, message: str="OutputSchemaNotFound"):
         self.message = message
         super().__init__(self.message)
+
+
+class Found(Exception):
+    def __init__(self, message: str="OutputSchemaNotFound"):
+        self.message = message
+        super().__init__(self.message)
+
+
