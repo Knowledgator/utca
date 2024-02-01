@@ -22,7 +22,7 @@ class TokenSearcherGeneralOutput(BaseTokenSearcherOutput[Entity]):
 
 
 class TokenSearcherGeneralConfig(BaseTokenSearcherConfig):
-    pass
+    ...
 
 
 class TokenSearcherGeneralTask(

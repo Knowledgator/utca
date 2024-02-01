@@ -4,12 +4,12 @@ from implementation.tasks.token_searcher.general.general_task import (
 
 def test_tokensearcher_general():
     cfg = TokenSearcherGeneralConfig(
-        model_name='knowledgator/UTC-DeBERTa-small',
-        device='cpu'
+        model_name="knowledgator/UTC-DeBERTa-small",
+        device="cpu"
     )
 
     task = TokenSearcherGeneralTask(cfg)
-    res = task.execute({'prompt': (
+    res = task.execute({"prompt": (
         "Identify organizations mentioned in the text:"
         " The National Aeronautics and Space Administration"
         " (NASA) is an independent agency of the U.S. federal"
@@ -17,4 +17,4 @@ def test_tokensearcher_general():
         " as well as aeronautics and space research."
     )})
 
-    assert res.output[0].span == 'National Aeronautics and Space Administration'
+    assert res.output[0].span == "National Aeronautics and Space Administration"
