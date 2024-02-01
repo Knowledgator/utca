@@ -1,9 +1,9 @@
 from implementation.tasks.token_searcher.ner.task import (
-    NERConfig, TokenSearcherNERTask
+    TokenSearcherNERConfig, TokenSearcherNERTask
 )
 
 def test_ner():
-    cfg = NERConfig(
+    cfg = TokenSearcherNERConfig(
         model_name="knowledgator/UTC-DeBERTa-small",
         device="cpu",
     )

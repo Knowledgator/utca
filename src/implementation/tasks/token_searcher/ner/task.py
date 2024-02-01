@@ -17,7 +17,7 @@ from implementation.tasks.token_searcher.base_token_searcher_task.objects import
     ClassifiedEntity
 )
 
-class NERInput(InputWithThreshold):
+class TokenSearcherNERInput(InputWithThreshold):
     text: str
     labels: list[str]
     _prompts: Optional[list[str]] = PrivateAttr()
@@ -53,23 +53,29 @@ class NERInput(InputWithThreshold):
         return cast(list[int], self._prompt_lens)
 
 
-class NEROutput(BaseTokenSearcherOutput[ClassifiedEntity]):
+class TokenSearcherNEROutput(BaseTokenSearcherOutput[ClassifiedEntity]):
     text: str
 
 
-class NERConfig(BaseTokenSearcherConfig):
+class TokenSearcherNERConfig(BaseTokenSearcherConfig):
     ...
 
 
-class TokenSearcherNERTask(BaseTokenSearcher[NERInput, NEROutput]):
-    input_data_type: Type[NERInput] = NERInput
+class TokenSearcherNERTask(
+    BaseTokenSearcher[
+        TokenSearcherNERConfig,
+        TokenSearcherNERInput, 
+        TokenSearcherNEROutput
+    ]
+):
+    input_data_type: Type[TokenSearcherNERInput] = TokenSearcherNERInput
     prompt: str = """
 Identify entities in the text having the following classes:
 {label}
 Text:
  """
 
-    def __init__(self, cfg: NERConfig) -> None:
+    def __init__(self, cfg: TokenSearcherNERConfig) -> None:
         super().__init__(cfg) 
 
         self.nlp: Language = spacy.load(
@@ -116,8 +122,8 @@ Text:
 
 
     def _preprocess(
-        self, input_data: Union[NERInput, Dict[str, Any]]
-    ) -> NERInput:
+        self, input_data: Union[TokenSearcherNERInput, Dict[str, Any]]
+    ) -> TokenSearcherNERInput:
         input_data = super()._preprocess(input_data)
         chunks, chunks_starts = self.chunkanize(input_data.text)
         prompts, prompts_lens = self.get_inputs(chunks, input_data.labels)
@@ -128,20 +134,20 @@ Text:
             chunks=chunks, 
             chunk_starts=chunks_starts
         )
-
         return input_data
 
+
     def _process(
-        self, input_data: NERInput
+        self, input_data: TokenSearcherNERInput
     ) -> list[list[Dict[str, Any]]]:
         return self.get_predictions(input_data.inputs)
     
 
     def _postprocess(
         self, 
-        input_data: NERInput, 
+        input_data: TokenSearcherNERInput, 
         predicts: list[list[Dict[str, Any]]]
-    ) -> NEROutput:
+    ) -> TokenSearcherNEROutput:
         outputs: list[ClassifiedEntity] = []
 
         for id, output in enumerate(predicts): # type: ignore
@@ -155,18 +161,7 @@ Text:
                     input_data.text, ent, cast(float, input_data.threshold), label, shift=shift
                 ):
                     outputs.append(entity)
-        return NEROutput(
+        return TokenSearcherNEROutput(
             text=input_data.text,
             output=outputs
-        )
-
-
-    def execute(
-        self, 
-        input_data: Union[NERInput, Dict[str, Any]]
-    ) -> NEROutput:
-        input_data = self._preprocess(input_data)
-        return self._postprocess(
-            input_data,
-            self._process(input_data)
         )
