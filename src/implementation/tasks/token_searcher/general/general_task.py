@@ -1,25 +1,57 @@
-from typing import Dict, Any
+from typing import Any, Union, Dict, cast
 
-from implementation.models.token_searcher.model import TokenSearcher
-from core.executable_level_1.schema import Output
-from core.model_level_2.schema import BasicPrompt, PromptTemplate
-from core.task_level_3.task import Task
+from implementation.tasks.token_searcher.base_token_searcher_task.base_token_searcher import (
+    BaseTokenSearcher, 
+    InputWithThreshold, 
+    BaseTokenSearcherOutput, 
+    BaseTokenSearcherConfig
+)
 
-# class TokenSearcherNERInput(Input):
-#     pass
+
+class TokenSearcherGeneralInput(InputWithThreshold):
+    prompt: str
 
 
-class TokenSearcherGeneralOutput(Output):
+class TokenSearcherGeneralOutput(BaseTokenSearcherOutput):
+    prompt: str
+
+
+class TokenSearcherGeneralConfig(BaseTokenSearcherConfig):
     pass
 
 
-class TokenSearcherGeneralTask(Task[BasicPrompt, TokenSearcherGeneralOutput]):
-    model_type = TokenSearcher
-    template = PromptTemplate('{prompt}')
+class TokenSearcherGeneralTask(BaseTokenSearcher):
+    def _preprocess( # type: ignore ###############################################
+        self, input_data: Union[TokenSearcherGeneralInput, Dict[str, Any]]
+    ) -> TokenSearcherGeneralInput:
 
-    def preprocess(self, input_data: BasicPrompt) -> BasicPrompt:
-        return input_data
+        return (
+            input_data if isinstance(
+                input_data, 
+                TokenSearcherGeneralInput
+            ) else TokenSearcherGeneralInput.parse_obj(input_data)
+        )
+
+
+    def _process(
+        self, input_data: TokenSearcherGeneralInput
+    ) -> Any:
+        return self.get_predictions([input_data.prompt])
     
 
-    def postprocess(self, output_data: Dict[str, Any]) -> Dict[str, Any]:
-        return output_data
+    def _postprocess(
+        self, 
+        input_data: TokenSearcherGeneralInput, 
+        predicts: Any
+    ) -> TokenSearcherGeneralOutput:
+        return TokenSearcherGeneralOutput(
+            prompt=input_data.prompt,
+            output=[
+                entity
+                for output in predicts 
+                for ent in output 
+                if (entity:=self.build_entity(
+                    input_data.prompt, ent, cast(float, input_data.threshold) ############
+                ))
+            ]
+        )

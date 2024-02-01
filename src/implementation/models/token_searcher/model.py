@@ -3,21 +3,22 @@ from typing import Dict, Any
 from transformers import ( # type: ignore
     pipeline, AutoTokenizer, AutoModelForTokenClassification # type: ignore
 ) 
-from pydantic import BaseModel
+# from pydantic import BaseModel
 
+# from core.executable_level_1.schema import Input, Output
 from core.model_level_2.model import Model, ModelConfigs
 from core.model_level_2.schema import BasicPrompt
 
-class Entity(BaseModel):
-    entity_group: str 
-    score: float
-    word: str
-    start: int
-    end: int
+# class Entity(BaseModel):
+#     entity_group: str 
+#     score: float
+#     word: str
+#     start: int
+#     end: int
 
 
-class TokenSearcherOutputs(BaseModel):
-    outputs: list[list[Entity]]
+# class TokenSearcherOutputs(Output, BaseModel):
+#     outputs: list[list[Entity]]
 
 
 class TokenSearcherConfigs(ModelConfigs):
@@ -34,7 +35,7 @@ class TokenSearcher(Model[BasicPrompt]):
         model = AutoModelForTokenClassification.from_pretrained(cfg.model_name) # type: ignore
 
         try:
-            self.pipeline = pipeline(
+            self.pipeline = pipeline( # type: ignore
                 "ner", 
                 model=model, # type: ignore
                 tokenizer=tokenizer,
