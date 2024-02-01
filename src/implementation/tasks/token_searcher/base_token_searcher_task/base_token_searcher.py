@@ -1,10 +1,13 @@
-from typing import Any, Union, Dict, Optional, Type, Generic, TypeVar
+from typing import Any, Union, Dict, Optional, Type, Generic, TypeVar, Sequence
 from abc import ABC, abstractmethod
-import string
 
 from pydantic import BaseModel
 from transformers import ( # type: ignore
     pipeline, AutoTokenizer, AutoModelForTokenClassification # type: ignore
+)
+
+from implementation.tasks.token_searcher.base_token_searcher_task.objects import (
+    Entity, ClassifiedEntity
 )
 
 class Input(BaseModel, ABC):
@@ -57,7 +60,7 @@ class TokenSearcherModel(Model[TokenSearcherModelConfigType, InputType, OutputTy
 
     def get_predictions(
         self, inputs: list[str]
-    ) -> list[list[dict[str, Any]]]:
+    ) -> list[list[Dict[str, Any]]]:
         return self.pipeline(inputs) # type: ignore
 
 
@@ -72,13 +75,6 @@ class TokenSearcherModel(Model[TokenSearcherModelConfigType, InputType, OutputTy
         return input_data
 
 
-class Entity(BaseModel):
-    start: int
-    end: int
-    span: str
-    score: float
-
-
 class BaseTokenSearcherConfig(TokenSearcherModelConfig):
     threshold: float=0.
 
@@ -91,13 +87,17 @@ InputWithThresholdType = TypeVar(
     'InputWithThresholdType', bound=InputWithThreshold
 )
 
+EntityType = TypeVar('EntityType', bound=Entity)
 
-class BaseTokenSearcherOutput(Output):
-    output: list[Entity]
+class BaseTokenSearcherOutput(Generic[EntityType], Output):
+    output: Sequence[EntityType]
 
 
 BaseTokenSearcherOutputType = TypeVar(
-    'BaseTokenSearcherOutputType', bound=BaseTokenSearcherOutput
+    'BaseTokenSearcherOutputType', 
+    BaseTokenSearcherOutput[Entity],
+    BaseTokenSearcherOutput[ClassifiedEntity],
+    covariant=True
 )
 
 
@@ -122,32 +122,6 @@ class BaseTokenSearcher(
             else self.cfg.threshold
         )
     
-
-    @classmethod
-    def clean_span(cls, prompt: str, start: int, end: int):
-        junk = {*string.punctuation, *' \n\r\t'}
-        while start != end - 1 and prompt[start] in junk:
-            start += 1
-        while end != start and prompt[end - 1] in string.punctuation:
-            end -= 1
-        return prompt[start:end], start, end
-
-
-    def build_entity(
-        self, text: str, raw_entity: Dict[str, Any], threshold: float 
-    ) -> Union[Entity, None]:
-        if raw_entity['score'] > threshold:
-            span, start, end = self.clean_span(
-                text, raw_entity['start'], raw_entity['end']
-            )
-            return Entity(
-                start=start,
-                end=end,
-                span=span,
-                score=raw_entity['score']
-            )
-        return None
-
 
     def _preprocess(
         self, input_data: Union[InputWithThresholdType, Dict[str, Any]]

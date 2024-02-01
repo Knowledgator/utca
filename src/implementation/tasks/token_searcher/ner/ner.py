@@ -1,11 +1,20 @@
-from typing import Tuple, Any, Dict, Optional, Union
+from typing import Tuple, Any, Dict, Optional, Union, cast
 
 import spacy
 from spacy.language import Language
 from pydantic import PrivateAttr
 
 from implementation.tasks.token_searcher.base_token_searcher_task.base_token_searcher import (
-    InputWithThreshold, BaseTokenSearcher, BaseTokenSearcherConfig, BaseTokenSearcherOutput
+    InputWithThreshold, 
+    BaseTokenSearcher, 
+    BaseTokenSearcherConfig, 
+    BaseTokenSearcherOutput,
+)
+from implementation.tasks.token_searcher.base_token_searcher_task.utils import (
+    build_entity
+)
+from implementation.tasks.token_searcher.base_token_searcher_task.objects import (
+    ClassifiedEntity
 )
 
 class NERInput(InputWithThreshold):
@@ -28,16 +37,31 @@ class NERInput(InputWithThreshold):
         self._chunks = chunks
         self._chunk_starts = chunk_starts
 
+    
+    @property
+    def inputs(self) -> list[str]:
+        return cast(list[str], self._prompts)
+    
 
-class NEROutput(BaseTokenSearcherOutput):
-    pass
+    @property
+    def chunk_starts(self) -> list[int]:
+        return cast(list[int], self._chunk_starts)
+    
+
+    @property
+    def prompt_lens(self) -> list[int]:
+        return cast(list[int], self._prompt_lens)
+
+
+class NEROutput(BaseTokenSearcherOutput[ClassifiedEntity]):
+    text: str
 
 
 class NERConfig(BaseTokenSearcherConfig):
-    pass
+    ...
 
 
-class TokenSearcherNERTask(BaseTokenSearcher):
+class TokenSearcherNERTask(BaseTokenSearcher[NERInput, NEROutput]):
     prompt: str = """
 Identify entities in the text having the following classes:
 {label}
@@ -111,47 +135,35 @@ Text:
 
         return input_data
 
-
     def _process(
         self, input_data: NERInput
-    ) -> list[Dict[str, Any]]:
-        outputs: list[Dict[str, Any]] = []
-
-        for id, output in enumerate(self.pipeline(inputs)): # type: ignore
-            label = labels[id//len(chunks_starts)]
-            shift = chunks_starts[id%len(chunks_starts)] - prompts_lens[id//len(chunks_starts)]
-            for ent in output:
-                start = ent['start'] + shift + 1
-                end = ent['end'] + shift
-                start, end, span = self.clean_span(start, end, text[start:end])
-                if not span:
-                    continue
-                
-                if ent['score'] >= threshold:
-                    outputs.append({
-                        'span': span,
-                        'start': start,
-                        'end': end,
-                        'entity': label
-                    })
-        return outputs
-
-
-    def execute(
-        self, input_data: NERInput
-    ) -> NEROutput:
-        threshold = self.choose_threshold(input_data)
-        
-        outputs = self.predict(
-            input_data.text, 
-            inputs, 
-            input_data.labels, 
-            chunks_starts, 
-            prompts_lens, 
-            threshold
-        )
-        return {"text": input_data.text, "entities": outputs}
+    ) -> list[list[Dict[str, Any]]]:
+        return self.get_predictions(input_data.inputs)
     
+
+    def _postprocess(
+        self, 
+        input_data: NERInput, 
+        predicts: list[list[Dict[str, Any]]]
+    ) -> NEROutput:
+        outputs: list[ClassifiedEntity] = []
+
+        for id, output in enumerate(predicts): # type: ignore
+            label = input_data.labels[id//len(input_data.chunk_starts)]
+            shift = (
+                input_data.chunk_starts[id%len(input_data.chunk_starts)] 
+                - input_data.prompt_lens[id//len(input_data.chunk_starts)]
+            )
+            for ent in output:
+                if entity := build_entity(
+                    input_data.text, ent, cast(float, input_data.threshold), label, shift=shift
+                ):
+                    outputs.append(entity)
+        return NEROutput(
+            text=input_data.text,
+            output=outputs
+        )
+
 
     def execute(
         self, 
