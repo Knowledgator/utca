@@ -59,7 +59,6 @@ class TokenSearcherModel(Model[TokenSearcherModelConfigType, InputType, OutputTy
         return self.pipeline(inputs) # type: ignore
 
 
-
     def _preprocess(
         self, input_data: Union[InputType, Dict[str, Any]]
     ) -> InputType:
@@ -108,6 +107,8 @@ class BaseTokenSearcher(
     ], 
     ABC
 ):
+    input_data_type: Type[InputWithThresholdType]
+
     def __init__(self, cfg: BaseTokenSearcherConfig) -> None:
         super().__init__(cfg)
 

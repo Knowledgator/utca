@@ -21,6 +21,8 @@ class TokenSearcherGeneralConfig(BaseTokenSearcherConfig):
 
 
 class TokenSearcherGeneralTask(BaseTokenSearcher[TokenSearcherGeneralInput, TokenSearcherGeneralOutput]):
+    input_data_type: TokenSearcherGeneralInput = TokenSearcherGeneralInput
+    
     def _process(
         self, input_data: TokenSearcherGeneralInput
     ) -> Any:
