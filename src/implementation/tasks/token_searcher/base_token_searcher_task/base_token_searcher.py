@@ -13,24 +13,32 @@ class Input(BaseModel, ABC):
 class Output(BaseModel, ABC):
     pass
 
+class Config(BaseModel, ABC):
+    pass
+
 InputType = TypeVar('InputType', bound=Input)
-OutputType = TypeVar('OutputType', bound=Output)
+OutputType = TypeVar('OutputType', bound=Output, covariant=True)
+ConfigType = TypeVar('ConfigType', bound=Config, contravariant=True)
 
-
-class TokenSearcherModelConfig(BaseModel):
+class TokenSearcherModelConfig(Config):
     model_name: str
     sents_batch: int=10
     batch_size: int=12
     device: str='cpu'
 
+TokenSearcherModelConfigType = TypeVar(
+    'TokenSearcherModelConfigType', bound=TokenSearcherModelConfig, contravariant=True)
 
-class TokenSearcherModel(Generic[InputType, OutputType], ABC):
-    input_data_type: Type[InputType]
-    output_data_type: Type[OutputType]
 
-    def __init__(self, cfg: TokenSearcherModelConfig) -> None:
+class Model(Generic[ConfigType, InputType, OutputType], ABC):
+    def __init__(self, cfg: ConfigType):
         self.cfg = cfg
 
+
+class TokenSearcherModel(Model[TokenSearcherModelConfigType, InputType, OutputType]):
+    input_data_type: Type[InputType]
+    
+    def __init__(self, cfg: TokenSearcherModelConfigType) -> None:
         self.tokenizer = AutoTokenizer.from_pretrained(cfg.model_name) # type: ignore
         model = AutoModelForTokenClassification.from_pretrained(cfg.model_name) # type: ignore
         
@@ -42,6 +50,7 @@ class TokenSearcherModel(Generic[InputType, OutputType], ABC):
             batch_size=cfg.batch_size,
             device=cfg.device
         )
+        super().__init__(cfg)
 
 
     def get_predictions(
@@ -56,7 +65,7 @@ class TokenSearcherModel(Generic[InputType, OutputType], ABC):
     ) -> InputType:
         input_data = (
             input_data
-            if isinstance(input_data, self.input_data_type) 
+            if isinstance(input_data, type(InputType)) 
             else self.input_data_type.parse_obj(input_data)
         )
         return input_data
@@ -70,10 +79,6 @@ class Entity(BaseModel):
 
 
 class BaseTokenSearcherConfig(TokenSearcherModelConfig):
-    model_name: str
-    sents_batch: int=10
-    batch_size: int=12
-    device: str='cpu'
     threshold: float=0.
 
 
@@ -81,17 +86,30 @@ class InputWithThreshold(Input):
     threshold: Optional[float]
 
 
+InputWithThresholdType = TypeVar(
+    'InputWithThresholdType', bound=InputWithThreshold
+)
+
+
 class BaseTokenSearcherOutput(Output):
     output: list[Entity]
 
 
+BaseTokenSearcherOutputType = TypeVar(
+    'BaseTokenSearcherOutputType', bound=BaseTokenSearcherOutput
+)
+
 
 class BaseTokenSearcher(
-    TokenSearcherModel[InputWithThreshold, BaseTokenSearcherOutput],
+    TokenSearcherModel[
+        BaseTokenSearcherConfig, 
+        InputWithThresholdType, 
+        BaseTokenSearcherOutputType
+    ], 
+    ABC
 ):
     def __init__(self, cfg: BaseTokenSearcherConfig) -> None:
         super().__init__(cfg)
-        self.cfg = cfg #################################################
 
 
     def choose_threshold(self, input_data: InputWithThreshold):
@@ -129,8 +147,8 @@ class BaseTokenSearcher(
 
 
     def _preprocess(
-        self, input_data: Union[InputWithThreshold, Dict[str, Any]]
-    ) -> InputWithThreshold:
+        self, input_data: Union[InputWithThresholdType, Dict[str, Any]]
+    ) -> InputWithThresholdType:
         input_data = super()._preprocess(input_data)
         input_data.threshold = self.choose_threshold(input_data)
         return input_data
@@ -138,7 +156,7 @@ class BaseTokenSearcher(
 
     @abstractmethod
     def _process(
-        self, input_data: InputWithThreshold
+        self, input_data: InputWithThresholdType
     ) -> Any:
         pass
 
@@ -146,16 +164,16 @@ class BaseTokenSearcher(
     @abstractmethod
     def _postprocess(
         self, 
-        input_data: InputWithThreshold, 
+        input_data: InputWithThresholdType, 
         predicts: Any
-    ) -> BaseTokenSearcherOutput:
+    ) -> BaseTokenSearcherOutputType:
         pass
 
 
     def execute(
         self, 
-        input_data: Union[InputWithThreshold, Dict[str, Any]]
-    ) -> BaseTokenSearcherOutput:
+        input_data: Union[InputWithThresholdType, Dict[str, Any]]
+    ) -> BaseTokenSearcherOutputType:
         input_data = self._preprocess(input_data)
         return self._postprocess(
             input_data,
