@@ -1,4 +1,4 @@
-from implementation.tasks.token_searcher.general.general_task import (
+from implementation.tasks.token_searcher.general.task import (
     TokenSearcherGeneralTask, TokenSearcherGeneralConfig
 )
 
@@ -17,4 +17,4 @@ def test_tokensearcher_general():
         " as well as aeronautics and space research."
     )})
 
-    assert res.output[0].span == "National Aeronautics and Space Administration"
+    assert "National Aeronautics and Space Administration" == res.output[0].span

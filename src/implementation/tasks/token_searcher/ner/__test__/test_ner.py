@@ -1,4 +1,4 @@
-from implementation.tasks.token_searcher.ner.ner import (
+from implementation.tasks.token_searcher.ner.task import (
     NERConfig, TokenSearcherNERTask
 )
 
@@ -17,5 +17,5 @@ def test_ner():
             "city"
         ],
     })
-    assert len(res.output) == 4
-    assert res.output[0].span == "Paul Hammond"
+    assert 4 == len(res.output)
+    assert "Paul Hammond" == res.output[0].span
