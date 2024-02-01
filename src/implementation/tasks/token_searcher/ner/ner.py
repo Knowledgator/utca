@@ -1,4 +1,4 @@
-from typing import Tuple, Any, Dict, Optional, Union, cast
+from typing import Tuple, Any, Dict, Optional, Union, cast, Type
 
 import spacy
 from spacy.language import Language
@@ -62,11 +62,12 @@ class NERConfig(BaseTokenSearcherConfig):
 
 
 class TokenSearcherNERTask(BaseTokenSearcher[NERInput, NEROutput]):
+    input_data_type: Type[NERInput] = NERInput
     prompt: str = """
 Identify entities in the text having the following classes:
 {label}
 Text:
- {text}"""
+ """
 
     def __init__(self, cfg: NERConfig) -> None:
         super().__init__(cfg) 
@@ -106,7 +107,7 @@ Text:
         prompts_lens: list[int] = []
 
         for label in labels:
-            prompt = self.prompt.format(label)
+            prompt = self.prompt.format(label=label)
             prompts_lens.append(len(prompt))
             for chunk in chunks:
                 inputs.append(prompt + chunk)
@@ -117,12 +118,7 @@ Text:
     def _preprocess(
         self, input_data: Union[NERInput, Dict[str, Any]]
     ) -> NERInput:
-        input_data = (
-            input_data if isinstance(
-                input_data, 
-                NERInput
-            ) else NERInput.parse_obj(input_data)
-        )
+        input_data = super()._preprocess(input_data)
         chunks, chunks_starts = self.chunkanize(input_data.text)
         prompts, prompts_lens = self.get_inputs(chunks, input_data.labels)
 
