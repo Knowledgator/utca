@@ -26,7 +26,11 @@ class TokenSearcherGeneralConfig(BaseTokenSearcherConfig):
 
 
 class TokenSearcherGeneralTask(
-    BaseTokenSearcher[TokenSearcherGeneralInput, TokenSearcherGeneralOutput]
+    BaseTokenSearcher[
+        TokenSearcherGeneralConfig,
+        TokenSearcherGeneralInput, 
+        TokenSearcherGeneralOutput
+    ]
 ):
     input_data_type: Type[TokenSearcherGeneralInput] = TokenSearcherGeneralInput
     

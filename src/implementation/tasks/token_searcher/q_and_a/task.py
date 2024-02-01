@@ -38,7 +38,11 @@ class TokenSearcherQandAConfig(BaseTokenSearcherConfig):
 
 
 class TokenSearcherQandATask(
-    BaseTokenSearcher[TokenSearcherQandAInput, TokenSearcherQandAOutput]
+    BaseTokenSearcher[
+        TokenSearcherQandAConfig, 
+        TokenSearcherQandAInput, 
+        TokenSearcherQandAOutput
+    ]
 ):
     input_data_type: Type[TokenSearcherQandAInput] = TokenSearcherQandAInput
     prompt: str = """{question}

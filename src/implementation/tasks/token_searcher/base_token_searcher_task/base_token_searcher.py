@@ -79,6 +79,12 @@ class BaseTokenSearcherConfig(TokenSearcherModelConfig):
     threshold: float=0.
 
 
+BaseTokenSearcherConfigType = TypeVar(
+    'BaseTokenSearcherConfigType', bound=BaseTokenSearcherConfig
+)
+
+
+
 class InputWithThreshold(Input):
     threshold: Optional[float]
 
@@ -95,15 +101,17 @@ class BaseTokenSearcherOutput(Generic[EntityType], Output):
 
 BaseTokenSearcherOutputType = TypeVar(
     'BaseTokenSearcherOutputType', 
-    BaseTokenSearcherOutput[Entity],
-    BaseTokenSearcherOutput[ClassifiedEntity],
+    bound=Union[
+        BaseTokenSearcherOutput[Entity],
+        BaseTokenSearcherOutput[ClassifiedEntity],
+    ],
     covariant=True
 )
 
 
 class BaseTokenSearcher(
     TokenSearcherModel[
-        BaseTokenSearcherConfig, 
+        BaseTokenSearcherConfigType, 
         InputWithThresholdType, 
         BaseTokenSearcherOutputType
     ], 
@@ -111,7 +119,7 @@ class BaseTokenSearcher(
 ):
     input_data_type: Type[InputWithThresholdType]
 
-    def __init__(self, cfg: BaseTokenSearcherConfig) -> None:
+    def __init__(self, cfg: BaseTokenSearcherConfigType) -> None:
         super().__init__(cfg)
 
 
