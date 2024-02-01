@@ -31,6 +31,8 @@ TokenSearcherModelConfigType = TypeVar(
 
 
 class Model(Generic[ConfigType, InputType, OutputType], ABC):
+    input_data_type: Type[InputType]
+
     def __init__(self, cfg: ConfigType):
         self.cfg = cfg
 

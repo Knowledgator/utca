@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import Any, cast, Type
 
 from implementation.tasks.token_searcher.base_token_searcher_task.base_token_searcher import (
     BaseTokenSearcher, 
@@ -21,7 +21,7 @@ class TokenSearcherGeneralConfig(BaseTokenSearcherConfig):
 
 
 class TokenSearcherGeneralTask(BaseTokenSearcher[TokenSearcherGeneralInput, TokenSearcherGeneralOutput]):
-    input_data_type: TokenSearcherGeneralInput = TokenSearcherGeneralInput
+    input_data_type: Type[TokenSearcherGeneralInput] = TokenSearcherGeneralInput
     
     def _process(
         self, input_data: TokenSearcherGeneralInput
