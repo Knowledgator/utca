@@ -1,7 +1,7 @@
 from typing import Dict, Union, Any, overload, Optional
 import string
 
-from implementation.models.token_searcher.objects import (
+from implementation.models.objects.objects import (
     Entity, ClassifiedEntity
 )
 

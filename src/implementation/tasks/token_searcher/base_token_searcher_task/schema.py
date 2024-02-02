@@ -1,10 +1,13 @@
 from typing import TypeVar, Optional, Sequence, Generic, Union
 
 from implementation.models.token_searcher.schema import (
-    Input, TokenSearcherModelConfig, EntityType, Output
+    Input, TokenSearcherModelConfig, Output
 )
-from implementation.models.token_searcher.objects import (
+from implementation.models.objects.objects import (
     Entity, ClassifiedEntity
+)
+from implementation.models.objects.schema import (
+    EntityType
 )
 
 class BaseTokenSearcherConfig(TokenSearcherModelConfig):

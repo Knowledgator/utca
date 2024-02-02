@@ -1,14 +1,14 @@
 from typing import Any, Union, Dict, Type
 
 from implementation.models.token_searcher.model import (
-    BaseTokenSearcherModel
+    TransformersModel
 )
 from implementation.tasks.token_searcher.base_token_searcher_task.schema import (
     BaseTokenSearcherConfigType, InputWithThresholdType, BaseTokenSearcherOutputType
 )
 
 class BaseTokenSearcher(
-    BaseTokenSearcherModel[
+    TransformersModel[
         BaseTokenSearcherConfigType, 
         InputWithThresholdType, 
         BaseTokenSearcherOutputType

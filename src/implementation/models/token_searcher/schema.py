@@ -1,25 +1,12 @@
-from typing import TypeVar, Dict, Any
+from typing import Dict, Any
 
-from core.model_level_2.schema import Config
 from core.executable_level_1.schema import Input, Output
-from implementation.models.token_searcher.objects import (
-    Entity
+from implementation.models.transformers_models.schema import (
+    TransformersModelConfig
 )
 
-class TokenSearcherModelConfig(Config):
-    model: str
-    sents_batch: int=10
-    batch_size: int=12
-    device: str='cpu'
-
-
-TokenSearcherModelConfigType = TypeVar(
-    'TokenSearcherModelConfigType', 
-    bound=TokenSearcherModelConfig, 
-    contravariant=True
-)
-
-EntityType = TypeVar('EntityType', bound=Entity)
+class TokenSearcherModelConfig(TransformersModelConfig):
+    ...
 
 
 class TokenSearcherModelInput(Input):

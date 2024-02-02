@@ -13,7 +13,7 @@ from implementation.tasks.token_searcher.base_token_searcher_task.schema import 
 from implementation.tasks.token_searcher.base_token_searcher_task.utils import (
     build_entity
 )
-from implementation.models.token_searcher.objects import (
+from implementation.models.objects.objects import (
     Entity
 )
 
