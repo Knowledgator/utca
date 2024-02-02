@@ -1,13 +1,20 @@
-from typing import Any, Dict
+from typing import Any, Dict, Generic, Type
 
 from pydantic import  ValidationError
 
-from core.executable_level_1.executable import Validator
 from core.executable_level_1.schema import InputType
 
 
 TRANSFORMATION_DELIMITER = ";"
 TRANSFORMATION_POINTER = "<-"
+
+class Validator(Generic[InputType]):
+    def __init__(self, input_validation: Type[InputType]) -> None:
+        self.input_validation = input_validation
+
+    def validate(self, toValidate: Dict[str, Any]) -> InputType:
+        return self.input_validation(**toValidate)
+
 
 class Transformable():
     state:  Dict[str, Any]
@@ -102,6 +109,10 @@ class Transformable():
         except ValidationError as e:
              print(e.errors())
              return False
+
+
+
+
 
 # for pipeline     
 # class Data 
