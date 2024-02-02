@@ -14,8 +14,6 @@ from implementation.models.token_searcher.schema import (
     TokenSearcherModelOutput
 )
 
-
-
 class BaseTokenSearcherModel(
     Model[
         TokenSearcherModelConfigType, 
