@@ -34,6 +34,5 @@ BaseTokenSearcherOutputType = TypeVar(
     bound=Union[
         BaseTokenSearcherOutput[Entity],
         BaseTokenSearcherOutput[ClassifiedEntity],
-    ],
-    covariant=True
+    ]
 )
