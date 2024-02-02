@@ -1,63 +1,19 @@
-from typing import Dict, Generic, Type, Any, Union
-from abc import ABC, abstractmethod
+from typing import Dict, Type, Any, Union
+from abc import abstractmethod
 
 from transformers import ( # type: ignore
     pipeline, AutoTokenizer, AutoModelForTokenClassification # type: ignore
 )
 
+from core.executable_level_1.schema import InputType, OutputType
+from core.model_level_2.model import Model
 from implementation.models.token_searcher.schema import (
-    ConfigType, 
-    InputType, 
-    OutputType, 
     TokenSearcherModelConfigType,
     TokenSearcherModelConfig, 
     TokenSearcherModelInput, 
     TokenSearcherModelOutput
 )
 
-class Model(Generic[ConfigType, InputType, OutputType], ABC):
-    input_data_type: Type[InputType]
-
-    def __init__(self, cfg: ConfigType):
-        self.cfg = cfg
-
-
-    @abstractmethod
-    def get_predictions(
-        self, inputs: Any
-    ) -> Any:
-        ...
-
-
-    @abstractmethod
-    def _preprocess(
-        self, input_data: Union[InputType, Dict[str, Any]]
-    ) -> InputType:
-        ...
-
-
-    @abstractmethod
-    def _process(
-        self, input_data: InputType
-    ) -> Any:
-        ...
-
-
-    @abstractmethod
-    def _postprocess(
-        self, 
-        input_data: InputType, 
-        predicts: Any
-    ) -> OutputType:
-        ...
-
-
-    @abstractmethod
-    def execute(
-        self, 
-        input_data: Union[InputType, Dict[str, Any]]
-    ) -> OutputType:
-        ...
 
 
 class BaseTokenSearcherModel(
