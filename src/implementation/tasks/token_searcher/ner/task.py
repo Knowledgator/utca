@@ -88,7 +88,7 @@ Text:
         chunks: list[str] = []
         starts: list[int] = []
 
-        sentences: list[Tuple[int, int]] = sent_tokenizer(text)
+        sentences: list[Tuple[int, int]] = [*sent_tokenizer(text)]
 
         for i in range(0, len(sentences), self.cfg.sents_batch):
             start = sentences[i][0]
