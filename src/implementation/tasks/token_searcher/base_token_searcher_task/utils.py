@@ -1,7 +1,7 @@
 from typing import Dict, Union, Any, overload, Optional
 import string
 
-from implementation.tasks.token_searcher.base_token_searcher_task.objects import (
+from implementation.models.token_searcher.objects import (
     Entity, ClassifiedEntity
 )
 

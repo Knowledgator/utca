@@ -1,7 +1,9 @@
 from typing import Any, cast, Type, Dict
 
 from implementation.tasks.token_searcher.base_token_searcher_task.base_token_searcher import (
-    BaseTokenSearcher, 
+    BaseTokenSearcher
+)
+from implementation.tasks.token_searcher.base_token_searcher_task.schema import (
     InputWithThreshold, 
     BaseTokenSearcherOutput, 
     BaseTokenSearcherConfig
@@ -9,7 +11,7 @@ from implementation.tasks.token_searcher.base_token_searcher_task.base_token_sea
 from implementation.tasks.token_searcher.base_token_searcher_task.utils import (
     build_entity
 )
-from implementation.tasks.token_searcher.base_token_searcher_task.objects import (
+from implementation.models.token_searcher.objects import (
     Entity
 )
 

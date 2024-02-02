@@ -5,15 +5,17 @@ from spacy.language import Language
 from pydantic import PrivateAttr
 
 from implementation.tasks.token_searcher.base_token_searcher_task.base_token_searcher import (
+    BaseTokenSearcher
+)
+from implementation.tasks.token_searcher.base_token_searcher_task.schema import (
     InputWithThreshold, 
-    BaseTokenSearcher, 
-    BaseTokenSearcherConfig, 
-    BaseTokenSearcherOutput,
+    BaseTokenSearcherOutput, 
+    BaseTokenSearcherConfig
 )
 from implementation.tasks.token_searcher.base_token_searcher_task.utils import (
     build_entity
 )
-from implementation.tasks.token_searcher.base_token_searcher_task.objects import (
+from implementation.models.token_searcher.objects import (
     ClassifiedEntity
 )
 
