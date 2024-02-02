@@ -17,5 +17,5 @@ def test_ner():
             "city"
         ],
     })
-    assert 4 == len(res.output)
-    assert "Paul Hammond" == res.output[0].span
+    assert len(res.output) == 4
+    assert res.output[0].span == "Paul Hammond"
