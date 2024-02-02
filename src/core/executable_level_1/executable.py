@@ -1,17 +1,12 @@
 from typing import Any, Generic, Type, Dict, Union, overload
 
 from abc import ABC,  abstractmethod
-from core.executable_level_1.transformable import Transformable
+from core.executable_level_1.transformable import Transformable, Validator
 
 from schema import   InputType,  OutputType
 
 
-class Validator(Generic[InputType]):
-    def __init__(self, input_validation: Type[InputType]) -> None:
-        self.input_validation = input_validation
 
-    def validate(self, toValidate: Dict[str, Any]) -> InputType:
-        return self.input_validation(**toValidate)
 
 
 # + and | code
@@ -76,13 +71,16 @@ class Executable(Generic[InputType, OutputType], ABC):
                 validated_input = self.validate_input(input_data)
             else:
                 validated_input = input_data
-            result = self.invoke(validated_input)
+                
+            result: Dict[str, Any] = self.invoke(validated_input)
             output = self.validate_output(result)
 
-            if not return_dict:
-                return output
-            else:
+            if return_type is Transformable:
+                return output.get_transform()
+            elif return_type is Dict:
                 return result
+            else:
+                return output
         except Exception as e:
             raise ValueError(f"Validation error: {e}")
     def getValidator(self) -> Validator[InputType]:

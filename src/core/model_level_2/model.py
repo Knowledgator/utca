@@ -4,21 +4,6 @@ from abc import ABC, abstractmethod
 from core.executable_level_1.schema import InputType, OutputType
 from core.model_level_2.schema import ConfigType
 
-# class ModelIOValidator(IOValidator, ABC):
-        
-#     @abstractmethod
-#     def isValidInput(self, input_data: Input) -> bool:
-#         pass
-#     @abstractmethod
-#     def isValidOutput(self, output_data: Output) -> bool:
-#         pass
-#     @abstractmethod
-#     def isValidInput(self, input_data: Input) -> bool:
-#         pass
-#     @abstractmethod
-#     def isValidOutput(self, output_data: Output) -> bool:
-#         pass
-
 
 # class ModelInput(Input):
 #     def __init__(self, value: Optional[Dict[Any, Any]] = None) -> None: 
@@ -71,7 +56,7 @@ class Model(Generic[ConfigType, InputType, OutputType], ABC):
     input_data_type: Type[InputType]
 
     def __init__(self, cfg: ConfigType):
-        self.cfg = cfg
+        self.cfg: ConfigType = cfg
 
 
     @abstractmethod
