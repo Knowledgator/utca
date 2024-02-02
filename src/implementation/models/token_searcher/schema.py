@@ -1,28 +1,10 @@
 from typing import TypeVar, Dict, Any
-from abc import ABC
 
-from pydantic import BaseModel
-
+from core.model_level_2.schema import Config
+from core.executable_level_1.schema import Input, Output
 from implementation.models.token_searcher.objects import (
     Entity
 )
-
-class Input(BaseModel, ABC):
-    pass
-
-
-class Output(BaseModel, ABC):
-    pass
-
-
-class Config(BaseModel, ABC):
-    pass
-
-
-InputType = TypeVar('InputType', bound=Input)
-OutputType = TypeVar('OutputType', bound=Output, covariant=True)
-ConfigType = TypeVar('ConfigType', bound=Config, contravariant=True)
-
 
 class TokenSearcherModelConfig(Config):
     model_name: str
