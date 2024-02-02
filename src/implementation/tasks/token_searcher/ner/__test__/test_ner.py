@@ -4,7 +4,7 @@ from implementation.tasks.token_searcher.ner.task import (
 
 def test_ner():
     cfg = TokenSearcherNERConfig(
-        model_name="knowledgator/UTC-DeBERTa-small",
+        model="knowledgator/UTC-DeBERTa-small",
         device="cpu",
     )
 

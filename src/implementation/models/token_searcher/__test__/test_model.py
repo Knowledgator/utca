@@ -7,7 +7,7 @@ from implementation.models.token_searcher.schema import (
 
 def test_tokensearcher():
     cfg = TokenSearcherModelConfig(
-        model_name='knowledgator/UTC-DeBERTa-small',
+        model='knowledgator/UTC-DeBERTa-small',
         device='cpu'
     )
 

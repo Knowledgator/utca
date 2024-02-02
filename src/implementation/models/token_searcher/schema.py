@@ -7,7 +7,7 @@ from implementation.models.token_searcher.objects import (
 )
 
 class TokenSearcherModelConfig(Config):
-    model_name: str
+    model: str
     sents_batch: int=10
     batch_size: int=12
     device: str='cpu'

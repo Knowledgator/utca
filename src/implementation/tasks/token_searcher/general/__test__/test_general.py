@@ -4,7 +4,7 @@ from implementation.tasks.token_searcher.general.task import (
 
 def test_tokensearcher_general():
     cfg = TokenSearcherGeneralConfig(
-        model_name="knowledgator/UTC-DeBERTa-small",
+        model="knowledgator/UTC-DeBERTa-small",
         device="cpu"
     )
 

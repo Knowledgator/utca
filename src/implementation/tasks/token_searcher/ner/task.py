@@ -1,9 +1,8 @@
 from typing import Tuple, Any, Dict, Optional, Union, cast, Type
 
-import spacy
-from spacy.language import Language
 from pydantic import PrivateAttr
 
+from implementation.tasks.utils import sent_tokenizer
 from implementation.tasks.token_searcher.base_token_searcher_task.base_token_searcher import (
     BaseTokenSearcher
 )
@@ -78,13 +77,7 @@ Text:
  """
 
     def __init__(self, cfg: TokenSearcherNERConfig) -> None:
-        super().__init__(cfg) 
-
-        self.nlp: Language = spacy.load(
-            'en_core_web_sm', 
-            disable = ['lemmatizer', 'parser', 'tagger', 'ner']
-        )
-        self.nlp.add_pipe('sentencizer')
+        super().__init__(cfg)
     
 
     def get_last_sentence_id(self, i: int, sentences_len: int) -> int:
@@ -92,17 +85,17 @@ Text:
 
 
     def chunkanize(self, text: str) -> Tuple[list[str], list[int]]:
-        doc = self.nlp(text)
         chunks: list[str] = []
         starts: list[int] = []
-        sentences = list(doc.sents)
+
+        sentences: list[Tuple[int, int]] = list(sent_tokenizer(text))
 
         for i in range(0, len(sentences), self.cfg.sents_batch):
-            start = sentences[i].start_char
+            start = sentences[i][0]
             starts.append(start)
 
             last_sentence = self.get_last_sentence_id(i, len(sentences))
-            end = sentences[last_sentence].end_char
+            end = sentences[last_sentence][0]
 
             chunks.append(text[start:end])
         return chunks, starts

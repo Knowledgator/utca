@@ -17,7 +17,7 @@ BaseTokenSearcherConfigType = TypeVar(
 
 
 class InputWithThreshold(Input):
-    threshold: Optional[float]
+    threshold: Optional[float]=None
 
 
 InputWithThresholdType = TypeVar(
@@ -25,7 +25,7 @@ InputWithThresholdType = TypeVar(
 )
 
 
-class BaseTokenSearcherOutput(Generic[EntityType], Output):
+class BaseTokenSearcherOutput(Output, Generic[EntityType]):
     output: Sequence[EntityType]
 
 

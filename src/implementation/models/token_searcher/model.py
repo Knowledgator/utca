@@ -24,8 +24,8 @@ class BaseTokenSearcherModel(
     input_data_type: Type[InputType]
     
     def __init__(self, cfg: TokenSearcherModelConfigType) -> None:
-        self.tokenizer = AutoTokenizer.from_pretrained(cfg.model_name) # type: ignore
-        model = AutoModelForTokenClassification.from_pretrained(cfg.model_name) # type: ignore
+        self.tokenizer = AutoTokenizer.from_pretrained(cfg.model) # type: ignore
+        model = AutoModelForTokenClassification.from_pretrained(cfg.model) # type: ignore
         
         self.pipeline = pipeline(
             "ner", 
@@ -50,7 +50,7 @@ class BaseTokenSearcherModel(
         return (
             input_data
             if isinstance(input_data, type(InputType)) 
-            else self.input_data_type.parse_obj(input_data)
+            else self.input_data_type.model_validate(input_data)
         )
 
 
