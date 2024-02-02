@@ -1,4 +1,4 @@
-from typing import Any, Generic, Type, Dict, Union
+from typing import Any, Generic, Type, Dict, Union, overload
 
 from abc import ABC,  abstractmethod
 from core.executable_level_1.transformable import Transformable
@@ -35,7 +35,39 @@ class Executable(Generic[InputType, OutputType], ABC):
     def validate_output(self, output_data: Dict[str, Any]) -> OutputType:
         return self.output_class(**output_data)
 
-    def execute(self, input_data: Union[Dict[str, Any], InputType, Transformable], return_dict: bool = False) -> Union[Dict[str, Any], OutputType, Transformable]:
+
+    @overload
+    def execute(
+        self, 
+        input_data: Union[Dict[str, Any], InputType, Transformable], 
+        return_type: Type[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        ...
+
+
+    @overload
+    def execute(
+        self, 
+        input_data: Union[Dict[str, Any], InputType, Transformable], 
+        return_type: Type[OutputType]
+    ) -> OutputType:
+        ...
+
+
+    @overload
+    def execute(
+        self, 
+        input_data: Union[Dict[str, Any], InputType, Transformable], 
+        return_type: Type[Transformable]
+    ) -> Transformable:
+        ...
+
+
+    def execute(
+        self, 
+        input_data: Union[Dict[str, Any], InputType, Transformable], 
+        return_type: Type[Union[Dict[str, Any], OutputType, Transformable]]
+    ) -> Union[Dict[str, Any], OutputType, Transformable]:
         try:
             if isinstance(input_data, Transformable):
                 extracted_dict = input_data.extract()
