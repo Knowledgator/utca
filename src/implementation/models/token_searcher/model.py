@@ -1,50 +1,153 @@
+from typing import Dict, Generic, Type, Any, Union
+from abc import ABC, abstractmethod
+
 from transformers import ( # type: ignore
     pipeline, AutoTokenizer, AutoModelForTokenClassification # type: ignore
-) 
-from pydantic import BaseModel
+)
 
-from src.model_level_2.model import Model, ModelConfigs
-from src.model_level_2.schema import Prompt
+from implementation.models.token_searcher.schema import (
+    ConfigType, 
+    InputType, 
+    OutputType, 
+    TokenSearcherModelConfigType,
+    TokenSearcherModelConfig, 
+    TokenSearcherModelInput, 
+    TokenSearcherModelOutput
+)
 
-class Entity(BaseModel):
-    entity_group: str 
-    score: float
-    word: str
-    start: int
-    end: int
+class Model(Generic[ConfigType, InputType, OutputType], ABC):
+    input_data_type: Type[InputType]
 
-
-class TokenSearcherOutputs(BaseModel):
-    outputs: list[list[Entity]]
-
-
-class TokenSearcherConfigs(ModelConfigs):
-    model_name: str
-    device: str='cpu'
-    batch_size: int=12
+    def __init__(self, cfg: ConfigType):
+        self.cfg = cfg
 
 
-class TokenSearcher(Model[Prompt, TokenSearcherOutputs]):
-    def __init__(self, cfg: TokenSearcherConfigs) -> None:
+    @abstractmethod
+    def get_predictions(
+        self, inputs: Any
+    ) -> Any:
+        ...
+
+
+    @abstractmethod
+    def _preprocess(
+        self, input_data: Union[InputType, Dict[str, Any]]
+    ) -> InputType:
+        ...
+
+
+    @abstractmethod
+    def _process(
+        self, input_data: InputType
+    ) -> Any:
+        ...
+
+
+    @abstractmethod
+    def _postprocess(
+        self, 
+        input_data: InputType, 
+        predicts: Any
+    ) -> OutputType:
+        ...
+
+
+    @abstractmethod
+    def execute(
+        self, 
+        input_data: Union[InputType, Dict[str, Any]]
+    ) -> OutputType:
+        ...
+
+
+class BaseTokenSearcherModel(
+    Model[
+        TokenSearcherModelConfigType, 
+        InputType, 
+        OutputType
+    ]
+):
+    input_data_type: Type[InputType]
+    
+    def __init__(self, cfg: TokenSearcherModelConfigType) -> None:
+        self.tokenizer = AutoTokenizer.from_pretrained(cfg.model_name) # type: ignore
+        model = AutoModelForTokenClassification.from_pretrained(cfg.model_name) # type: ignore
+        
+        self.pipeline = pipeline(
+            "ner", 
+            model=model, # type: ignore
+            tokenizer=self.tokenizer,
+            aggregation_strategy='first', 
+            batch_size=cfg.batch_size,
+            device=cfg.device
+        )
         super().__init__(cfg)
 
-        tokenizer = AutoTokenizer.from_pretrained(cfg.model_name) # type: ignore
-        model = AutoModelForTokenClassification.from_pretrained(cfg.model_name) # type: ignore
 
-        try:
-            self.pipeline = pipeline(
-                "ner", 
-                model=model, # type: ignore
-                tokenizer=tokenizer,
-                aggregation_strategy='first', 
-                batch_size=cfg.batch_size, # TODO: check what it actually does!
-                device=cfg.device
-            )
-        except Exception as e:
-            raise ValueError(e)
+    def get_predictions(
+        self, inputs: list[str]
+    ) -> list[list[Dict[str, Any]]]:
+        return self.pipeline(inputs) # type: ignore
 
+
+    def _preprocess(
+        self, input_data: Union[InputType, Dict[str, Any]]
+    ) -> InputType:
+        return (
+            input_data
+            if isinstance(input_data, type(InputType)) 
+            else self.input_data_type.parse_obj(input_data)
+        )
+
+
+    @abstractmethod
+    def _process(
+        self, input_data: InputType
+    ) -> list[list[Dict[str, Any]]]:
+        ...
+
+
+    @abstractmethod
+    def _postprocess(
+        self, 
+        input_data: InputType, 
+        predicts: Any
+    ) -> OutputType:
+        ...
+
+
+    def execute(
+        self, 
+        input_data: Union[InputType, Dict[str, Any]]
+    ) -> OutputType:
+        input_data = self._preprocess(input_data)
+        return self._postprocess(
+            input_data,
+            self._process(input_data)
+        )
     
-    def invoke(self, input_data: Prompt) -> TokenSearcherOutputs:
-        return TokenSearcherOutputs.parse_obj({
-            'outputs': self.pipeline([input_data.prompt])
-        })
+
+class TokenSearcherModel(
+    BaseTokenSearcherModel[
+        TokenSearcherModelConfig, 
+        TokenSearcherModelInput, 
+        TokenSearcherModelOutput
+    ]
+):
+    input_data_type: Type[TokenSearcherModelInput] = TokenSearcherModelInput
+
+    def _process(
+        self, input_data: TokenSearcherModelInput
+    ) -> list[list[Dict[str, Any]]]:
+        return self.get_predictions(input_data.inputs)
+
+
+    def _postprocess(
+        self, 
+        input_data: TokenSearcherModelInput, 
+        predicts: Any
+    ) -> TokenSearcherModelOutput:
+        return TokenSearcherModelOutput(
+            inputs=input_data.inputs,
+            output=predicts
+        )

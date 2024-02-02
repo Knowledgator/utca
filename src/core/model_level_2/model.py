@@ -1,5 +1,5 @@
+from typing import Dict, Any, Generic
 from abc import ABC, abstractmethod
-# from typing import Any, Dict, Optional
 
 from pydantic import BaseModel
 
@@ -8,6 +8,12 @@ from src.executable_level_1.schema import InputType, OutputType
 
 # class ModelIOValidator(IOValidator, ABC):
         
+#     @abstractmethod
+#     def isValidInput(self, input_data: Input) -> bool:
+#         pass
+#     @abstractmethod
+#     def isValidOutput(self, output_data: Output) -> bool:
+#         pass
 #     @abstractmethod
 #     def isValidInput(self, input_data: Input) -> bool:
 #         pass
@@ -31,13 +37,22 @@ class ModelConfigs(BaseModel, ABC): # TODO: Check for more suitable pydantic typ
     # def set_config_value(self, key: str, val: Any) -> None:
     #     # Optionally, add validation logic here
     #     self.settings[key] = val
+    
+    # def set_config_value(self, key: str, val: Any) -> None:
+    #     # Optionally, add validation logic here
+    #     self.settings[key] = val
 
 
     # def get_config_value(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
     #     # Provide a default value for missing keys
     #     return self.settings.get(key, default)
+    # def get_config_value(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
+    #     # Provide a default value for missing keys
+    #     return self.settings.get(key, default)
 
 
+    # def __call__(self) -> Dict[str, Any]:
+    #     return self.settings
     # def __call__(self) -> Dict[str, Any]:
     #     return self.settings
 
@@ -46,7 +61,7 @@ class ModelConfigs(BaseModel, ABC): # TODO: Check for more suitable pydantic typ
         return f"{self.__class__.__name__}({self.__str__()})"
 
 
-class Model(Executable[InputType, OutputType], ABC):
+class Model(Generic[InputType], ABC):
     def __init__(self, cfg: ModelConfigs) -> None:
         self.cfg = cfg
 

@@ -1,0 +1,15 @@
+{
+    "outputs": [
+        {
+            "input": "string",
+            "tokens": [
+                {
+                    "span": "string",
+                    "start": "int",
+                    "end": "int",
+                    "score": "float"
+                }
+            ]
+        }
+    ]
+}
