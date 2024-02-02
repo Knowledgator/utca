@@ -7,6 +7,9 @@ from implementation.models.token_searcher.objects import (
 
 def clean_span(text: str, start: int, end: int, shift: int=0):
     junk = {*string.punctuation, *' \n\r\t'}
+    
+    start += shift
+    end += shift
     while start != end - 1 and text[start] in junk:
         start += 1
     while end != start and text[end - 1] in string.punctuation:
@@ -46,8 +49,9 @@ def build_entity(
     if raw_entity['score'] > threshold:
         span, start, end = clean_span(
             text, 
-            raw_entity['start'] + 1 + shift, 
-            raw_entity['end'] + shift
+            raw_entity['start'] + 1, 
+            raw_entity['end'],
+            shift
         )
         return ClassifiedEntity(
             start=start,
