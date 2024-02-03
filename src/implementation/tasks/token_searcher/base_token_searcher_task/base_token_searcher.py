@@ -1,6 +1,6 @@
 from typing import Type
 
-from core.task_level_3.task import Task
+from core.task_level_3.task import NERTask
 from implementation.models.token_searcher.schema import (
     TokenSearcherModelConfig, TokenSearcherModelInput, TokenSearcherModelOutput
 )
@@ -9,7 +9,7 @@ from implementation.tasks.token_searcher.base_token_searcher_task.schema import 
 )
 
 class BaseTokenSearcher(
-    Task[
+    NERTask[
         BaseTokenSearcherConfigType, 
         InputWithThresholdType, 
         BaseTokenSearcherOutputType,

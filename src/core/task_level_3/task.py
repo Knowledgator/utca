@@ -36,3 +36,12 @@ class Task(
         output_data: Any
     ) -> Dict[str, Any]:
         ...
+
+
+class NERTask(
+    Task[
+        ConfigType, InputType, OutputType,
+        ModelConfigType, ModelInputType, ModelOutputType
+    ]
+):
+    ...
