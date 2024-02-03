@@ -1,7 +1,7 @@
 # Example subclass implementation
 from typing import Any, Dict
 from core.executable_level_1.executable import Executable
-from core.executable_level_1.schema import Input, Output
+from core.executable_level_1.schema import Input, Output, Config
 
 
 class MyInput(Input):
@@ -13,7 +13,7 @@ class MyOutput(Output):
     # Output class implementation goes here
     pass
 
-class MyExecutable(Executable[MyInput, MyOutput]):
+class MyExecutable(Executable[Config, MyInput, MyOutput]):
     input_class = MyInput
     output_class = MyOutput
 
@@ -22,6 +22,6 @@ class MyExecutable(Executable[MyInput, MyOutput]):
         return {"f": 5}
     
 input = {"f": 4}
-example = MyExecutable()
+example = MyExecutable(Config())
 
-print(example.execute(input))
+print(example.execute(input, Dict[str, Any]))
