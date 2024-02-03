@@ -1,4 +1,4 @@
-from typing import Any, Union, cast, Type, Dict, Optional
+from typing import Any, cast, Type, Dict, Optional
 
 from pydantic import PrivateAttr
 
@@ -46,12 +46,14 @@ class TokenSearcherQandATask(
         TokenSearcherQandAOutput
     ]
 ):
-    input_data_type: Type[TokenSearcherQandAInput] = TokenSearcherQandAInput
+    input_class: Type[TokenSearcherQandAInput] = TokenSearcherQandAInput
+    output_class: Type[TokenSearcherQandAOutput] = TokenSearcherQandAOutput
+
     prompt: str = """{question}
 Text:
  """
     def _preprocess(
-        self, input_data: Union[TokenSearcherQandAInput, Dict[str, Any]]
+        self, input_data: TokenSearcherQandAInput
     ) -> TokenSearcherQandAInput:
         input_data = super()._preprocess(input_data)
         input_data.set_inputs(
@@ -60,25 +62,29 @@ Text:
         return input_data
 
 
-    def _process(
+    def invoke(
         self, input_data: TokenSearcherQandAInput
-    ) -> list[list[Dict[str, Any]]]:
-        return self.get_predictions([input_data.prompt])
+    ) -> Dict[str, Any]:
+        input_data = self._preprocess(input_data)
+        predicts = self.model.execute(
+            {'inputs': [input_data.prompt]}, Dict[str, Any]
+        )
+        return self._postprocess(input_data, predicts)
     
 
     def _postprocess(
         self, 
         input_data: TokenSearcherQandAInput, 
-        predicts: list[list[Dict[str, Any]]]
-    ) -> TokenSearcherQandAOutput:
-        return TokenSearcherQandAOutput(
-            prompt=input_data.prompt,
-            output=[
+        output_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        return {
+            'prompt': input_data.prompt,
+            'output': [
                 entity
-                for output in predicts
+                for output in output_data['outputs']
                 for ent in output 
                 if (entity := build_entity(
                     input_data.prompt, ent, cast(float, input_data.threshold)
                 ))
             ]
-        )
+        }

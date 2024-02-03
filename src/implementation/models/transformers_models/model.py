@@ -1,5 +1,4 @@
-from typing import Dict, Type, Any, Union
-from abc import abstractmethod
+from typing import Dict, Type, Any
 
 from transformers import ( # type: ignore
     pipeline, AutoTokenizer, AutoModelForTokenClassification # type: ignore
@@ -39,40 +38,3 @@ class TransformersModel(
         self, inputs: list[str]
     ) -> list[list[Dict[str, Any]]]:
         return self.pipeline(inputs) # type: ignore
-
-
-    def _preprocess(
-        self, input_data: Union[InputType, Dict[str, Any]]
-    ) -> InputType:
-        return (
-            input_data
-            if isinstance(input_data, type(InputType)) 
-            else self.input_data_type.model_validate(input_data)
-        )
-
-
-    @abstractmethod
-    def _process(
-        self, input_data: InputType
-    ) -> list[list[Dict[str, Any]]]:
-        ...
-
-
-    @abstractmethod
-    def _postprocess(
-        self, 
-        input_data: InputType, 
-        predicts: Any
-    ) -> OutputType:
-        ...
-
-
-    def execute(
-        self, 
-        input_data: Union[InputType, Dict[str, Any]]
-    ) -> OutputType:
-        input_data = self._preprocess(input_data)
-        return self._postprocess(
-            input_data,
-            self._process(input_data)
-        )

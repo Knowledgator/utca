@@ -15,4 +15,4 @@ class TokenSearcherModelInput(Input):
 
 class TokenSearcherModelOutput(Output):
     inputs: list[str]
-    output: list[list[Dict[str, Any]]]
+    outputs: list[list[Dict[str, Any]]]

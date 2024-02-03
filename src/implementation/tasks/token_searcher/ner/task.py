@@ -1,8 +1,8 @@
-from typing import Tuple, Any, Dict, Optional, Union, cast, Type
+from typing import Tuple, Any, Dict, Optional, cast, Type
 
 from pydantic import PrivateAttr
 
-from implementation.tasks.utils import sent_tokenizer
+from implementation.tasks.utils import sent_tokenizer # type: ignore
 from implementation.tasks.token_searcher.base_token_searcher_task.base_token_searcher import (
     BaseTokenSearcher
 )
@@ -59,7 +59,7 @@ class TokenSearcherNEROutput(BaseTokenSearcherOutput[ClassifiedEntity]):
 
 
 class TokenSearcherNERConfig(BaseTokenSearcherConfig):
-    ...
+    sents_batch: int=10
 
 
 class TokenSearcherNERTask(
@@ -69,17 +69,15 @@ class TokenSearcherNERTask(
         TokenSearcherNEROutput
     ]
 ):
-    input_data_type: Type[TokenSearcherNERInput] = TokenSearcherNERInput
+    input_class: Type[TokenSearcherNERInput] = TokenSearcherNERInput
+    output_class: Type[TokenSearcherNEROutput] = TokenSearcherNEROutput
+
     prompt: str = """
 Identify entities in the text having the following classes:
 {label}
 Text:
  """
-
-    def __init__(self, cfg: TokenSearcherNERConfig) -> None:
-        super().__init__(cfg)
     
-
     def get_last_sentence_id(self, i: int, sentences_len: int) -> int:
         return min(i + self.cfg.sents_batch, sentences_len) - 1
 
@@ -117,7 +115,7 @@ Text:
 
 
     def _preprocess(
-        self, input_data: Union[TokenSearcherNERInput, Dict[str, Any]]
+        self, input_data: TokenSearcherNERInput
     ) -> TokenSearcherNERInput:
         input_data = super()._preprocess(input_data)
         chunks, chunks_starts = self.chunkanize(input_data.text)
@@ -132,20 +130,26 @@ Text:
         return input_data
 
 
-    def _process(
+    def invoke(
         self, input_data: TokenSearcherNERInput
-    ) -> list[list[Dict[str, Any]]]:
-        return self.get_predictions(input_data.inputs)
+    ) -> Dict[str, Any]:
+        input_data = self._preprocess(input_data)
+        predicts = self.model.execute(
+            {'inputs': input_data.inputs}, Dict[str, Any]
+        )
+        return self._postprocess(
+            input_data, predicts
+        )
     
 
     def _postprocess(
         self, 
         input_data: TokenSearcherNERInput, 
-        predicts: list[list[Dict[str, Any]]]
-    ) -> TokenSearcherNEROutput:
+        output_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         outputs: list[ClassifiedEntity] = []
 
-        for id, output in enumerate(predicts): # type: ignore
+        for id, output in enumerate(output_data['outputs']):
             label = input_data.labels[id//len(input_data.chunk_starts)]
             shift = (
                 input_data.chunk_starts[id%len(input_data.chunk_starts)] 
@@ -156,7 +160,7 @@ Text:
                     input_data.text, ent, cast(float, input_data.threshold), label, shift=shift
                 ):
                     outputs.append(entity)
-        return TokenSearcherNEROutput(
-            text=input_data.text,
-            output=outputs
-        )
+        return {
+            'text': input_data.text,
+            'output': outputs
+        }

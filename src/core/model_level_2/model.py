@@ -1,8 +1,9 @@
-from typing import Generic, Type, Any, Union, Dict
-from abc import ABC, abstractmethod
-
-from core.executable_level_1.schema import InputType, OutputType
-from core.model_level_2.schema import ConfigType
+from core.executable_level_1.executable import Executable
+from core.model_level_2.schema import (
+    ModelInputType,
+    ModelOutputType,
+    ModelConfigType
+)
 
 
 # class ModelInput(Input):
@@ -52,46 +53,6 @@ from core.model_level_2.schema import ConfigType
 #     # def invoke_model(self):
 #     #     pass
 
-class Model(Generic[ConfigType, InputType, OutputType], ABC):
-    input_data_type: Type[InputType]
 
-    def __init__(self, cfg: ConfigType):
-        self.cfg: ConfigType = cfg
-
-
-    @abstractmethod
-    def get_predictions(
-        self, inputs: Any
-    ) -> Any:
-        ...
-
-
-    @abstractmethod
-    def _preprocess(
-        self, input_data: Union[InputType, Dict[str, Any]]
-    ) -> InputType:
-        ...
-
-
-    @abstractmethod
-    def _process(
-        self, input_data: InputType
-    ) -> Any:
-        ...
-
-
-    @abstractmethod
-    def _postprocess(
-        self, 
-        input_data: InputType, 
-        predicts: Any
-    ) -> OutputType:
-        ...
-
-
-    @abstractmethod
-    def execute(
-        self, 
-        input_data: Union[InputType, Dict[str, Any]]
-    ) -> OutputType:
-        ...
+class Model(Executable[ModelConfigType, ModelInputType, ModelOutputType]):
+    ...

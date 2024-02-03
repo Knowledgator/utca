@@ -1,18 +1,11 @@
 from __future__ import annotations
-from typing import TypeVar, Any, Union, Dict
-from abc import ABC
+from typing import Any, Union, Dict, TypeVar
 
-from pydantic import BaseModel
+from core.executable_level_1.schema import Input, Output, Config
 
-# from src.executable_level_1.schema import InputType
-
-class Config(BaseModel, ABC):
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.__str__()})"
-
-
-ConfigType = TypeVar('ConfigType', bound=Config, contravariant=True)
-
+ModelConfigType = TypeVar('ModelConfigType', bound=Config, contravariant=True)
+ModelInputType = TypeVar('ModelInputType', bound=Input)
+ModelOutputType = TypeVar('ModelOutputType', bound=Output)
 
 class Prompt:
     def __init__(self, prompt: str) -> None:

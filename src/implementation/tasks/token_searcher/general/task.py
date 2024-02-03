@@ -34,27 +34,30 @@ class TokenSearcherGeneralTask(
         TokenSearcherGeneralOutput
     ]
 ):
-    input_data_type: Type[TokenSearcherGeneralInput] = TokenSearcherGeneralInput
-    
-    def _process(
+    input_class: Type[TokenSearcherGeneralInput] = TokenSearcherGeneralInput
+    output_class: Type[TokenSearcherGeneralOutput] = TokenSearcherGeneralOutput
+
+    def invoke(
         self, input_data: TokenSearcherGeneralInput
-    ) -> list[list[Dict[str, Any]]]:
-        return self.get_predictions([input_data.prompt])
-    
+    ) -> Dict[str, Any]:
+        input_data = self._preprocess(input_data)
+        predicts = self.model.execute({'inputs':[input_data.prompt]}, return_type=Dict[str, Any])
+        return self._postprocess(input_data, predicts)
+
 
     def _postprocess(
         self, 
         input_data: TokenSearcherGeneralInput, 
-        predicts: list[list[Dict[str, Any]]]
-    ) -> TokenSearcherGeneralOutput:
-        return TokenSearcherGeneralOutput(
-            prompt=input_data.prompt,
-            output=[
+        output_data: Dict[str, Any]
+    ) ->  Dict[str, Any]:
+        return {
+            'prompt': input_data.prompt,
+            'output': [
                 entity
-                for output in predicts
+                for output in output_data['outputs']
                 for ent in output 
                 if (entity := build_entity(
                     input_data.prompt, ent, cast(float, input_data.threshold)
                 ))
             ]
-        )
+        }

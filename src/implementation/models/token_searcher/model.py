@@ -16,20 +16,13 @@ class TokenSearcherModel(
         TokenSearcherModelOutput
     ]
 ):
-    input_data_type: Type[TokenSearcherModelInput] = TokenSearcherModelInput
+    input_class: Type[TokenSearcherModelInput] = TokenSearcherModelInput
+    output_class: Type[TokenSearcherModelOutput] = TokenSearcherModelOutput
 
-    def _process(
+    def invoke(
         self, input_data: TokenSearcherModelInput
-    ) -> list[list[Dict[str, Any]]]:
-        return self.get_predictions(input_data.inputs)
-
-
-    def _postprocess(
-        self, 
-        input_data: TokenSearcherModelInput, 
-        predicts: Any
-    ) -> TokenSearcherModelOutput:
-        return TokenSearcherModelOutput(
-            inputs=input_data.inputs,
-            output=predicts
-        )
+    ) -> Dict[str, Any]:
+        return {
+            'inputs': input_data.inputs,
+            'outputs': self.get_predictions(input_data.inputs)
+        }

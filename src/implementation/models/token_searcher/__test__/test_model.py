@@ -25,5 +25,5 @@ def test_tokensearcher():
     expected_ouput = {'entity_group': 'ENT', 'score': 0.793671, 'word': 'NationalAeronauticsandSpaceAdministration', 'start': 49, 'end': 95}
     assert (
         expected_ouput['word'] 
-        == actual_ouput.output[0][0]['word']
+        == actual_ouput.outputs[0][0]['word']
     )

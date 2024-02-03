@@ -1,8 +1,6 @@
 from typing import TypeVar, Optional, Sequence, Generic, Union
 
-from implementation.models.token_searcher.schema import (
-    Input, TokenSearcherModelConfig, Output
-)
+from core.executable_level_1.schema import Input, Output, Config
 from implementation.models.objects.objects import (
     Entity, ClassifiedEntity
 )
@@ -10,7 +8,7 @@ from implementation.models.objects.schema import (
     EntityType
 )
 
-class BaseTokenSearcherConfig(TokenSearcherModelConfig):
+class BaseTokenSearcherConfig(Config):
     threshold: float=0.
 
 

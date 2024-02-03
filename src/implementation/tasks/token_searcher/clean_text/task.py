@@ -1,4 +1,4 @@
-from typing import Any, Union, cast, Type, Dict, Optional
+from typing import Any, cast, Type, Dict, Optional
 
 from pydantic import PrivateAttr
 
@@ -47,18 +47,16 @@ class TokenSearcherTextCleanerTask(
         TokenSearcherTextCleanerOutput
     ]
 ):
-    input_data_type: Type[TokenSearcherTextCleanerInput] = TokenSearcherTextCleanerInput
+    input_class: Type[TokenSearcherTextCleanerInput] = TokenSearcherTextCleanerInput
+    output_class: Type[TokenSearcherTextCleanerOutput] = TokenSearcherTextCleanerOutput
     prompt: str = """
 Clean the following text extracted from the web matching not relevant parts:
 
 {text}
 """
-    def __init__(self, cfg: TokenSearcherTextCleanerConfig) -> None:
-        super().__init__(cfg)
-
 
     def _preprocess(
-        self, input_data: Union[TokenSearcherTextCleanerInput, Dict[str, Any]]
+        self, input_data: TokenSearcherTextCleanerInput
     ) -> TokenSearcherTextCleanerInput:
         input_data = super()._preprocess(input_data)
         input_data.set_inputs(
@@ -70,11 +68,15 @@ Clean the following text extracted from the web matching not relevant parts:
         return input_data
 
 
-    def _process(
+    def invoke(
         self, input_data: TokenSearcherTextCleanerInput
-    ) -> list[list[Dict[str, Any]]]:
-        return self.get_predictions([input_data.prompt])
-    
+    ) -> Dict[str, Any]:
+        self._preprocess(input_data)
+        predcits = self.model.execute(
+            {'inputs': [input_data.prompt]}, Dict[str, Any]
+        )
+        return self._postprocess(input_data, predcits)
+
 
     @classmethod
     def clean_text(cls, text: str, junk: list[Entity]) -> str:
@@ -90,21 +92,21 @@ Clean the following text extracted from the web matching not relevant parts:
     def _postprocess(
         self, 
         input_data: TokenSearcherTextCleanerInput, 
-        predicts: list[list[Dict[str, Any]]]
-    ) -> TokenSearcherTextCleanerOutput:
+        output_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         junk = [
             entity
-            for output in predicts
+            for output in output_data['outputs']
             for ent in output 
             if (entity := build_entity(
                 input_data.prompt, ent, cast(float, input_data.threshold)
             ))
         ]
-        return TokenSearcherTextCleanerOutput(
-            text=input_data.text,
-            output=junk,
-            cleaned_text=(
+        return {
+            'text': input_data.text,
+            'output': junk,
+            'cleaned_text': (
                 self.clean_text(input_data.text, junk) 
                 if input_data.clean else None
             )
-        )
+        }

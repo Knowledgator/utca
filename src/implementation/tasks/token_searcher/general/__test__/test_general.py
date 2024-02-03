@@ -1,14 +1,19 @@
+from implementation.models.token_searcher.model import (
+    TokenSearcherModel, TokenSearcherModelConfig
+)
 from implementation.tasks.token_searcher.general.task import (
     TokenSearcherGeneralTask, TokenSearcherGeneralConfig
 )
 
 def test_tokensearcher_general():
-    cfg = TokenSearcherGeneralConfig(
-        model="knowledgator/UTC-DeBERTa-small",
-        device="cpu"
-    )
+    cfg = TokenSearcherGeneralConfig()
 
-    task = TokenSearcherGeneralTask(cfg)
+    task = TokenSearcherGeneralTask(
+        cfg, TokenSearcherModel(TokenSearcherModelConfig(
+            model="knowledgator/UTC-DeBERTa-small",
+            device="cpu"
+        ))
+    )
     res = task.execute({"prompt": (
         "Identify organizations mentioned in the text:"
         " The National Aeronautics and Space Administration"

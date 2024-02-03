@@ -1,24 +1,25 @@
-from typing import Any, Union, Dict, Type
+from typing import Type
 
-from implementation.models.token_searcher.model import (
-    TransformersModel
+from core.task_level_3.task import Task
+from implementation.models.token_searcher.schema import (
+    TokenSearcherModelConfig, TokenSearcherModelInput, TokenSearcherModelOutput
 )
 from implementation.tasks.token_searcher.base_token_searcher_task.schema import (
     BaseTokenSearcherConfigType, InputWithThresholdType, BaseTokenSearcherOutputType
 )
 
 class BaseTokenSearcher(
-    TransformersModel[
+    Task[
         BaseTokenSearcherConfigType, 
         InputWithThresholdType, 
-        BaseTokenSearcherOutputType
+        BaseTokenSearcherOutputType,
+        TokenSearcherModelConfig, 
+        TokenSearcherModelInput, 
+        TokenSearcherModelOutput
     ]
 ):
-    input_data_type: Type[InputWithThresholdType]
-
-    def __init__(self, cfg: BaseTokenSearcherConfigType) -> None:
-        super().__init__(cfg)
-
+    input_class: Type[InputWithThresholdType]
+    output_class: Type[BaseTokenSearcherOutputType]
 
     def choose_threshold(self, input_data: InputWithThresholdType):
         return (
@@ -29,8 +30,7 @@ class BaseTokenSearcher(
     
 
     def _preprocess(
-        self, input_data: Union[InputWithThresholdType, Dict[str, Any]]
+        self, input_data: InputWithThresholdType
     ) -> InputWithThresholdType:
-        input_data = super()._preprocess(input_data)
         input_data.threshold = self.choose_threshold(input_data)
         return input_data

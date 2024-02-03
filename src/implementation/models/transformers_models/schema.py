@@ -1,10 +1,9 @@
 from typing import TypeVar
 
-from core.model_level_2.schema import Config
+from core.executable_level_1.schema import Config
 
 class TransformersModelConfig(Config):
     model: str
-    sents_batch: int=10
     batch_size: int=12
     device: str='cpu'
 
