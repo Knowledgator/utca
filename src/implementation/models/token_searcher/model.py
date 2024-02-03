@@ -1,7 +1,8 @@
 from typing import Dict, Type, Any
 
-from implementation.models.transformers_models.model import (
-    TransformersModel
+from core.model_level_2.model import PromptModel
+from core.model_level_2.tranformers_pipeline import (
+    TransformersPipeline
 )
 from implementation.models.token_searcher.schema import (
     TokenSearcherModelConfig, 
@@ -10,7 +11,12 @@ from implementation.models.token_searcher.schema import (
 )   
 
 class TokenSearcherModel(
-    TransformersModel[
+    TransformersPipeline[
+        TokenSearcherModelConfig, 
+        TokenSearcherModelInput, 
+        TokenSearcherModelOutput
+    ],
+    PromptModel[
         TokenSearcherModelConfig, 
         TokenSearcherModelInput, 
         TokenSearcherModelOutput

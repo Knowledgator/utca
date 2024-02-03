@@ -6,10 +6,7 @@ from implementation.models.token_searcher.schema import (
 )
 
 def test_tokensearcher():
-    cfg = TokenSearcherModelConfig(
-        model='knowledgator/UTC-DeBERTa-small',
-        device='cpu'
-    )
+    cfg = TokenSearcherModelConfig()
 
     model = TokenSearcherModel(cfg)
     actual_ouput = model.execute({

@@ -1,9 +1,16 @@
-from typing import Dict, Union, Any, overload, Optional
+from typing import Tuple, Iterator, cast, Dict, Union, Any, overload, Optional
 import string
 
-from implementation.models.objects.objects import (
+from core.model_level_2.objects.objects import (
     Entity, ClassifiedEntity
 )
+import nltk # type: ignore
+
+tokenizer = nltk.load("tokenizers/punkt/english.pickle") # type: ignore
+
+def sent_tokenizer(text: str) -> Iterator[Tuple[int, int]]:
+    return cast(Iterator[Tuple[int, int]], tokenizer.span_tokenize(text)) # type: ignore
+
 
 def clean_span(text: str, start: int, end: int, shift: int=0):
     junk = {*string.punctuation, *' \n\r\t'}
@@ -40,7 +47,7 @@ def build_entity(
 
 
 def build_entity(
-    text: str, 
+    text: str,
     raw_entity: Dict[str, Any], 
     threshold: float, 
     label: Optional[str]=None,

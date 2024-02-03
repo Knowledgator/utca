@@ -1,7 +1,7 @@
 from implementation.models.token_searcher.model import (
     TokenSearcherModel, TokenSearcherModelConfig
 )
-from implementation.tasks.token_searcher.q_and_a.task import (
+from implementation.tasks.q_and_a.token_searcher import (
     TokenSearcherQandATask, TokenSearcherQandAConfig
 )
 
@@ -10,8 +10,7 @@ def test_tokensearcher_general():
 
     task = TokenSearcherQandATask(
         cfg, TokenSearcherModel(TokenSearcherModelConfig(
-            model="knowledgator/UTC-DeBERTa-small",
-            device="cpu"
+            name="knowledgator/UTC-DeBERTa-small"
         ))
     )
     res = task.execute({

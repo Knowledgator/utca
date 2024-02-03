@@ -1,7 +1,7 @@
 from implementation.models.token_searcher.model import (
     TokenSearcherModel, TokenSearcherModelConfig
 )
-from implementation.tasks.token_searcher.ner.task import (
+from implementation.tasks.ner.token_searcher import (
     TokenSearcherNERConfig, TokenSearcherNERTask
 )
 
@@ -10,8 +10,7 @@ def test_ner():
 
     task = TokenSearcherNERTask(
         cfg, TokenSearcherModel(TokenSearcherModelConfig(
-            model="knowledgator/UTC-DeBERTa-small",
-            device="cpu"
+            name="knowledgator/UTC-DeBERTa-small"
         ))
     )
     res = task.execute({

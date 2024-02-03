@@ -1,7 +1,7 @@
 from implementation.models.token_searcher.model import (
     TokenSearcherModel, TokenSearcherModelConfig
 )
-from implementation.tasks.token_searcher.clean_text.task import (
+from implementation.tasks.clean_text.token_searcher import (
     TokenSearcherTextCleanerTask, TokenSearcherTextCleanerConfig
 )
 
@@ -10,8 +10,7 @@ def test_tokensearcher_general():
 
     task = TokenSearcherTextCleanerTask(
         cfg, TokenSearcherModel(TokenSearcherModelConfig(
-            model="knowledgator/UTC-DeBERTa-small",
-            device="cpu"
+            name="knowledgator/UTC-DeBERTa-small"
         ))
     )
     

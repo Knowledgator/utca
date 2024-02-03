@@ -2,19 +2,22 @@ from typing import Any, cast, Type, Dict, Optional
 
 from pydantic import PrivateAttr
 
-from implementation.tasks.token_searcher.base_token_searcher_task.base_token_searcher import (
-    BaseTokenSearcher
-)
-from implementation.tasks.token_searcher.base_token_searcher_task.schema import (
+from core.task_level_3.task import NERTask
+from core.task_level_3.schema import (
     InputWithThreshold, 
-    BaseTokenSearcherOutput, 
-    BaseTokenSearcherConfig
+    NEROutput,
+    NERConfig 
 )
-from implementation.tasks.token_searcher.base_token_searcher_task.utils import (
+from core.model_level_2.utils import (
     build_entity
 )
-from implementation.models.objects.objects import (
+from core.model_level_2.objects.objects import (
     Entity
+)
+from implementation.models.token_searcher.schema import (
+    TokenSearcherModelConfig, 
+    TokenSearcherModelInput, 
+    TokenSearcherModelOutput
 )
 
 class TokenSearcherTextCleanerInput(InputWithThreshold):
@@ -31,20 +34,23 @@ class TokenSearcherTextCleanerInput(InputWithThreshold):
         return cast(str, self._prompt)
 
 
-class TokenSearcherTextCleanerOutput(BaseTokenSearcherOutput[Entity]):
+class TokenSearcherTextCleanerOutput(NEROutput[Entity]):
     text: str
     cleaned_text: Optional[str] = None
 
 
-class TokenSearcherTextCleanerConfig(BaseTokenSearcherConfig):
+class TokenSearcherTextCleanerConfig(NERConfig):
     clean: bool = False
 
 
 class TokenSearcherTextCleanerTask(
-    BaseTokenSearcher[
+    NERTask[
         TokenSearcherTextCleanerConfig,
         TokenSearcherTextCleanerInput, 
-        TokenSearcherTextCleanerOutput
+        TokenSearcherTextCleanerOutput,
+        TokenSearcherModelConfig, 
+        TokenSearcherModelInput, 
+        TokenSearcherModelOutput
     ]
 ):
     input_class: Type[TokenSearcherTextCleanerInput] = TokenSearcherTextCleanerInput

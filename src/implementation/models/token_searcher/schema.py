@@ -1,12 +1,27 @@
 from typing import Dict, Any
 
-from core.executable_level_1.schema import Input, Output
-from implementation.models.transformers_models.schema import (
-    TransformersModelConfig
+from transformers import ( # type: ignore
+    AutoTokenizer, AutoModelForTokenClassification # type: ignore
 )
 
-class TokenSearcherModelConfig(TransformersModelConfig):
-    ...
+from core.executable_level_1.schema import Input, Output
+from core.model_level_2.tranformers_schema import (
+    TransformersPipelineConfig
+)
+
+class TokenSearcherModelConfig(TransformersPipelineConfig):
+    name: str
+    
+    def __init__(self, name: str='knowledgator/UTC-DeBERTa-small', **kwargs: Dict[str, Any]):
+        self.name = name
+        super().__init__(
+            task='ner', # type: ignore
+            model=AutoModelForTokenClassification.from_pretrained(name), # type: ignore
+            tokenizer=AutoTokenizer.from_pretrained(name), # type: ignore
+            aggregation_strategy='first', # type: ignore
+            batch_size=12, # type: ignore
+            **kwargs
+        )
 
 
 class TokenSearcherModelInput(Input):
