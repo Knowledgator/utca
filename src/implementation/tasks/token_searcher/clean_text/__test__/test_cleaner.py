@@ -10,8 +10,7 @@ def test_tokensearcher_general():
 
     task = TokenSearcherTextCleanerTask(
         cfg, TokenSearcherModel(TokenSearcherModelConfig(
-            model="knowledgator/UTC-DeBERTa-small",
-            device="cpu"
+            name="knowledgator/UTC-DeBERTa-small"
         ))
     )
     

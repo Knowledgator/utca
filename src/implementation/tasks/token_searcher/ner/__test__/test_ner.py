@@ -10,8 +10,7 @@ def test_ner():
 
     task = TokenSearcherNERTask(
         cfg, TokenSearcherModel(TokenSearcherModelConfig(
-            model="knowledgator/UTC-DeBERTa-small",
-            device="cpu"
+            name="knowledgator/UTC-DeBERTa-small"
         ))
     )
     res = task.execute({

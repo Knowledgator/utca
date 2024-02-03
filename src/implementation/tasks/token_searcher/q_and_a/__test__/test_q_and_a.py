@@ -10,8 +10,7 @@ def test_tokensearcher_general():
 
     task = TokenSearcherQandATask(
         cfg, TokenSearcherModel(TokenSearcherModelConfig(
-            model="knowledgator/UTC-DeBERTa-small",
-            device="cpu"
+            name="knowledgator/UTC-DeBERTa-small"
         ))
     )
     res = task.execute({

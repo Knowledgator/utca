@@ -56,3 +56,7 @@ from core.model_level_2.schema import (
 
 class Model(Executable[ModelConfigType, ModelInputType, ModelOutputType]):
     ...
+
+
+class PromptModel(Model[ModelConfigType, ModelInputType, ModelOutputType]):
+    ...
