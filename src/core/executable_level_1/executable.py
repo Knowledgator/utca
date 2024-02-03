@@ -1,26 +1,24 @@
-from typing import Any, Generic, Type, Dict, Union, overload
+from typing import Any, Generic, Type, Dict, Union, overload, Optional
 
 from abc import ABC,  abstractmethod
-from core.executable_level_1.transformable import Transformable, Validator
 
-from schema import   InputType,  OutputType
-
-
-
+from core.executable_level_1.schema import InputType, OutputType, ConfigType, Transformable, Validator
 
 
 # + and | code
 # protocol with transformable
 
-class Executable(Generic[InputType, OutputType], ABC):
+class Executable(Generic[ConfigType, InputType, OutputType], ABC):
     input_class: Type[InputType]
     output_class: Type[OutputType]
-    def __init__(self):
-        pass
-        
+
+    def __init__(self, cfg: ConfigType) -> None:
+        self.cfg = cfg
+
+
     @abstractmethod
     def invoke(self, input_data: InputType) -> Dict[str, Any]:
-        pass
+        ...
 
 
     def validate_input(self, input_data: Dict[str, Any]) -> InputType:
@@ -44,7 +42,7 @@ class Executable(Generic[InputType, OutputType], ABC):
     def execute(
         self, 
         input_data: Union[Dict[str, Any], InputType, Transformable], 
-        return_type: Type[OutputType]
+        return_type: None=None
     ) -> OutputType:
         ...
 
@@ -61,7 +59,7 @@ class Executable(Generic[InputType, OutputType], ABC):
     def execute(
         self, 
         input_data: Union[Dict[str, Any], InputType, Transformable], 
-        return_type: Type[Union[Dict[str, Any], OutputType, Transformable]]
+        return_type: Optional[Type[Union[Dict[str, Any], Transformable]]]=None
     ) -> Union[Dict[str, Any], OutputType, Transformable]:
         try:
             if isinstance(input_data, Transformable):
@@ -77,7 +75,7 @@ class Executable(Generic[InputType, OutputType], ABC):
 
             if return_type is Transformable:
                 return output.get_transform()
-            elif return_type is Dict:
+            elif return_type is Dict[str, Any]:
                 return result
             else:
                 return output
