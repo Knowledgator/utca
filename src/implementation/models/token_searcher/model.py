@@ -1,7 +1,7 @@
 from typing import Dict, Type, Any
 
 from core.model_level_2.model import PromptModel
-from core.model_level_2.transformers_models.pipeline import (
+from core.model_level_2.tranformers_pipeline import (
     TransformersPipeline
 )
 from implementation.models.token_searcher.schema import (

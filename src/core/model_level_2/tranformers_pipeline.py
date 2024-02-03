@@ -6,7 +6,7 @@ from transformers import ( # type: ignore
 
 from core.executable_level_1.schema import InputType, OutputType
 from core.model_level_2.model import Model
-from core.model_level_2.transformers_models.schema import (
+from core.model_level_2.tranformers_schema import (
     TransformersPipelineConfigType
 )
 

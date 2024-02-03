@@ -7,6 +7,9 @@ from core.executable_level_1.schema import (
 )
 from core.model_level_2.model import Model
 from core.model_level_2.schema import ModelConfigType, ModelInputType, ModelOutputType
+from core.task_level_3.schema import (
+    InputWithThresholdType, NERConfigType
+)
 
 class Task(
     Executable[ConfigType, InputType, OutputType],
@@ -40,8 +43,20 @@ class Task(
 
 class NERTask(
     Task[
-        ConfigType, InputType, OutputType,
+        NERConfigType, InputWithThresholdType, OutputType,
         ModelConfigType, ModelInputType, ModelOutputType
     ]
 ):
-    ...
+    def choose_threshold(self, input_data: InputWithThresholdType) -> float:
+        return (
+            input_data.threshold 
+            if not input_data.threshold is None 
+            else self.cfg.threshold
+        )
+    
+
+    def _preprocess(
+        self, input_data: InputWithThresholdType
+    ) -> InputWithThresholdType:
+        input_data.threshold = self.choose_threshold(input_data)
+        return input_data

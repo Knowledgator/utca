@@ -1,19 +1,19 @@
 from typing import TypeVar, Optional, Sequence, Generic, Union
 
 from core.executable_level_1.schema import Input, Output, Config
-from implementation.models.objects.objects import (
+from core.model_level_2.objects.objects import (
     Entity, ClassifiedEntity
 )
-from implementation.models.objects.schema import (
+from core.model_level_2.objects.objects import (
     EntityType
 )
 
-class BaseTokenSearcherConfig(Config):
+class NERConfig(Config):
     threshold: float=0.
 
 
-BaseTokenSearcherConfigType = TypeVar(
-    'BaseTokenSearcherConfigType', bound=BaseTokenSearcherConfig
+NERConfigType = TypeVar(
+    'NERConfigType', bound=NERConfig
 )
 
 
@@ -26,14 +26,14 @@ InputWithThresholdType = TypeVar(
 )
 
 
-class BaseTokenSearcherOutput(Output, Generic[EntityType]):
+class NEROutput(Output, Generic[EntityType]):
     output: Sequence[EntityType]
 
 
 BaseTokenSearcherOutputType = TypeVar(
     'BaseTokenSearcherOutputType', 
     bound=Union[
-        BaseTokenSearcherOutput[Entity],
-        BaseTokenSearcherOutput[ClassifiedEntity],
+        NEROutput[Entity],
+        NEROutput[ClassifiedEntity],
     ]
 )

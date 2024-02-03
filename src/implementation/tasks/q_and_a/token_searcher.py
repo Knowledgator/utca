@@ -2,19 +2,22 @@ from typing import Any, cast, Type, Dict, Optional
 
 from pydantic import PrivateAttr
 
-from implementation.tasks.token_searcher.base_token_searcher_task.base_token_searcher import (
-    BaseTokenSearcher
-)
-from implementation.tasks.token_searcher.base_token_searcher_task.schema import (
+from core.task_level_3.task import NERTask
+from core.task_level_3.schema import (
     InputWithThreshold, 
-    BaseTokenSearcherOutput, 
-    BaseTokenSearcherConfig
+    NEROutput,
+    NERConfig 
 )
-from implementation.tasks.token_searcher.base_token_searcher_task.utils import (
+from core.model_level_2.utils import (
     build_entity
 )
-from implementation.models.objects.objects import (
+from core.model_level_2.objects.objects import (
     Entity
+)
+from implementation.models.token_searcher.schema import (
+    TokenSearcherModelConfig, 
+    TokenSearcherModelInput, 
+    TokenSearcherModelOutput
 )
 
 class TokenSearcherQandAInput(InputWithThreshold):
@@ -31,19 +34,22 @@ class TokenSearcherQandAInput(InputWithThreshold):
         return cast(str, self._prompt)
 
 
-class TokenSearcherQandAOutput(BaseTokenSearcherOutput[Entity]):
+class TokenSearcherQandAOutput(NEROutput[Entity]):
     prompt: str
 
 
-class TokenSearcherQandAConfig(BaseTokenSearcherConfig):
+class TokenSearcherQandAConfig(NERConfig):
     ...
 
 
 class TokenSearcherQandATask(
-    BaseTokenSearcher[
+    NERTask[
         TokenSearcherQandAConfig, 
         TokenSearcherQandAInput, 
-        TokenSearcherQandAOutput
+        TokenSearcherQandAOutput,
+        TokenSearcherModelConfig, 
+        TokenSearcherModelInput, 
+        TokenSearcherModelOutput
     ]
 ):
     input_class: Type[TokenSearcherQandAInput] = TokenSearcherQandAInput

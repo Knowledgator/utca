@@ -1,37 +1,43 @@
 from typing import Any, cast, Type, Dict
 
-from implementation.tasks.token_searcher.base_token_searcher_task.base_token_searcher import (
-    BaseTokenSearcher
-)
-from implementation.tasks.token_searcher.base_token_searcher_task.schema import (
+from core.task_level_3.task import NERTask
+from core.task_level_3.schema import (
     InputWithThreshold, 
-    BaseTokenSearcherOutput, 
-    BaseTokenSearcherConfig
+    NEROutput,
+    NERConfig 
 )
-from implementation.tasks.token_searcher.base_token_searcher_task.utils import (
+from core.model_level_2.utils import (
     build_entity
 )
-from implementation.models.objects.objects import (
+from core.model_level_2.objects.objects import (
     Entity
+)
+from implementation.models.token_searcher.schema import (
+    TokenSearcherModelConfig, 
+    TokenSearcherModelInput, 
+    TokenSearcherModelOutput
 )
 
 class TokenSearcherGeneralInput(InputWithThreshold):
     prompt: str
 
 
-class TokenSearcherGeneralOutput(BaseTokenSearcherOutput[Entity]):
+class TokenSearcherGeneralOutput(NEROutput[Entity]):
     prompt: str
 
 
-class TokenSearcherGeneralConfig(BaseTokenSearcherConfig):
+class TokenSearcherGeneralConfig(NERConfig):
     ...
 
 
 class TokenSearcherGeneralTask(
-    BaseTokenSearcher[
+    NERTask[
         TokenSearcherGeneralConfig,
         TokenSearcherGeneralInput, 
-        TokenSearcherGeneralOutput
+        TokenSearcherGeneralOutput,
+        TokenSearcherModelConfig, 
+        TokenSearcherModelInput, 
+        TokenSearcherModelOutput
     ]
 ):
     input_class: Type[TokenSearcherGeneralInput] = TokenSearcherGeneralInput

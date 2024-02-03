@@ -1,7 +1,7 @@
 from implementation.models.token_searcher.model import (
     TokenSearcherModel, TokenSearcherModelConfig
 )
-from implementation.tasks.token_searcher.general.task import (
+from implementation.tasks.general.token_searcher import (
     TokenSearcherGeneralTask, TokenSearcherGeneralConfig
 )
 

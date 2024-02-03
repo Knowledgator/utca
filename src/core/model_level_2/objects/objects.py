@@ -1,3 +1,5 @@
+from typing import TypeVar
+
 from pydantic import BaseModel
 
 class Entity(BaseModel):
@@ -9,3 +11,5 @@ class Entity(BaseModel):
 
 class ClassifiedEntity(Entity):
     entity: str
+
+EntityType = TypeVar('EntityType', bound=Entity)
