@@ -1,3 +1,5 @@
+from hmac import new
+import string
 from typing import Any, Dict, Generic, Type
 
 from pydantic import  ValidationError
@@ -37,33 +39,6 @@ class Transformable():
     query = "new_name<-old_name",
     list of transformations are delimited with ';'
     """
-    def rename_own_attr(self, query: str):
-        if not query:
-            raise ValueError("No transformation query provided.")
-
-        transformation_list = query.split(TRANSFORMATION_DELIMITER)
-
-        for transf in transformation_list:
-            try:
-                parts = transf.split("<-")
-                if len(parts) != 2:
-                    raise ValueError(f"Invalid transformation format: '{transf}'")
-
-                new_name, old_name = [name.strip() for name in parts]
-
-                if not hasattr(self, old_name):
-                    raise AttributeError(f"Attribute '{old_name}' not found.")
-
-                old_value = getattr(self, old_name)
-                setattr(self, new_name, old_value)
-                delattr(self, old_name)
-
-            except ValueError as ve:
-                print(f"Error: {ve}")
-            except AttributeError as ae:
-                print(f"Error: {ae}")
-            except Exception as e:
-                print(f"Unexpected error: {e}")
     def rename_state_attr(self, query: str):
         if not query:
             raise ValueError("No transformation query provided.")
@@ -100,6 +75,7 @@ class Transformable():
 
     def extract(self):
         return self.state
+    # for finding particular unmatched fields
     def incomplete_field(self):
         pass
     def validate(self, validator: Validator[InputType]):
@@ -111,8 +87,28 @@ class Transformable():
              return False
 
 
+class AddData():
+    data: Dict[str, Any]
+    def __init__(self,  data: Dict[str, Any]) -> None:
+        self.data = data
 
+class RenameAttribute():
+    old_name: str
+    new_name: str
+    def __init__(self, old_name: str, new_name: str) -> None:
+        self.old_name = old_name
+        self.new_name = new_name
+        
 
+class MergeData():
+    def __init__(self, data: Dict[str, Any], new_priority: bool) -> None:
+        self.data = data
+        self.new_priority = new_priority
+
+class ChangeValue():
+    def __init__(self, key: str, value: Any) -> None:
+        self.key = key
+        self.value = value
 
 # for pipeline     
 # class Data 
