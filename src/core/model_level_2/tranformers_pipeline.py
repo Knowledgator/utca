@@ -1,13 +1,26 @@
-from typing import Type, Any
+from typing import Type, TypeVar, Any, Dict
 
 from transformers import ( # type: ignore
-    pipeline # type: ignore
+    pipeline, Pipeline # type: ignore
 )
 
 from core.executable_level_1.schema import InputType, OutputType
 from core.model_level_2.model import Model
-from core.model_level_2.tranformers_schema import (
-    TransformersPipelineConfigType
+from core.executable_level_1.schema import Config
+
+class TransformersPipelineConfig(Config):    
+    def __init__(self, **kwargs: Dict[str, Any]):
+        self.pipeline: Pipeline = pipeline(**kwargs) # type: ignore
+
+
+    def __setattr__(self, name: str, value: Any) -> None: # disable pydantic
+        self.__dict__[name] = value
+
+
+TransformersPipelineConfigType = TypeVar(
+    'TransformersPipelineConfigType', 
+    bound=TransformersPipelineConfig, 
+    contravariant=True
 )
 
 class TransformersPipeline(

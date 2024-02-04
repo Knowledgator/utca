@@ -1,7 +1,7 @@
 from typing import Tuple, Iterator, cast, Dict, Union, Any, overload, Optional
 import string
 
-from core.model_level_2.objects.objects import (
+from core.task_level_3.objects.objects import (
     Entity, ClassifiedEntity
 )
 import nltk # type: ignore

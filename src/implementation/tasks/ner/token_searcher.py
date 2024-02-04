@@ -8,10 +8,10 @@ from core.task_level_3.schema import (
     NEROutput,
     NERConfig 
 )
-from core.model_level_2.utils import (
+from core.task_level_3.utils import (
     build_entity, sent_tokenizer
 )
-from core.model_level_2.objects.objects import (
+from core.task_level_3.objects.objects import (
     ClassifiedEntity
 )
 from implementation.models.token_searcher.schema import (

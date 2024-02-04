@@ -8,7 +8,7 @@ from core.executable_level_1.schema import (
 from core.model_level_2.model import Model
 from core.model_level_2.schema import ModelConfigType, ModelInputType, ModelOutputType
 from core.task_level_3.schema import (
-    InputWithThresholdType, NERConfigType
+    InputWithThresholdType, NERConfigType, NEROutputType
 )
 
 class Task(
@@ -43,7 +43,7 @@ class Task(
 
 class NERTask(
     Task[
-        NERConfigType, InputWithThresholdType, OutputType,
+        NERConfigType, InputWithThresholdType, NEROutputType,
         ModelConfigType, ModelInputType, ModelOutputType
     ]
 ):
