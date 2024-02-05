@@ -1,6 +1,6 @@
 # CUSTOM
-token*
-credentials*
+token.*
+credentials.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
