@@ -1,13 +1,13 @@
 from typing import Any, Dict, Optional
+from enum import Enum
 
 from pydantic import BaseModel
 
-from core.datasource_level.schema import DatasourceData
-from implementation.datasources.google_cloud.schema import GoogleCloudClientConfig
-
-class GoogleSpreadsheetPage(BaseModel):
-    table: list[list[Any]]
-
+from core.datasource_level.schema import DatasourceInput, DatasourceOutput
+from implementation.datasources.google_cloud.schema import (
+    GoogleCloudClientConfig,
+    GoogleCloudDatasourceServiceConfig
+)
 
 class Sheet(BaseModel):
     title: str
@@ -27,7 +27,80 @@ class GoogleSpreadsheetClientConfig(GoogleCloudClientConfig):
     ]
 
 
-class GoogleSpreadsheetData(DatasourceData):
-    spread_sheet_id: Optional[str]=None
-    table: Optional[list[list[Any]]]=None
-    tables: Optional[list[list[list[Any]]]]=None
+class Dimension(Enum):
+    ROWS = 'ROWS'
+    COLUMNS = 'COLUMNS'
+
+
+class InputOption(Enum):
+    RAW = 'RAW'
+    USER_ENTERED = 'USER_ENTERED'
+
+
+class InsertDataOption(Enum):
+    INSERT_ROWS = 'INSERT_ROWS'
+    OVERWRITE = 'OVERWRITE'
+
+
+class GoogleSpreadsheetReadConfig(GoogleCloudDatasourceServiceConfig):
+    spreadsheet_id: str
+    dimension: Dimension = Dimension.ROWS
+
+
+class GoogleSpreadsheetReadInput(DatasourceInput):
+    page_name: Optional[str]=None
+    select_range: Optional[str]=None
+
+    @property
+    def cells_range(self) -> str:
+        if not (self.page_name or self.select_range):
+            raise ValueError(f'page_name or select_range should be provided')
+        return '!'.join((i for i in (self.page_name, self.select_range) if i))
+
+
+class GoogleSpreadsheetReadOutput(DatasourceOutput):
+    table: list[list[Any]]
+
+
+class GoogleSpreadsheetWriteConfig(GoogleCloudDatasourceServiceConfig):
+    spreadsheet_id: str
+    value_input_option: InputOption = InputOption.USER_ENTERED
+
+
+class GoogleSpreadsheetWriteInput(DatasourceInput):
+    page_name: Optional[str]=None
+    select_range: Optional[str]=None
+    values: list[list[str]]
+    dimension: Dimension = Dimension.ROWS
+
+    @property
+    def cells_range(self) -> Dict[str, Any]:
+        if not (self.page_name or self.select_range):
+            raise ValueError(f'page_name or select_range should be provided')
+        return {
+            'range': '!'.join((i for i in (self.page_name, self.select_range) if i)),
+            'values': self.values,
+            'majorDimension': self.dimension.value,
+            
+        }
+
+
+class GoogleSpreadsheetWriteOutput(DatasourceOutput):
+    ...
+
+
+class GoogleSpreadsheetAppendConfig(GoogleSpreadsheetWriteConfig):
+    insert_data_option: InsertDataOption = InsertDataOption.OVERWRITE
+
+
+class GoogleSpreadsheetCreateConfig(GoogleCloudDatasourceServiceConfig):
+    ...
+
+
+class GoogleSpreadsheetCreateInput(DatasourceInput):
+    title: str
+    sheets: Optional[list[Sheet]] = None
+
+
+class GoogleSpreadsheetCreateOutput(DatasourceOutput):
+    spreadsheet_id: str

@@ -1,84 +1,38 @@
 from __future__ import annotations
-from typing import Optional, Any, cast, Dict, Union, Generic, TypeVar
-from enum import Enum
+from typing import Any, Dict, Type
 
-from pydantic import BaseModel
-
-from core.datasource_level.schema import DatasourceAction
+from core.datasource_level.datasource import Datasource
 from implementation.datasources.google_spreadsheet.schema import (
-    Sheet
+    GoogleSpreadsheetReadConfig,
+    GoogleSpreadsheetReadInput, 
+    GoogleSpreadsheetReadOutput,
+    GoogleSpreadsheetWriteConfig,
+    GoogleSpreadsheetWriteInput,
+    GoogleSpreadsheetWriteOutput,
+    GoogleSpreadsheetAppendConfig,
+    GoogleSpreadsheetCreateConfig,
+    GoogleSpreadsheetCreateInput,
+    GoogleSpreadsheetCreateOutput
 )
 
-class GoogleSpreadsheetSelectRange(BaseModel):
-    page_name: Optional[str]=None
-    select_range: Optional[str]=None
+class GoogleSpreadsheetRead(
+    Datasource[
+        GoogleSpreadsheetReadConfig, 
+        GoogleSpreadsheetReadInput, 
+        GoogleSpreadsheetReadOutput
+    ]
+):
+    input_class: Type[GoogleSpreadsheetReadInput] = GoogleSpreadsheetReadInput
+    output_class: Type[GoogleSpreadsheetReadOutput] = GoogleSpreadsheetReadOutput
 
-    @property
-    def cells_range(self) -> str:
-        if not (self.page_name or self.select_range):
-            raise ValueError(f'page_name or select_range should be provided')
-        return '!'.join((i for i in (self.page_name, self.select_range) if i))
-
-
-class Dimension(Enum):
-    ROWS = 'ROWS'
-    COLUMNS = 'COLUMNS'
-
-
-class GoogleSpreadsheetWriteRange(BaseModel):
-    page_name: Optional[str]=None
-    select_range: Optional[str]=None
-    values: list[list[str]]
-    dimension: Dimension = Dimension.ROWS
-
-    @property
-    def cells_range(self) -> Dict[str, Any]:
-        if not (self.page_name or self.select_range):
-            raise ValueError(f'page_name or select_range should be provided')
-        return {
-            'range': '!'.join((i for i in (self.page_name, self.select_range) if i)),
-            'values': self.values,
-            'majorDimension': self.dimension.value,
-            
-        }
-
-
-RangeType = TypeVar('RangeType', GoogleSpreadsheetSelectRange, GoogleSpreadsheetWriteRange)
-
-
-class Range(BaseModel, Generic[RangeType]):
-    select_range: RangeType
-
-    @property
-    def cells_range(self) -> Union[str, Dict[str, Any]]:
-        return self.select_range.cells_range
-    
-
-class Ranges(BaseModel, Generic[RangeType]):
-    select_range: list[RangeType]
-
-    @property
-    def cells_range(self) -> list[Union[str, Dict[str, Any]]]:
-        return [r.cells_range for r in self.select_range]
-
-
-class InputOption(Enum):
-    RAW = 'RAW'
-    USER_ENTERED = 'USER_ENTERED'
-
-
-class GoogleSpreadsheetRead(DatasourceAction, Range[GoogleSpreadsheetSelectRange]):
-    spreadsheet_id: str
-    dimension: Dimension = Dimension.ROWS
-
-    def execute(self, sheet_service) -> Dict[str, Any]: # type: ignore
+    def invoke(self, input_data: GoogleSpreadsheetReadInput) -> Dict[str, Any]:
         try:
             result = ( # type: ignore
-                sheet_service.values() # type: ignore
+                self.cfg.service.values() # type: ignore
                 .get(
-                    spreadsheetId=self.spreadsheet_id, 
-                    range=self.select_range.cells_range,
-                    majorDimension=self.dimension.value
+                    spreadsheetId=self.cfg.spreadsheet_id, 
+                    range=input_data.cells_range,
+                    majorDimension=self.cfg.dimension.value
                 )
                 .execute() 
             )
@@ -87,41 +41,44 @@ class GoogleSpreadsheetRead(DatasourceAction, Range[GoogleSpreadsheetSelectRange
             raise ValueError(f'Unable to read specified sheet: {e}')
 
 
-class GoogleSpreadsheetReadBatch(DatasourceAction, Ranges[GoogleSpreadsheetSelectRange]):
-    spreadsheet_id: str
-    dimension: Dimension = Dimension.ROWS
-
-    def execute(self, sheet_service) -> Dict[str, Any]: # type: ignore
+    def invoke_batch(self, input_data: list[GoogleSpreadsheetReadInput]) -> list[Dict[str, Any]]:
         try:
             result = ( # type: ignore
-                sheet_service.values() # type: ignore
+                self.cfg.service.values() # type: ignore
                 .batchGet(
-                    spreadsheetId=self.spreadsheet_id, 
-                    ranges=self.cells_range,
-                    majorDimension=self.dimension.value,
+                    spreadsheetId=self.cfg.spreadsheet_id, 
+                    ranges=[i.cells_range for i in input_data],
+                    majorDimension=self.cfg.dimension.value,
                 )
                 .execute() 
             )
-            return {
-                'tables': [i.get("values", []) for i in result.get("valueRanges", [])]  # type: ignore
-            }
+            return [
+                {'table': i.get("values", [])} # type: ignore
+                for i in result.get("valueRanges", []) # type: ignore
+            ]
         except Exception as e:
             raise ValueError(f'Unable to read specified sheet: {e}')
 
 
-class GoogleSpreadsheetUpdate(DatasourceAction, Range[GoogleSpreadsheetWriteRange]):
-    spreadsheet_id: str
-    value_input_option: InputOption = InputOption.USER_ENTERED
+class GoogleSpreadsheetWrite(
+    Datasource[
+        GoogleSpreadsheetWriteConfig, 
+        GoogleSpreadsheetWriteInput, 
+        GoogleSpreadsheetWriteOutput
+    ]
+):
+    input_class: Type[GoogleSpreadsheetWriteInput] = GoogleSpreadsheetWriteInput
+    output_class: Type[GoogleSpreadsheetWriteOutput] = GoogleSpreadsheetWriteOutput
 
-    def execute(self, sheet_service) -> Dict[str, Any]: # type: ignore
-        update = cast(Dict[str, Any], self.cells_range)
+    def invoke(self, input_data: GoogleSpreadsheetWriteInput) -> Dict[str, Any]:
+        update: Dict[str, Any] = input_data.cells_range
         try:
             (
-                sheet_service # type: ignore
+                self.cfg.service # type: ignore
                 .values()
                 .update(
-                    spreadsheetId=self.spreadsheet_id,
-                    valueInputOption=self.value_input_option.value,
+                    spreadsheetId=self.cfg.spreadsheet_id,
+                    valueInputOption=self.cfg.value_input_option.value,
                     body=update,
                     range=update['range']
                 )
@@ -132,48 +89,44 @@ class GoogleSpreadsheetUpdate(DatasourceAction, Range[GoogleSpreadsheetWriteRang
             raise ValueError(f"An error occurred: {e}")
 
 
-class GoogleSpreadsheetUpdateBatch(DatasourceAction, Ranges[GoogleSpreadsheetWriteRange]):
-    spreadsheet_id: str
-    value_input_option: InputOption = InputOption.USER_ENTERED
-
-    def execute(self, sheet_service) -> Dict[str, Any]: # type: ignore
+    def invoke_batch(self, input_data: list[GoogleSpreadsheetWriteInput]) -> list[Dict[str, Any]]:
         try:
             (
-                sheet_service # type: ignore
+                self.cfg.service # type: ignore
                 .values()
                 .batchUpdate(
-                    spreadsheetId=self.spreadsheet_id,
+                    spreadsheetId=self.cfg.spreadsheet_id,
                     body={
-                        "data": self.cells_range,
-                        "valueInputOption": self.value_input_option.value,
+                        "data": [i.cells_range for i in input_data],
+                        "valueInputOption": self.cfg.value_input_option.value,
                     },
                 )
                 .execute()
             )
-            return {}
+            return []
         except Exception as e:
             raise ValueError(f"An error occurred: {e}")
 
 
-class InsertDataOption(Enum):
-    INSERT_ROWS = 'INSERT_ROWS'
-    OVERWRITE = 'OVERWRITE'
+class GoogleSpreadsheetAppend(
+    Datasource[
+        GoogleSpreadsheetAppendConfig, 
+        GoogleSpreadsheetWriteInput, 
+        GoogleSpreadsheetWriteOutput
+    ], 
+):
+    input_class: Type[GoogleSpreadsheetWriteInput] = GoogleSpreadsheetWriteInput
+    output_class: Type[GoogleSpreadsheetWriteOutput] = GoogleSpreadsheetWriteOutput
 
-
-class GoogleSpreadsheetAppend(DatasourceAction, Range[GoogleSpreadsheetWriteRange]):
-    spreadsheet_id: str
-    value_input_option: InputOption = InputOption.USER_ENTERED
-    insert_data_option: InsertDataOption = InsertDataOption.OVERWRITE
-
-    def execute(self, sheet_service) -> Dict[str, Any]: # type: ignore
-        update = cast(Dict[str, Any], self.cells_range)
+    def invoke(self, input_data: GoogleSpreadsheetWriteInput) -> Dict[str, Any]:
+        update = input_data.cells_range
         try:
             (
-                sheet_service # type: ignore
+                self.cfg.service # type: ignore
                 .values()
                 .append(
-                    spreadsheetId=self.spreadsheet_id,
-                    valueInputOption=self.value_input_option.value,
+                    spreadsheetId=self.cfg.spreadsheet_id,
+                    valueInputOption=self.cfg.value_input_option.value,
                     body=update,
                     range=update['range']
                 )
@@ -183,23 +136,33 @@ class GoogleSpreadsheetAppend(DatasourceAction, Range[GoogleSpreadsheetWriteRang
         except Exception as e:
             raise ValueError(f"An error occurred: {e}")
         
+    
+    def invoke_batch(self, input_data: list[GoogleSpreadsheetWriteInput]) -> list[Dict[str, Any]]:
+        raise Exception("Not supported")
 
-class GoogleSpreadsheetCreate(DatasourceAction):
-    title: str
-    sheets: Optional[list[Sheet]] = None
 
-    def execute(self, sheet_service) -> Dict[str, Any]: # type: ignore
+class GoogleSpreadsheetCreate(
+    Datasource[
+        GoogleSpreadsheetCreateConfig, 
+        GoogleSpreadsheetCreateInput, 
+        GoogleSpreadsheetCreateOutput
+    ]
+):
+    input_class: Type[GoogleSpreadsheetCreateInput] = GoogleSpreadsheetCreateInput
+    output_class: Type[GoogleSpreadsheetCreateOutput] = GoogleSpreadsheetCreateOutput
+
+    def invoke(self, input_data: GoogleSpreadsheetCreateInput) -> Dict[str, Any]:
         try:
             idx: str = ( # type: ignore
-                sheet_service # type: ignore
+                self.cfg.service # type: ignore
                 .create( 
                     body={
                         'properties': {
-                            'title': self.title
+                            'title': input_data.title
                         },
                         'sheets': [
-                            s.info for s in self.sheets
-                        ] if self.sheets else []
+                            s.info for s in input_data.sheets
+                        ] if input_data.sheets else []
                     }, 
                     fields='spreadsheetId'
                 )
@@ -211,3 +174,7 @@ class GoogleSpreadsheetCreate(DatasourceAction):
             }
         except Exception as e:
             raise ValueError(f'Unable to create sheet: {e}')
+        
+    
+    def invoke_batch(self, input_data: list[GoogleSpreadsheetCreateInput]) -> list[Dict[str, Any]]:
+        raise Exception("Not supported")

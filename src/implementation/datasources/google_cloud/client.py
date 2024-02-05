@@ -1,17 +1,19 @@
-from typing import Optional, cast
+from typing import Optional, cast, Any
 import os.path
+from abc import ABC
 
 import google.auth # type: ignore
 from google.auth.transport.requests import Request # type: ignore
 from google.oauth2.credentials import Credentials # type: ignore
 from google_auth_oauthlib.flow import InstalledAppFlow # type: ignore
 
-from core.datasource_level.datasource import Datasource
-from core.datasource_level.schema import DatasourceDataType, DatasourceAction
-from implementation.datasources.google_cloud.schema import GoogleCloudClientConfig
+from implementation.datasources.google_cloud.schema import (
+    GoogleCloudClientConfig
+)
 
-class GoogleCloudClient(Datasource[GoogleCloudClientConfig, DatasourceAction, DatasourceDataType]):
+class GoogleCloudClient(ABC):
     creds: Optional[Credentials]
+    service: Any
 
     @classmethod
     def authorize(cls, cfg: GoogleCloudClientConfig) -> Credentials:
