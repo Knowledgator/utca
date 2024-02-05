@@ -1,8 +1,9 @@
-from typing import Any, Dict, Union, Optional
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel
 
-from core.datasource_level.schema import DatasourceConfig, DatasourceData
+from core.datasource_level.schema import DatasourceData
+from implementation.datasources.google_cloud.schema import GoogleCloudClientConfig
 
 class GoogleSpreadsheetPage(BaseModel):
     table: list[list[Any]]
@@ -20,8 +21,7 @@ class Sheet(BaseModel):
         }
 
 
-class GoogleSpreadsheetClientConfig(DatasourceConfig):
-    credentials: Union[Dict[str, Any], str]
+class GoogleSpreadsheetClientConfig(GoogleCloudClientConfig):
     scopes: list[str] = [
         "https://www.googleapis.com/auth/spreadsheets" ##################################################
     ]
