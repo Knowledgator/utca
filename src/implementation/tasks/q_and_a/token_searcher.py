@@ -78,6 +78,12 @@ Text:
         return self._postprocess(input_data, predicts)
     
 
+    def invoke_batch(
+        self, input_data: list[TokenSearcherQandAInput]
+    ) -> list[Dict[str, Any]]:
+        raise Exception('TODO!')
+
+
     def _postprocess(
         self, 
         input_data: TokenSearcherQandAInput, 

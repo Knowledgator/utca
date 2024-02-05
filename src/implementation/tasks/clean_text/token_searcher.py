@@ -82,6 +82,12 @@ Clean the following text extracted from the web matching not relevant parts:
             {'inputs': [input_data.prompt]}, Dict[str, Any]
         )
         return self._postprocess(input_data, predcits)
+    
+
+    def invoke_batch(
+        self, input_data: list[TokenSearcherTextCleanerInput]
+    ) -> list[Dict[str, Any]]:
+        raise Exception('TODO!')
 
 
     @classmethod
