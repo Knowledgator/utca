@@ -1,20 +1,20 @@
 from typing import Any, Generic, Type, Dict, Union, overload, Optional
 
 from abc import ABC,  abstractmethod
+from core.executable_level_1.component import Component
 
-from core.executable_level_1.schema import InputType, OutputType, ConfigType, Transformable, Validator
+from core.executable_level_1.schema import ConfigType, InputType, OutputType, Transformable, Validator
 
 
 # + and | code
 # protocol with transformable
 
-class Executable(Generic[ConfigType, InputType, OutputType], ABC):
+class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
     input_class: Type[InputType]
     output_class: Type[OutputType]
 
     def __init__(self, cfg: ConfigType) -> None:
         self.cfg = cfg
-
 
     @abstractmethod
     def invoke(self, input_data: InputType) -> Dict[str, Any]:
