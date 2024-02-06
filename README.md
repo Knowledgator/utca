@@ -322,7 +322,7 @@ List of classified entities.
 Passed text for processing.
 
 
-# Objects
+# core.Objects
 
 ## Entity
 
