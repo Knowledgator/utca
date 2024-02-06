@@ -35,7 +35,8 @@ class TokenSearcherQandAInput(InputWithThreshold):
 
 
 class TokenSearcherQandAOutput(NEROutput[Entity]):
-    prompt: str
+    text: str
+    question: str
 
 
 class TokenSearcherQandAConfig(NERConfig):
@@ -90,7 +91,8 @@ Text:
         output_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         return {
-            'prompt': input_data.prompt,
+            'text': input_data.text,
+            'question': input_data.question,
             'output': [
                 entity
                 for output in output_data['outputs']
