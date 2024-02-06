@@ -2,6 +2,7 @@
 
 Tasks implementations.
 
+---
 
 ## implementation.tasks.clean_text.TokenSearcherTextCleanerTask
 
@@ -65,6 +66,8 @@ output = task.execute({
 })
 ```
 
+---
+
 
 ## implementation.q_and_a.TokenSearcherQandATask
 
@@ -124,7 +127,7 @@ output = task.execute({
 })
 ```
 
-
+---
 
 
 ## implementation.q_and_a.TokenSearcherNERTask
@@ -187,3 +190,5 @@ output = task.execute({
     ],
 })
 ```
+
+---

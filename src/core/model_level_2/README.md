@@ -2,6 +2,7 @@
 
 Classes used for AI models abstractions.
 
+---
 
 ## Model
 
@@ -26,13 +27,13 @@ Returning value can be:
 - Transformable;
 - ModelOutput
 
-
+---
 
 ## PromptModel
 
 Abstract class of models that use prompts.
 
-
+---
 
 ## TransformersPipeline
 
@@ -134,3 +135,5 @@ Additional dictionary of keyword arguments passed along to the model’s from_pr
 - kwargs: Dict[str, Any]
 
 Additional keyword arguments passed along to the specific pipeline init (see the documentation for the corresponding pipeline class for possible values).
+
+---

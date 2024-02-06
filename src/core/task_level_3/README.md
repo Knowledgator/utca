@@ -2,20 +2,24 @@
 
 Classes used for tasks abstractions that use models.
 
+---
 
 ## Task
 
 Abstract subclass of the Executable and base class of the tasks. Use Models
 
+---
 
 ## NERTask
 
 Subclass of the Task. Abstraction for NER tasks.
 
-
+---
+---
 
 # Objects
 
+---
 
 ## Entity
 
@@ -31,6 +35,7 @@ Start postition in a text.
 
 End postition in a text.
 
+---
 
 ## ClassifiedEntity
 

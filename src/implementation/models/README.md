@@ -2,6 +2,7 @@
 
 Models implementations.
 
+---
 
 ## TokenSearcherModel
 
@@ -62,3 +63,5 @@ ouput = model.execute({
     )]
 })
 ```
+
+---
