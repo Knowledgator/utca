@@ -4,7 +4,7 @@ Tasks implementations.
 
 ---
 
-## implementation.tasks.clean_text.TokenSearcherTextCleanerTask
+## clean_text.TokenSearcherTextCleanerTask
 
 Subclass of the NERTask. Used for text cleaning from not informative parts. Use implemintation.models.TokenSearcherModel
 
@@ -69,7 +69,7 @@ output = task.execute({
 ---
 
 
-## implementation.q_and_a.TokenSearcherQandATask
+## q_and_a.TokenSearcherQandATask
 
 Subclass of the NERTask. Used for Q and A tasks. Use implemintation.models.TokenSearcherModel
 
@@ -130,7 +130,7 @@ output = task.execute({
 ---
 
 
-## implementation.q_and_a.TokenSearcherNERTask
+## ner.TokenSearcherNERTask
 
 Subclass of the NERTask. Used for NER tasks. Use implemintation.models.TokenSearcherModel
 
