@@ -51,4 +51,4 @@ class GoogleDocsCreateInput(DatasourceInput):
 
 
 class GoogleDocsCreateOutput(DatasourceOutput):
-    doc_id: str
+    document_id: str
