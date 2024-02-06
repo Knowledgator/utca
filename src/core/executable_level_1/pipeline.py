@@ -4,7 +4,7 @@ from core.executable_level_1.component import Component
 from core.executable_level_1.custom_exceptions import ExecutionSchemaInvalidFirstComponent
 
 from core.executable_level_1.executable import Executable
-from core.executable_level_1.schema import  Action, AddData, ChangeValue, Config, ConfigType, Input, InputType, MergeData, Output, OutputType, RenameAttribute, RenameAttributeQuery, Transformable
+from core.executable_level_1.schema import  Action, AddData, ChangeValue, Config, Input,  MergeData, Output,RenameAttribute, RenameAttributeQuery, Transformable
 
 
 STATEMENT = List[Union[Executable[Config, Input, Output], Action]]
@@ -58,24 +58,43 @@ class ExecutionSchema():
     def retieve_program(self):
         return self.statements
 
+
+class EvaluatorConfigs():
+    pass
+
 # develop further as game engine ?
 class Evaluator():
     program: PROGRAM
     state_saver: int 
     logger: int
-    def __init__(self, schema: ExecutionSchema) -> None:
+    transferable_checkpoint: Transformable
+    def __init__(self, schema: ExecutionSchema, cfg: EvaluatorConfigs = EvaluatorConfigs()) -> None:
         self.schema = schema.retieve_program()
-    def run(self):
+    def run(self, program_input: Input):
         # execution loop
         for i, st in enumerate(self.program):
-            self.execute_statement(st)
-            print("Executed step: ", i)
-    def execute_statement(self, statement: STATEMENT):
-        for el in statement:
-            if el is Executable:
-                pass
+            if i == 0:
+                self.execute_input_statement(st, program_input)
             else:
-                pass
+                self.execute_ordinary_statement(st)
+            print("Executed step: ", i)
+
+    def execute_ordinary_statement(self, statement: STATEMENT):
+        for el in statement:
+            if  isinstance(el, Executable):
+                self.transferable_checkpoint = el.execute(self.transferable_checkpoint, Transformable)
+            else:
+                Protocol.handle_transform(self.transferable_checkpoint, el)
+
+    def execute_input_statement(self, statement: STATEMENT, input: Input):
+        for i, el in enumerate(statement):
+            if  isinstance(el, Executable):
+                if i == 0:
+                    self.transferable_checkpoint = el.execute(input, Transformable)
+                else:
+                    self.transferable_checkpoint = el.execute(self.transferable_checkpoint, Transformable)
+            else:
+                Protocol.handle_transform(self.transferable_checkpoint, el)
 
 
 
