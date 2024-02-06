@@ -1,24 +1,17 @@
-
-
-from typing import Union
+from typing import Any, Union, List
+from core.executable_level_1.component import Component
 
 from core.executable_level_1.executable import Executable
-from core.executable_level_1.schema import  Action, AddData, ChangeValue, ConfigType, InputType, MergeData, OutputType, RenameAttribute, RenameAttributeQuery, Transformable
+from core.executable_level_1.schema import  Action, AddData, ChangeValue, Config, ConfigType, Input, InputType, MergeData, Output, OutputType, RenameAttribute, RenameAttributeQuery, Transformable
 
-# transformable can NOT be done on static fold
-# how it can dynamic change ?
-class Pipeline():
 
-    def __ror__(self, __value: Union[Executable[ConfigType, InputType, OutputType], Transformable])-> int: 
-        return 3
-    
-    def run(self) -> None:
-        pass
-    
-    def run_protocol(self):
-        pass
-
-    def handle_transform(self, transform: Transformable, action: Action):
+# execute to execute protocol
+# one to one
+class Protocol():
+    # mb start and end executable
+    # ror scheck is it start or end + validation 
+    @classmethod
+    def handle_transform(cls, transform: Transformable, action: Action):
         if isinstance(action, AddData):
             transform.add_data(action.get_data())
         elif isinstance(action, RenameAttribute):
@@ -30,6 +23,47 @@ class Pipeline():
         elif isinstance(action, ChangeValue):
             transform.change_value(action.get_key(), action.get_value())
         return transform
+
+class ExecutionSchema():
+    last_executable: Executable[Config, Input, Output]
+    transformer: Transformable
+    statements: List[Union[List[Executable[Config, Input, Output]], List[Action]]]
+    def __init__(self, component: Component) -> None:
+        if component is Executable[Config, Input, Output]:
+            self.last_executable = component
+
+    def add(self, comp: Component):
+        pass
+
+
+class Evaluator():
+    pass
+
+
+
+
+
+# transformable can NOT be done on static fold
+# how it can dynamic change ?
+
+# Головні питання:
+#  чи наслідується від executable ? + є io + спільний метода і передача
+# 
+# 
+class Pipeline():
+    last_exec: Executable[Config, Input, Output]
+    def __ror__(self, __value: Union[Executable[ConfigType, InputType, OutputType], Transformable])-> int:
+        # add 2 pipelines
+        return 3
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        pass
+    def run(self) -> None:
+        pass
+    
+    def run_protocol(self):
+
+        pass
+
 
 
 

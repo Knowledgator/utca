@@ -3,6 +3,9 @@ from typing import  Callable, TypeVar, Any, Dict, Generic, Type
 
 from pydantic import BaseModel, ValidationError
 
+from core.executable_level_1.component import Component
+
+
 class Input(BaseModel, ABC):
     ...
 
@@ -18,11 +21,12 @@ class Validator(Generic[InputType]):
     def validate(self, toValidate: Dict[str, Any]) -> InputType:
         return self.input_validation(**toValidate)
 
-
-class Transformable():
+# Task №1 - can validate is it right based on input and output class !!!
+class Transformable(Component):
     state:  Dict[str, Any]
     def __init__(self, input: Dict[str, Any]) -> None:
         self.state = input
+
     def __setattr__(self, __name: str, __value: Any) -> None:
         self.__dict__[__name] = __value
     def merge_state(self, input: Dict[str, Any], new_priority: bool = True):
@@ -105,7 +109,7 @@ class Transformable():
              print(e.errors())
              return False
 
-class Action(ABC):
+class Action(Component, ABC):
     pass
 
 class AddData(Action):
