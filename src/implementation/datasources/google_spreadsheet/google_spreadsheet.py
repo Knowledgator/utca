@@ -16,8 +16,6 @@ from implementation.datasources.google_spreadsheet.schema import (
     GoogleSpreadsheetWriteOutput,
     GoogleSpreadsheetAppendConfig,
     GoogleSpreadsheetCreateConfig,
-    GoogleSpreadsheetCreateInput,
-    GoogleSpreadsheetCreateOutput
 )
 from implementation.datasources.google_spreadsheet.actions import (
     GoogleSpreadsheetRead,
@@ -33,10 +31,7 @@ class GoogleSpreadsheetClient(
         GoogleSpreadsheetReadOutput,
         GoogleSpreadsheetWriteConfig,
         GoogleSpreadsheetWriteInput,
-        GoogleSpreadsheetWriteOutput,
-        GoogleSpreadsheetCreateConfig,
-        GoogleSpreadsheetCreateInput,
-        GoogleSpreadsheetCreateOutput
+        GoogleSpreadsheetWriteOutput
     ], 
     GoogleCloudClient
 ):
