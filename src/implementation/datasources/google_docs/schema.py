@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 # from pydantic import BaseModel
 
@@ -26,9 +26,8 @@ class GoogleDocsReadInput(DatasourceInput):
 
 
 class GoogleDocsReadOutput(DatasourceOutput):
-    title: Optional[str] = None
-    body: Optional[Dict[str, Any]] = None
-
+    title: str
+    body: Dict[str, Any]
 
 class GoogleDocsWriteConfig(GoogleCloudDatasourceServiceConfig):
     document_id: str
