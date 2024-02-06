@@ -5,7 +5,7 @@ from pydantic import PrivateAttr, BaseModel
 from core.datasource_level.schema import DatasourceConfig
 
 class GoogleCloudClientConfig(BaseModel):
-    credentials: Union[Dict[str, Any], str]
+    credentials: Union[Dict[str, Any], str, None]
     scopes: list[str]
 
 
