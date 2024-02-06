@@ -1,10 +1,4 @@
-# Models
-
-Models implementations.
-
----
-
-## TokenSearcherModel
+# TokenSearcherModel
 
 Implemintation of the Token Searcher model.
 
