@@ -178,7 +178,7 @@ SAMPLE_SPREADSHEET_ID: str = "spread_sheet_id"
 SAMPLE_RANGE_NAME: str = "sheet_name"
 
 cfg = GoogleSpreadsheetClientConfig(
-    credentials='__test__/credentials.json'
+    credentials='credentials.json'
 )
 cli = GoogleSpreadsheetClient(cfg)
 
