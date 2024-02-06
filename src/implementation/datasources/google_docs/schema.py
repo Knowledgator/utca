@@ -2,24 +2,14 @@ from typing import Any, Dict, Optional
 
 # from pydantic import BaseModel
 
-from core.datasource_level.schema import DatasourceData
-from implementation.datasources.google_cloud.schema import GoogleCloudClientConfig
-
-# class GoogleSpreadsheetPage(BaseModel):
-#     table: list[list[Any]]
-
-
-# class Sheet(BaseModel):
-#     title: str
-
-#     @property
-#     def info(self) -> Dict[str, Any]:
-#         return {
-#             'properyties': {
-#                 'title': self.title
-#             }
-#         }
-
+from core.datasource_level.schema import (
+    DatasourceInput,
+    DatasourceOutput
+)
+from implementation.datasources.google_cloud.schema import (
+    GoogleCloudClientConfig,
+    GoogleCloudDatasourceServiceConfig,
+)
 
 class GoogleDocsClientConfig(GoogleCloudClientConfig):
     scopes: list[str] = [
@@ -27,6 +17,38 @@ class GoogleDocsClientConfig(GoogleCloudClientConfig):
     ]
 
 
-class GoogleDocsData(DatasourceData):
+class GoogleDocsReadConfig(GoogleCloudDatasourceServiceConfig):
+    ...
+
+
+class GoogleDocsReadInput(DatasourceInput):
+    document_id: str
+
+
+class GoogleDocsReadOutput(DatasourceOutput):
     title: Optional[str] = None
     body: Optional[Dict[str, Any]] = None
+
+
+class GoogleDocsWriteConfig(GoogleCloudDatasourceServiceConfig):
+    document_id: str
+
+
+class GoogleDocsWriteInput(DatasourceInput):
+    action: Dict[str, Any]
+
+
+class GoogleDocsWriteOutput(DatasourceOutput):
+    ...
+
+
+class GoogleDocsCreateConfig(GoogleCloudDatasourceServiceConfig):
+    ...
+
+
+class GoogleDocsCreateInput(DatasourceInput):
+    title: str
+
+
+class GoogleDocsCreateOutput(DatasourceOutput):
+    doc_id: str

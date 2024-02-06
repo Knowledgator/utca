@@ -1,22 +1,51 @@
 import logging
 
 from implementation.datasources.google_docs.google_docs import GoogleDocsClient
-from implementation.datasources.google_docs.schema import GoogleDocsClientConfig
-from implementation.datasources.google_docs.actions import (
-    GoogleDocsRead,
-    GoogleDocsCreate,
-    GoogleDocsUpdate
+from implementation.datasources.google_docs.schema import (
+    GoogleDocsClientConfig,
+    GoogleDocsWriteConfig,
+    GoogleDocsWriteInput,
+    GoogleDocsReadConfig,
+    GoogleDocsReadInput
+
 )
 
 def test_docs():
     # The ID of a sample document.
     DOCUMENT_ID = "1qDrWeHqblOOakVCIc7FJUr8u2rAhRdj2YSb4SgTz96g"
     cli = GoogleDocsClient(GoogleDocsClientConfig(credentials='__test__/credentials.json'))
-    read_action = GoogleDocsRead(document_id=DOCUMENT_ID)
-    write_action = GoogleDocsUpdate(
+
+    # template_action = GoogleDocsUpdate(
+    #     document_id=DOCUMENT_ID,
+    #     updates=[{
+    #         'replaceAllText': {
+    #             'containsText': {
+    #                 'text': '{{template_placeholder}}', # placeholder
+    #                 'matchCase':  'true'
+    #             },
+    #             'replaceText': 'HEY!!!!!!!!!!!!',
+    #         }
+    #     }]
+    # )
+    # delete_action = GoogleDocsUpdate(
+    #     document_id=DOCUMENT_ID,
+    #     updates=[{
+    #         'deleteContentRange': {
+    #             'range': {
+    #                 'startIndex': 18,
+    #                 'endIndex': 50,
+    #             }
+
+    #         }
+
+    #     }]
+    # )
+
+    cli.write(GoogleDocsWriteConfig(
         document_id=DOCUMENT_ID,
-        updates=[
-            {
+    )).execute(
+        GoogleDocsWriteInput(
+            action={
                 'insertText': {
                     'location': {
                         'index': 19,
@@ -24,45 +53,13 @@ def test_docs():
                     'text': '{{template_placeholder}}\n' # '\n' is mandatory for new paragraph
                 },
 
-            }, {
-                'insertText': {
-                    'location': {
-                        'index': 44,
-                    },
-                    'text': '{{template_placeholder}}\n'
-                },
-
-            }, 
-        ],
-    )
-    template_action = GoogleDocsUpdate(
-        document_id=DOCUMENT_ID,
-        updates=[{
-            'replaceAllText': {
-                'containsText': {
-                    'text': '{{template_placeholder}}', # placeholder
-                    'matchCase':  'true'
-                },
-                'replaceText': 'HEY!!!!!!!!!!!!',
             }
-        }]
+        )
     )
-    delete_action = GoogleDocsUpdate(
-        document_id=DOCUMENT_ID,
-        updates=[{
-            'deleteContentRange': {
-                'range': {
-                    'startIndex': 18,
-                    'endIndex': 50,
-                }
-
-            }
-
-        }]
+    logging.error(
+        cli.read(GoogleDocsReadConfig())
+        .execute(GoogleDocsReadInput(document_id=DOCUMENT_ID))
     )
-
-    cli.execute(delete_action)
-    logging.error(cli.execute(read_action))
 
 
 # a = [

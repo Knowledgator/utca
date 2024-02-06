@@ -1,6 +1,17 @@
 from typing import Any, Dict
 
-from core.datasource_level.schema import DatasourceAction
+from core.datasource_level.datasource import DatasourceAction
+from implementation.datasources.google_docs.schema import (
+    GoogleDocsReadConfig,
+    GoogleDocsReadInput,
+    GoogleDocsReadOutput,
+    GoogleDocsWriteConfig,
+    GoogleDocsWriteInput,
+    GoogleDocsWriteOutput,
+    GoogleDocsCreateConfig,
+    GoogleDocsCreateInput,
+    GoogleDocsCreateOutput
+)
 
 # TODO: docs templating (casual update but with copying file and update copy)
 # updates = [
@@ -22,36 +33,48 @@ from core.datasource_level.schema import DatasourceAction
 #     }
 # ]
 
-class GoogleDocsCreate(DatasourceAction):
-    title: str
-
-    def execute(self, docs_service) -> Dict[str, Any]: # type: ignore
+class GoogleDocsCreate(
+    DatasourceAction[
+        GoogleDocsCreateConfig,
+        GoogleDocsCreateInput,
+        GoogleDocsCreateOutput
+    ]
+):
+    def invoke(self, input_data: GoogleDocsCreateInput) -> Dict[str, Any]: # type: ignore
         try:
-            (
+            doc_id: str = ( # type: ignore
                 docs_service # type: ignore
                 .create(
                     body={
-                        'title': self.title
-                    }
+                        'title': input_data.title
+                    },
+                    fields='spreadsheetId'
                 )
                 .execute()
             )
-            return {}
+            return {'doc_id': doc_id}
         except Exception as e:
             raise ValueError(f'Unable to create doc: {e}')
         
+    
+    def invoke_batch(self, input_data: list[GoogleDocsCreateInput]) -> list[Dict[str, Any]]:
+        raise Exception('Not implemented')
+        
 
-class GoogleDocsUpdate(DatasourceAction):
-    document_id: str
-    updates: list[Dict[str, Any]]
-
-    def execute(self, docs_service) -> Dict[str, Any]: # type: ignore
+class GoogleDocsWrite(
+    DatasourceAction[
+        GoogleDocsWriteConfig,
+        GoogleDocsWriteInput,
+        GoogleDocsWriteOutput,
+    ]
+):
+    def invoke(self, input_data: GoogleDocsWriteInput) -> Dict[str, Any]: # type: ignore
         try:
             (
-                docs_service # type: ignore
+                self.cfg.service # type: ignore
                 .batchUpdate(
-                    documentId=self.document_id, 
-                    body={'requests': self.updates}
+                    documentId=self.cfg.document_id, 
+                    body={'requests': [input_data.action]}
                 ).execute()
             )
             return {}
@@ -59,16 +82,38 @@ class GoogleDocsUpdate(DatasourceAction):
             raise ValueError(f'Unable to update doc: {e}')
 
 
-class GoogleDocsRead(DatasourceAction):
-    document_id: str
+    def invoke_batch(self, input_data: list[GoogleDocsWriteInput]) -> list[Dict[str, Any]]:
+        try:
+            (
+                self.cfg.service # type: ignore
+                .batchUpdate(
+                    documentId=self.cfg.document_id, 
+                    body={'requests': [i.action for i in input_data]}
+                ).execute()
+            )
+            return []
+        except Exception as e:
+            raise ValueError(f'Unable to update doc: {e}')
 
-    def execute(self, docs_service) -> Dict[str, Any]: # type: ignore
+
+class GoogleDocsRead(
+    DatasourceAction[
+        GoogleDocsReadConfig,
+        GoogleDocsReadInput,
+        GoogleDocsReadOutput,
+    ]
+):
+    def invoke(self, input_data: GoogleDocsReadInput) -> Dict[str, Any]:
         try:
             return (
-                docs_service # type: ignore
+                self.cfg.service # type: ignore
                 .get(
-                    documentId=self.document_id
+                    documentId=input_data.document_id
                 ).execute()
             )
         except Exception as e:
             raise ValueError(f'Unable to read doc: {e}')
+        
+    
+    def invoke_batch(self, input_data: list[GoogleDocsReadInput]) -> list[Dict[str, Any]]:
+        raise Exception('Not implemented')
