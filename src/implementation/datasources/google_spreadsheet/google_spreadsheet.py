@@ -3,7 +3,7 @@ from __future__ import annotations
 from googleapiclient.discovery import build # type: ignore
 
 from core.datasource_level.datasource import DatasourceManager
-from implementation.datasources.google_cloud.client import (
+from implementation.apis.google_cloud.client import (
     GoogleCloudClient
 )
 from implementation.datasources.google_spreadsheet.schema import (

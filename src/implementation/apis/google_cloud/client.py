@@ -7,7 +7,7 @@ from google.auth.transport.requests import Request # type: ignore
 from google.oauth2.credentials import Credentials # type: ignore
 from google_auth_oauthlib.flow import InstalledAppFlow # type: ignore
 
-from implementation.datasources.google_cloud.schema import (
+from implementation.apis.google_cloud.schema import (
     GoogleCloudClientConfig
 )
 

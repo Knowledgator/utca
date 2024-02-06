@@ -6,7 +6,7 @@ from core.datasource_level.schema import (
     DatasourceInput,
     DatasourceOutput
 )
-from implementation.datasources.google_cloud.schema import (
+from implementation.apis.google_cloud.schema import (
     GoogleCloudClientConfig,
     GoogleCloudDatasourceServiceConfig,
 )

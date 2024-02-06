@@ -1,7 +1,7 @@
 from googleapiclient.discovery import build # type: ignore
 
 from core.datasource_level.datasource import DatasourceManager
-from implementation.datasources.google_cloud.client import (
+from implementation.apis.google_cloud.client import (
     GoogleCloudClient
 )
 from implementation.datasources.google_docs.actions import (
