@@ -48,14 +48,14 @@ class GoogleSpreadsheetReadConfig(GoogleCloudDatasourceServiceConfig):
 
 
 class GoogleSpreadsheetReadInput(DatasourceInput):
-    page_name: Optional[str]=None
+    sheet_name: Optional[str]=None
     select_range: Optional[str]=None
 
     @property
     def cells_range(self) -> str:
-        if not (self.page_name or self.select_range):
+        if not (self.sheet_name or self.select_range):
             raise ValueError(f'page_name or select_range should be provided')
-        return '!'.join((i for i in (self.page_name, self.select_range) if i))
+        return '!'.join((i for i in (self.sheet_name, self.select_range) if i))
 
 
 class GoogleSpreadsheetReadOutput(DatasourceOutput):
@@ -68,17 +68,17 @@ class GoogleSpreadsheetWriteConfig(GoogleCloudDatasourceServiceConfig):
 
 
 class GoogleSpreadsheetWriteInput(DatasourceInput):
-    page_name: Optional[str]=None
+    sheet_name: Optional[str]=None
     select_range: Optional[str]=None
     values: list[list[str]]
     dimension: Dimension = Dimension.ROWS
 
     @property
     def cells_range(self) -> Dict[str, Any]:
-        if not (self.page_name or self.select_range):
+        if not (self.sheet_name or self.select_range):
             raise ValueError(f'page_name or select_range should be provided')
         return {
-            'range': '!'.join((i for i in (self.page_name, self.select_range) if i)),
+            'range': '!'.join((i for i in (self.sheet_name, self.select_range) if i)),
             'values': self.values,
             'majorDimension': self.dimension.value,
             

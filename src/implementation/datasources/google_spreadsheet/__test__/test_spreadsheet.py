@@ -26,7 +26,7 @@ def test_spreadsheet():
     cli.append(GoogleSpreadsheetAppendConfig(
         spreadsheet_id=SAMPLE_SPREADSHEET_ID
     )).execute(GoogleSpreadsheetWriteInput(
-        page_name=SAMPLE_RANGE_NAME,
+        sheet_name=SAMPLE_RANGE_NAME,
         values=[['A1', 'A2'], ['E', 'E']],
         dimension=Dimension.ROWS
     ))
@@ -38,6 +38,6 @@ def test_spreadsheet():
         )
     ).execute(
         GoogleSpreadsheetReadInput(
-            page_name=SAMPLE_RANGE_NAME, 
+            sheet_name=SAMPLE_RANGE_NAME, 
         )
     ))
