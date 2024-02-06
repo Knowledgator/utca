@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, Dict, Type
 
-from core.datasource_level.datasource import Datasource
+from core.datasource_level.datasource import DatasourceAction
 from implementation.datasources.google_spreadsheet.schema import (
     GoogleSpreadsheetReadConfig,
     GoogleSpreadsheetReadInput, 
@@ -16,7 +16,7 @@ from implementation.datasources.google_spreadsheet.schema import (
 )
 
 class GoogleSpreadsheetRead(
-    Datasource[
+    DatasourceAction[
         GoogleSpreadsheetReadConfig, 
         GoogleSpreadsheetReadInput, 
         GoogleSpreadsheetReadOutput
@@ -61,7 +61,7 @@ class GoogleSpreadsheetRead(
 
 
 class GoogleSpreadsheetWrite(
-    Datasource[
+    DatasourceAction[
         GoogleSpreadsheetWriteConfig, 
         GoogleSpreadsheetWriteInput, 
         GoogleSpreadsheetWriteOutput
@@ -109,7 +109,7 @@ class GoogleSpreadsheetWrite(
 
 
 class GoogleSpreadsheetAppend(
-    Datasource[
+    DatasourceAction[
         GoogleSpreadsheetAppendConfig, 
         GoogleSpreadsheetWriteInput, 
         GoogleSpreadsheetWriteOutput
@@ -142,7 +142,7 @@ class GoogleSpreadsheetAppend(
 
 
 class GoogleSpreadsheetCreate(
-    Datasource[
+    DatasourceAction[
         GoogleSpreadsheetCreateConfig, 
         GoogleSpreadsheetCreateInput, 
         GoogleSpreadsheetCreateOutput

@@ -2,15 +2,22 @@ from __future__ import annotations
 
 from googleapiclient.discovery import build # type: ignore
 
+from core.datasource_level.datasource import DatasourceManager
 from implementation.datasources.google_cloud.client import (
     GoogleCloudClient
 )
 from implementation.datasources.google_spreadsheet.schema import (
     GoogleSpreadsheetClientConfig,
     GoogleSpreadsheetReadConfig,
+    GoogleSpreadsheetReadInput,
+    GoogleSpreadsheetReadOutput,
     GoogleSpreadsheetWriteConfig,
+    GoogleSpreadsheetWriteInput,
+    GoogleSpreadsheetWriteOutput,
     GoogleSpreadsheetAppendConfig,
     GoogleSpreadsheetCreateConfig,
+    GoogleSpreadsheetCreateInput,
+    GoogleSpreadsheetCreateOutput
 )
 from implementation.datasources.google_spreadsheet.actions import (
     GoogleSpreadsheetRead,
@@ -19,28 +26,41 @@ from implementation.datasources.google_spreadsheet.actions import (
     GoogleSpreadsheetCreate
 )
 
-class GoogleSpreadsheetClient(GoogleCloudClient):
+class GoogleSpreadsheetClient(
+    DatasourceManager[
+        GoogleSpreadsheetReadConfig,
+        GoogleSpreadsheetReadInput,
+        GoogleSpreadsheetReadOutput,
+        GoogleSpreadsheetWriteConfig,
+        GoogleSpreadsheetWriteInput,
+        GoogleSpreadsheetWriteOutput,
+        GoogleSpreadsheetCreateConfig,
+        GoogleSpreadsheetCreateInput,
+        GoogleSpreadsheetCreateOutput
+    ], 
+    GoogleCloudClient
+):
     def __init__(self, cfg: GoogleSpreadsheetClientConfig) -> None:
         self.creds = self.authorize(cfg)
         self.service = build("sheets", "v4", credentials=self.creds) # type: ignore
         self.sheet_service = self.service.spreadsheets() # type: ignore
 
 
-    def read(self, read_config: GoogleSpreadsheetReadConfig) -> GoogleSpreadsheetRead:
-        read_config.set_service(self.sheet_service) # type: ignore
-        return GoogleSpreadsheetRead(read_config)
+    def read(self, cfg: GoogleSpreadsheetReadConfig) -> GoogleSpreadsheetRead:
+        cfg.set_service(self.sheet_service) # type: ignore
+        return GoogleSpreadsheetRead(cfg)
 
 
-    def write(self, write_config: GoogleSpreadsheetWriteConfig) -> GoogleSpreadsheetWrite:
-        write_config.set_service(self.sheet_service) # type: ignore
-        return GoogleSpreadsheetWrite(write_config)
+    def write(self, cfg: GoogleSpreadsheetWriteConfig) -> GoogleSpreadsheetWrite:
+        cfg.set_service(self.sheet_service) # type: ignore
+        return GoogleSpreadsheetWrite(cfg)
     
 
-    def append(self, append_config: GoogleSpreadsheetAppendConfig) -> GoogleSpreadsheetAppend:
-        append_config.set_service(self.sheet_service) # type: ignore
-        return GoogleSpreadsheetAppend(append_config)
+    def append(self, cfg: GoogleSpreadsheetAppendConfig) -> GoogleSpreadsheetAppend:
+        cfg.set_service(self.sheet_service) # type: ignore
+        return GoogleSpreadsheetAppend(cfg)
 
 
-    def create(self, create_config: GoogleSpreadsheetCreateConfig) -> GoogleSpreadsheetCreate:
-        create_config.set_service(self.sheet_service) # type: ignore
-        return GoogleSpreadsheetCreate(create_config)
+    def create(self, cfg: GoogleSpreadsheetCreateConfig) -> GoogleSpreadsheetCreate:
+        cfg.set_service(self.sheet_service) # type: ignore
+        return GoogleSpreadsheetCreate(cfg)
