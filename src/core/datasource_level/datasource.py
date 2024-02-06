@@ -23,10 +23,6 @@ WriteConfig = TypeVar('WriteConfig', bound=DatasourceConfig)
 WriteInput = TypeVar('WriteInput', bound=DatasourceInput)
 WriteOutput = TypeVar('WriteOutput', bound=DatasourceOutput)
 
-CreateConfig = TypeVar('CreateConfig', bound=DatasourceConfig)
-CreateInput = TypeVar('CreateInput', bound=DatasourceInput)
-CreateOutput = TypeVar('CreateOutput', bound=DatasourceOutput)
-
 
 class DatasourceManager(
     Generic[
@@ -37,10 +33,6 @@ class DatasourceManager(
         WriteConfig,
         WriteInput,
         WriteOutput,
-
-        CreateConfig,
-        CreateInput,
-        CreateOutput,
     ],
     ABC
 ):
@@ -62,16 +54,5 @@ class DatasourceManager(
         WriteConfig,
         WriteInput,
         WriteOutput,
-    ]:
-        ...
-
-
-    @abstractmethod
-    def create(
-        self, cfg: CreateConfig,
-    ) -> DatasourceAction[
-        CreateConfig,
-        CreateInput,
-        CreateOutput,
     ]:
         ...
