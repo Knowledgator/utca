@@ -16,4 +16,4 @@ class DatasourceOutput(Output):
 
 DatasourceConfigType = TypeVar('DatasourceConfigType', bound=DatasourceConfig, contravariant=True)
 DatasourceInputType = TypeVar('DatasourceInputType', bound=DatasourceInput)
-DatasourceDataType = TypeVar('DatasourceDataType', bound=DatasourceOutput)
+DatasourceOutputType = TypeVar('DatasourceOutputType', bound=DatasourceOutput)

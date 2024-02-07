@@ -7,11 +7,11 @@ from core.datasource_level_2.schema import (
     DatasourceOutput, 
     DatasourceConfig,
     DatasourceInputType, 
-    DatasourceDataType, 
+    DatasourceOutputType, 
     DatasourceConfigType
 )
 
-class DatasourceAction(Executable[DatasourceConfigType, DatasourceInputType, DatasourceDataType]):
+class DatasourceAction(Executable[DatasourceConfigType, DatasourceInputType, DatasourceOutputType]):
     ...
 
 
