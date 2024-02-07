@@ -10,7 +10,10 @@ class OutputSchemaNotFound(Exception):
         self.message = message
         super().__init__(self.message)
 
-
+class ExecutionSchemaInvalidFirstComponent(Exception):
+    def __init__(self, message: str="First component should be executable or input"):
+        self.message = message
+        super().__init__(self.message)
 
 
 
