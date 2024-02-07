@@ -16,4 +16,9 @@ class ExecutionSchemaInvalidFirstComponent(Exception):
         super().__init__(self.message)
 
 
+class ExecutionSchemaInvalidFlow(Exception):
+    def __init__(self, message: str="Last executable can not be null"):
+        self.message = message
+        super().__init__(self.message)
+
 
