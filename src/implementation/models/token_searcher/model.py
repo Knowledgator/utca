@@ -32,3 +32,9 @@ class TokenSearcherModel(
             'inputs': input_data.inputs,
             'outputs': self.get_predictions(input_data.inputs)
         }
+    
+
+    def invoke_batch(
+        self, input_data: list[TokenSearcherModelInput]
+    ) -> list[Dict[str, Any]]:
+        raise Exception('TODO!')

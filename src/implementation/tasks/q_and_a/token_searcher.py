@@ -35,7 +35,8 @@ class TokenSearcherQandAInput(InputWithThreshold):
 
 
 class TokenSearcherQandAOutput(NEROutput[Entity]):
-    prompt: str
+    text: str
+    question: str
 
 
 class TokenSearcherQandAConfig(NERConfig):
@@ -78,13 +79,20 @@ Text:
         return self._postprocess(input_data, predicts)
     
 
+    def invoke_batch(
+        self, input_data: list[TokenSearcherQandAInput]
+    ) -> list[Dict[str, Any]]:
+        raise Exception('TODO!')
+
+
     def _postprocess(
         self, 
         input_data: TokenSearcherQandAInput, 
         output_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         return {
-            'prompt': input_data.prompt,
+            'text': input_data.text,
+            'question': input_data.question,
             'output': [
                 entity
                 for output in output_data['outputs']

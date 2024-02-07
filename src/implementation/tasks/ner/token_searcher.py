@@ -147,6 +147,12 @@ Text:
         )
     
 
+    def invoke_batch(
+        self, input_data: list[TokenSearcherNERInput]
+    ) -> list[Dict[str, Any]]:
+        raise Exception('TODO!')
+
+
     def _postprocess(
         self, 
         input_data: TokenSearcherNERInput, 
