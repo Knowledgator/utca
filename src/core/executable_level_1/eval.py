@@ -6,16 +6,10 @@ from core.executable_level_1.custom_exceptions import ExecutionSchemaInvalidFirs
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
     Action, 
-    AddData, 
-    ChangeValue, 
     Config, 
     Input,
-    MergeData,
     Output,
-    RenameAttribute,
-    RenameAttributeQuery, 
     Transformable,
-    ExecuteFunction
 )
 
 TRANSFORM_STATEMENT = List[Union[Executable[Config, Input, Output], Action]]
@@ -33,21 +27,7 @@ PROGRAM = List[STATEMENT]
 class Protocol():
     # mb start and end executable
     # ror scheck is it start or end + validation 
-    @classmethod
-    def handle_transform(cls, transform: Transformable, action: Action):
-        if isinstance(action, AddData):
-            transform.add_data(action.get_data())
-        elif isinstance(action, RenameAttribute):
-            transform.rename_state_attr(action.old_name, action.old_name)
-        elif isinstance(action, RenameAttributeQuery):
-            transform.rename_state_attr_q(action.query)
-        elif isinstance(action, MergeData):
-            transform.merge_state(action.get_data(), action.is_new_priority())
-        elif isinstance(action, ChangeValue):
-            transform.change_value(action.get_key(), action.get_value())
-        elif isinstance(action, ExecuteFunction):
-            transform.custom_tranform(action.func)
-        return transform
+    ...
 
 
 class ExecutionSchema():
@@ -132,7 +112,7 @@ class Evaluator():
             if  isinstance(el, Executable):
                 self.transferable_checkpoint = el.execute(self.transferable_checkpoint, Transformable)
             else:
-                Protocol.handle_transform(self.transferable_checkpoint, el)
+                self.transferable_checkpoint.update_state(el)
 
 
     def execute_input_statement(self, statement: INPUT_STATEMENT, input: Input):
