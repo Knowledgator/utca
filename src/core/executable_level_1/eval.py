@@ -1,4 +1,4 @@
-from typing import  Optional, Union, List
+from typing import  Optional, Union, List, cast
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.custom_exceptions import ExecutionSchemaInvalidFirstComponent, ExecutionSchemaInvalidFlow
@@ -60,6 +60,7 @@ class ExecutionSchema():
         self.actions = []
         if isinstance(comp, Executable):
             self.last_executable = comp
+            comp = cast(Executable[Config, Input, Output], comp)
             self.create_input_statement(comp)
         else:
             raise ExecutionSchemaInvalidFirstComponent
@@ -70,6 +71,7 @@ class ExecutionSchema():
             self.actions.append(comp)
         elif isinstance(comp, Executable):
             if self.last_executable != None:
+                comp = cast(Executable[Config, Input, Output], comp)
                 self.create_statement(comp)
                 self.last_executable = comp
                 self.actions = []
