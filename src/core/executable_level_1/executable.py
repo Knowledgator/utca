@@ -33,7 +33,7 @@ class Executable(Generic[ConfigType, InputType, OutputType], ABC):
             extracted_dict = input_data.extract()
             return self.input_class(**extracted_dict)
         elif isinstance(input_data, Dict):
-            return self.validate_input(**input_data)
+            return self.input_class(**input_data)
         else:
             return input_data
 
