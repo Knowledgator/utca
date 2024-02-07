@@ -88,7 +88,7 @@ class Evaluator():
             if st is TRANSFORM_STATEMENT:
                 self.execute_ordinary_statement(st)
             print("Executed step: ", i)
-
+        return self.transferable_checkpoint.extract()
     def execute_ordinary_statement(self, statement: TRANSFORM_STATEMENT):
         for el in statement:
             if  isinstance(el, Executable):
