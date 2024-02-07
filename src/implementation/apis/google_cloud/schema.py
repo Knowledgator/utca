@@ -2,7 +2,7 @@ from typing import Any, Dict, Union, Optional
 
 from pydantic import PrivateAttr, BaseModel
 
-from core.datasource_level.schema import DatasourceConfig
+from core.datasource_level_2.schema import DatasourceConfig
 
 class GoogleCloudClientConfig(BaseModel):
     credentials: Union[Dict[str, Any], str, None]

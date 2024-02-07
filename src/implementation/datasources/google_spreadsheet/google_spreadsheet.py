@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from googleapiclient.discovery import build # type: ignore
 
-from core.datasource_level.datasource import DatasourceManager
+from core.datasource_level_2.datasource import DatasourceManager
 from implementation.apis.google_cloud.client import (
     GoogleCloudClient
 )

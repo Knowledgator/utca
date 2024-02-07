@@ -3,7 +3,7 @@ from enum import Enum
 
 from pydantic import BaseModel
 
-from core.datasource_level.schema import DatasourceInput, DatasourceOutput
+from core.datasource_level_2.schema import DatasourceInput, DatasourceOutput
 from implementation.apis.google_cloud.schema import (
     GoogleCloudClientConfig,
     GoogleCloudDatasourceServiceConfig

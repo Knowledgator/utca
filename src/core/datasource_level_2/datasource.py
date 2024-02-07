@@ -2,7 +2,7 @@ from typing import Generic, TypeVar
 from abc import ABC, abstractmethod
 
 from core.executable_level_1.executable import Executable
-from core.datasource_level.schema import (
+from core.datasource_level_2.schema import (
     DatasourceInput, 
     DatasourceOutput, 
     DatasourceConfig,

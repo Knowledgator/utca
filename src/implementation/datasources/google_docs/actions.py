@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from core.datasource_level.datasource import DatasourceAction
+from core.datasource_level_2.datasource import DatasourceAction
 from implementation.datasources.google_docs.schema import (
     GoogleDocsReadConfig,
     GoogleDocsReadInput,
