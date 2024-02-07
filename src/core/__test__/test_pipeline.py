@@ -1,4 +1,5 @@
 from typing import Dict, Any
+import logging
 
 from core.executable_level_1.eval import Evaluator
 from core.executable_level_1.schema import (
@@ -25,7 +26,7 @@ from implementation.tasks.ner.token_searcher import (
 def test_pipeline():
     file = PDFFile()
     read_input = PDFReadInput(
-        path_to_file='test.pdf'
+        path_to_file='src/core/__test__/test.pdf'
     )
     read_pdf = file.read(PDFReadConfig())
 
@@ -63,4 +64,4 @@ def test_pipeline():
     )
     res = Evaluator(pipeline).run(read_input)
 
-    print(res)
+    logging.error(res)
