@@ -23,19 +23,27 @@ class Validator(Generic[InputType]):
 
 # Task №1 - can validate is it right based on input and output class !!!
 class Transformable(Component):
-    state:  Dict[str, Any]
+    state: Dict[str, Any]
+
     def __init__(self, input: Dict[str, Any]) -> None:
         self.state = input
 
+    
     def __setattr__(self, __name: str, __value: Any) -> None:
         self.__dict__[__name] = __value
+    
+    
     def merge_state(self, input: Dict[str, Any], new_priority: bool = True):
         if new_priority:
             self.state = {**self.state, **input}
         else:
             self.state = {**input, **self.state}
+    
+    
     def add_data(self, input: Dict[str, Any]):
         self.state.update(input)
+
+
     def change_value(self, key: str, value: Any):
         self.state[key] = value
 
@@ -77,6 +85,8 @@ class Transformable(Component):
                 print(f"Error: {ke}")
             except Exception as e:
                 print(f"Unexpected error: {e}")
+
+
     def rename_state_attr(self, old_name: str, new_name: str):
         try:
 
@@ -96,11 +106,17 @@ class Transformable(Component):
             print(f"Error: {ke}")
         except Exception as e:
             print(f"Unexpected error: {e}")
+
+
     def extract(self):
         return self.state
+    
+
     # for finding particular unmatched fields
     def incomplete_field(self):
         pass
+    
+    
     def validate(self, validator: Validator[InputType]):
         try:
             validator.validate(self.state)
@@ -109,8 +125,16 @@ class Transformable(Component):
              print(e.errors())
              return False
 
+
+    def custom_tranform(
+        self, f: Callable[[Dict[str, Any]], Dict[str, Any]]
+    ) -> None:
+        self.state = f(self.state)
+
+
 class Action(Component, ABC):
     pass
+
 
 class AddData(Action):
     data: Dict[str, Any]
@@ -142,7 +166,7 @@ class RenameAttribute(Action):
 class RenameAttributeQuery(Action):
     query: str
 
-    def __init__(self, query: str, new_name: str) -> None:
+    def __init__(self, query: str) -> None:
         self.query = query
 
     def get_new_name(self) -> str:
@@ -184,7 +208,9 @@ class ChangeValue(Action):
         return self.value
 
 class ExecuteFunction(Action):
-    def __init__(self, func: Callable[..., None]) -> None:
+    def __init__(
+        self, func: Callable[[Dict[str, Any]], Dict[str, Any]]
+    ) -> None:
         self.func = func
 
 
