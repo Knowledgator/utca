@@ -15,7 +15,7 @@ Read Google Spreadsheet table with two columns:
 - text;
 - question.
 
-Run Q&A task and writes answers in newly created column 'answer'.
+Run Q&A task and writes answers in newly created column 'Answer'.
 
 ---
 
