@@ -11,7 +11,7 @@ from implementation.apis.google_cloud.schema import (
     GoogleCloudClientConfig
 )
 
-class GoogleCloudClient(ABC):
+class GoogleCloudClient(ABC): # TODO: issue with missmatched scopes
     creds: Optional[Credentials]
     service: Any
 
@@ -26,7 +26,7 @@ class GoogleCloudClient(ABC):
             creds = Credentials.from_authorized_user_file( # type: ignore
                 "token.json", cfg.scopes
             )
-        
+
         if not creds or not creds.valid or not all(s in cfg.scopes for s in creds.scopes): # type: ignore
             if creds and creds.expired and creds.refresh_token: # type: ignore
                 creds.refresh(Request()) # type: ignore
