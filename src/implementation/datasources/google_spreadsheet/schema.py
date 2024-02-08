@@ -70,7 +70,7 @@ class GoogleSpreadsheetWriteConfig(GoogleCloudDatasourceServiceConfig):
 class GoogleSpreadsheetWriteInput(DatasourceInput):
     sheet_name: Optional[str]=None
     select_range: Optional[str]=None
-    values: list[list[str]]
+    table: list[list[str]]
     dimension: Dimension = Dimension.ROWS
 
     @property
@@ -79,7 +79,7 @@ class GoogleSpreadsheetWriteInput(DatasourceInput):
             raise ValueError(f'page_name or select_range should be provided')
         return {
             'range': '!'.join((i for i in (self.sheet_name, self.select_range) if i)),
-            'values': self.values,
+            'values': self.table,
             'majorDimension': self.dimension.value,
             
         }

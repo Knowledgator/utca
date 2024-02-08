@@ -27,7 +27,7 @@ def test_spreadsheet():
         spreadsheet_id=SAMPLE_SPREADSHEET_ID
     )).execute(GoogleSpreadsheetWriteInput(
         sheet_name=SAMPLE_RANGE_NAME,
-        values=[['A1', 'A2'], ['E', 'E']],
+        table=[['A1', 'A2'], ['E', 'E']],
         dimension=Dimension.ROWS
     ))
 
