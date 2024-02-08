@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Type
 
 from core.datasource_level_2.datasource import DatasourceAction
 from implementation.datasources.google_docs.schema import (
@@ -40,6 +40,9 @@ class GoogleDocsCreate(
         GoogleDocsCreateOutput
     ]
 ):
+    input_class: Type[GoogleDocsCreateInput] = GoogleDocsCreateInput
+    output_class: Type[GoogleDocsCreateOutput] = GoogleDocsCreateOutput
+    
     def invoke(self, input_data: GoogleDocsCreateInput) -> Dict[str, Any]: # type: ignore
         try:
             doc_id: str = ( # type: ignore
@@ -68,6 +71,9 @@ class GoogleDocsWrite(
         GoogleDocsWriteOutput,
     ]
 ):
+    input_class: Type[GoogleDocsWriteInput] = GoogleDocsWriteInput
+    output_class: Type[GoogleDocsWriteOutput] = GoogleDocsWriteOutput
+
     def invoke(self, input_data: GoogleDocsWriteInput) -> Dict[str, Any]: # type: ignore
         try:
             (
@@ -103,6 +109,9 @@ class GoogleDocsRead(
         GoogleDocsReadOutput,
     ]
 ):
+    input_class: Type[GoogleDocsReadInput] = GoogleDocsReadInput
+    output_class: Type[GoogleDocsReadOutput] = GoogleDocsReadOutput
+
     def invoke(self, input_data: GoogleDocsReadInput) -> Dict[str, Any]:
         try:
             return (
