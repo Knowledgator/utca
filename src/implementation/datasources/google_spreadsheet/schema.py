@@ -43,11 +43,11 @@ class InsertDataOption(Enum):
 
 
 class GoogleSpreadsheetReadConfig(GoogleCloudDatasourceServiceConfig):
-    spreadsheet_id: str
     dimension: Dimension = Dimension.ROWS
 
 
 class GoogleSpreadsheetReadInput(DatasourceInput):
+    spreadsheet_id: str
     sheet_name: Optional[str]=None
     select_range: Optional[str]=None
 
@@ -63,11 +63,11 @@ class GoogleSpreadsheetReadOutput(DatasourceOutput):
 
 
 class GoogleSpreadsheetWriteConfig(GoogleCloudDatasourceServiceConfig):
-    spreadsheet_id: str
     value_input_option: InputOption = InputOption.USER_ENTERED
 
 
 class GoogleSpreadsheetWriteInput(DatasourceInput):
+    spreadsheet_id: str
     sheet_name: Optional[str]=None
     select_range: Optional[str]=None
     table: list[list[str]]

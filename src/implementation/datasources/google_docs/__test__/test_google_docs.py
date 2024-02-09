@@ -3,7 +3,6 @@ import logging
 from implementation.datasources.google_docs.google_docs import GoogleDocsClient
 from implementation.datasources.google_docs.schema import (
     GoogleDocsClientConfig,
-    GoogleDocsWriteConfig,
     GoogleDocsWriteInput,
     GoogleDocsReadConfig,
     GoogleDocsReadInput
@@ -41,10 +40,9 @@ def test_docs():
     #     }]
     # )
 
-    cli.write(GoogleDocsWriteConfig(
-        document_id=DOCUMENT_ID,
-    )).execute(
+    cli.write().execute(
         GoogleDocsWriteInput(
+            document_id=DOCUMENT_ID,
             action={
                 'insertText': {
                     'location': {

@@ -29,11 +29,13 @@ class GoogleDocsReadOutput(DatasourceOutput):
     title: str
     body: Dict[str, Any]
 
+
 class GoogleDocsWriteConfig(GoogleCloudDatasourceServiceConfig):
-    document_id: str
+    ...
 
 
 class GoogleDocsWriteInput(DatasourceInput):
+    document_id: str
     action: Dict[str, Any]
 
 

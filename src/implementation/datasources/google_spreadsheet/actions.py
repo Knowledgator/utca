@@ -30,7 +30,7 @@ class GoogleSpreadsheetRead(
             result = ( # type: ignore
                 self.cfg.service.values() # type: ignore
                 .get(
-                    spreadsheetId=self.cfg.spreadsheet_id, 
+                    spreadsheetId=input_data.spreadsheet_id, 
                     range=input_data.cells_range,
                     majorDimension=self.cfg.dimension.value
                 )
@@ -46,7 +46,7 @@ class GoogleSpreadsheetRead(
             result = ( # type: ignore
                 self.cfg.service.values() # type: ignore
                 .batchGet(
-                    spreadsheetId=self.cfg.spreadsheet_id, 
+                    spreadsheetId=input_data[0].spreadsheet_id, ######################################## 
                     ranges=[i.cells_range for i in input_data],
                     majorDimension=self.cfg.dimension.value,
                 )
@@ -77,7 +77,7 @@ class GoogleSpreadsheetWrite(
                 self.cfg.service # type: ignore
                 .values()
                 .update(
-                    spreadsheetId=self.cfg.spreadsheet_id,
+                    spreadsheetId=input_data.spreadsheet_id,
                     valueInputOption=self.cfg.value_input_option.value,
                     body=update,
                     range=update['range']
@@ -95,7 +95,7 @@ class GoogleSpreadsheetWrite(
                 self.cfg.service # type: ignore
                 .values()
                 .batchUpdate(
-                    spreadsheetId=self.cfg.spreadsheet_id,
+                    spreadsheetId=input_data[0].spreadsheet_id, ##############################################
                     body={
                         "data": [i.cells_range for i in input_data],
                         "valueInputOption": self.cfg.value_input_option.value,
@@ -125,7 +125,7 @@ class GoogleSpreadsheetAppend(
                 self.cfg.service # type: ignore
                 .values()
                 .append(
-                    spreadsheetId=self.cfg.spreadsheet_id,
+                    spreadsheetId=input_data.spreadsheet_id,
                     valueInputOption=self.cfg.value_input_option.value,
                     body=update,
                     range=update['range']

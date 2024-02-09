@@ -12,7 +12,12 @@ from core.model_level_2.tranformers_pipeline import (
 class TokenSearcherModelConfig(TransformersPipelineConfig):
     name: str
     
-    def __init__(self, name: str='knowledgator/UTC-DeBERTa-small', **kwargs: Dict[str, Any]):
+    def __init__(
+        self,
+        *,
+        name: str='knowledgator/UTC-DeBERTa-small', 
+        **kwargs: Any
+    ):
         self.name = name
         super().__init__(
             task='ner', # type: ignore

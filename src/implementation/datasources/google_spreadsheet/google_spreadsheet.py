@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Optional
 
 from googleapiclient.discovery import build # type: ignore
 
@@ -41,21 +41,37 @@ class GoogleSpreadsheetClient(
         self.sheet_service = self.service.spreadsheets() # type: ignore
 
 
-    def read(self, cfg: GoogleSpreadsheetReadConfig) -> GoogleSpreadsheetRead:
+    def read(
+        self, 
+        cfg: Optional[GoogleSpreadsheetReadConfig] = None
+    ) -> GoogleSpreadsheetRead:
+        cfg = cfg or GoogleSpreadsheetReadConfig()
         cfg.set_service(self.sheet_service) # type: ignore
         return GoogleSpreadsheetRead(cfg)
 
 
-    def write(self, cfg: GoogleSpreadsheetWriteConfig) -> GoogleSpreadsheetWrite:
+    def write(
+        self, 
+        cfg: Optional[GoogleSpreadsheetWriteConfig] = None
+    ) -> GoogleSpreadsheetWrite:
+        cfg = cfg or GoogleSpreadsheetWriteConfig()
         cfg.set_service(self.sheet_service) # type: ignore
         return GoogleSpreadsheetWrite(cfg)
     
 
-    def append(self, cfg: GoogleSpreadsheetAppendConfig) -> GoogleSpreadsheetAppend:
+    def append(
+        self, 
+        cfg: Optional[GoogleSpreadsheetAppendConfig] = None
+    ) -> GoogleSpreadsheetAppend:
+        cfg = cfg or GoogleSpreadsheetAppendConfig()
         cfg.set_service(self.sheet_service) # type: ignore
         return GoogleSpreadsheetAppend(cfg)
 
 
-    def create(self, cfg: GoogleSpreadsheetCreateConfig) -> GoogleSpreadsheetCreate:
+    def create(
+        self, 
+        cfg: Optional[GoogleSpreadsheetCreateConfig] = None
+    ) -> GoogleSpreadsheetCreate:
+        cfg = cfg or GoogleSpreadsheetCreateConfig()
         cfg.set_service(self.sheet_service) # type: ignore
         return GoogleSpreadsheetCreate(cfg)

@@ -1,4 +1,4 @@
-from typing import Dict, Type, Any
+from typing import Dict, Type, Any, Optional
 
 from core.model_level_2.model import PromptModel
 from core.model_level_2.tranformers_pipeline import (
@@ -24,6 +24,12 @@ class TokenSearcherModel(
 ):
     input_class: Type[TokenSearcherModelInput] = TokenSearcherModelInput
     output_class: Type[TokenSearcherModelOutput] = TokenSearcherModelOutput
+
+    def __init__(
+        self, cfg: Optional[TokenSearcherModelConfig]=None
+    ) -> None:
+        super().__init__(cfg or TokenSearcherModelConfig())
+
 
     def invoke(
         self, input_data: TokenSearcherModelInput

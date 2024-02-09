@@ -7,7 +7,6 @@ from implementation.datasources.google_spreadsheet.actions import (
 from implementation.datasources.google_spreadsheet.schema import (
     GoogleSpreadsheetClientConfig,
     GoogleSpreadsheetReadConfig,
-    GoogleSpreadsheetAppendConfig,
     Dimension
 )
 from implementation.datasources.google_spreadsheet.google_spreadsheet import GoogleSpreadsheetClient
@@ -23,9 +22,8 @@ def test_spreadsheet():
     cli = GoogleSpreadsheetClient(cfg)
 
 
-    cli.append(GoogleSpreadsheetAppendConfig(
-        spreadsheet_id=SAMPLE_SPREADSHEET_ID
-    )).execute(GoogleSpreadsheetWriteInput(
+    cli.append().execute(GoogleSpreadsheetWriteInput(
+        spreadsheet_id=SAMPLE_SPREADSHEET_ID,
         sheet_name=SAMPLE_RANGE_NAME,
         table=[['A1', 'A2'], ['E', 'E']],
         dimension=Dimension.ROWS
@@ -33,11 +31,11 @@ def test_spreadsheet():
 
     logging.error(cli.read(
         GoogleSpreadsheetReadConfig(
-            spreadsheet_id=SAMPLE_SPREADSHEET_ID,
             dimension=Dimension.ROWS
         )
     ).execute(
         GoogleSpreadsheetReadInput(
+            spreadsheet_id=SAMPLE_SPREADSHEET_ID,
             sheet_name=SAMPLE_RANGE_NAME, 
         )
     ))

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from googleapiclient.discovery import build # type: ignore
 
 from core.datasource_level_2.datasource import DatasourceManager
@@ -37,16 +39,28 @@ class GoogleDocsClient(
         self.docs_service = self.service.documents() # type: ignore
 
 
-    def read(self, cfg: GoogleDocsReadConfig) -> GoogleDocsRead:
+    def read(
+        self, 
+        cfg: Optional[GoogleDocsReadConfig]=None
+    ) -> GoogleDocsRead:
+        cfg = cfg or GoogleDocsReadConfig()
         cfg.set_service(self.docs_service) # type: ignore
         return GoogleDocsRead(cfg)
 
 
-    def write(self, cfg: GoogleDocsWriteConfig) -> GoogleDocsWrite:
+    def write(
+        self, 
+        cfg: Optional[GoogleDocsWriteConfig]=None
+    ) -> GoogleDocsWrite:
+        cfg = cfg or GoogleDocsWriteConfig()
         cfg.set_service(self.docs_service) # type: ignore
         return GoogleDocsWrite(cfg)
 
 
-    def create(self, cfg: GoogleDocsCreateConfig) -> GoogleDocsCreate:
+    def create(
+        self, 
+        cfg: Optional[GoogleDocsCreateConfig]=None
+    ) -> GoogleDocsCreate:
+        cfg = cfg or GoogleDocsCreateConfig()
         cfg.set_service(self.docs_service) # type: ignore
         return GoogleDocsCreate(cfg)

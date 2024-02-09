@@ -79,7 +79,7 @@ class GoogleDocsWrite(
             (
                 self.cfg.service # type: ignore
                 .batchUpdate(
-                    documentId=self.cfg.document_id, 
+                    documentId=input_data.document_id, 
                     body={'requests': [input_data.action]}
                 ).execute()
             )
@@ -93,7 +93,7 @@ class GoogleDocsWrite(
             (
                 self.cfg.service # type: ignore
                 .batchUpdate(
-                    documentId=self.cfg.document_id, 
+                    documentId=input_data[0].document_id, ############################ 
                     body={'requests': [i.action for i in input_data]}
                 ).execute()
             )
