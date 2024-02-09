@@ -6,7 +6,7 @@ from core.executable_level_1.schema import (
     AddData
 )
 from core.datasource_level_2.pdf import (
-    PDFReadConfig, PDFReadInput,
+    PDFReadInput,
     PDFFile
 )
 from implementation.models.token_searcher.model import (
@@ -29,11 +29,11 @@ def get_ner_input(input: Dict[str, Any]) -> Dict[str, Any]:
 
 if __name__ == '__main__':
     # stage for PDF reading
-    read_pdf = PDFFile().read(PDFReadConfig())
+    read_pdf = PDFFile().read()
 
     # model that will be used for clean text and NER tasks
     model = TokenSearcherModel(TokenSearcherModelConfig(
-        name="knowledgator/UTC-DeBERTa-small"
+        device = 'cpu'
     ))
 
     # clean text stage

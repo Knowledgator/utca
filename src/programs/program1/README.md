@@ -17,7 +17,7 @@ Program consists from:
 To initialize stage use:
 
 ``` python
-read_pdf = PDFFile().read(PDFReadConfig())
+read_pdf = PDFFile().read()
 ```
  
 ### Model
@@ -26,7 +26,7 @@ Before initializing task we need to initialize models that used by this tasks. I
 
 ``` python
 model = TokenSearcherModel(TokenSearcherModelConfig(
-    name="knowledgator/UTC-DeBERTa-small"
+    device = 'cpu'
 ))
 ```
 

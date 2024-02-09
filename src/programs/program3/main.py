@@ -7,7 +7,6 @@ from core.executable_level_1.schema import (
 from implementation.datasources.google_docs.google_docs import (
     GoogleDocsClientConfig,
     GoogleDocsClient,
-    GoogleDocsReadConfig,
     GoogleDocsReadInput,
 )
 from implementation.models.token_searcher.model import (
@@ -49,7 +48,7 @@ if __name__ == '__main__':
     # model that will be used
     model = TokenSearcherModel(
         TokenSearcherModelConfig(
-            name="knowledgator/UTC-DeBERTa-small"
+            device = 'cpu'
         )
     )
 
@@ -58,7 +57,7 @@ if __name__ == '__main__':
     
     # create pipeline with described stages
     pipeline = (
-        docs.read(GoogleDocsReadConfig())
+        docs.read()
         | ExecuteFunction(get_text)
         | ExecuteFunction(set_prompt)
         | model

@@ -35,7 +35,7 @@ docs = GoogleDocsClient(
 To initialize stage use:
 
 ``` python
-docs.read(GoogleDocsReadConfig())
+docs.read()
 ```
 
 ### Model
@@ -43,9 +43,11 @@ docs.read(GoogleDocsReadConfig())
 To initialize Token Searcher model use:
 
 ``` python
-model = TokenSearcherModel(TokenSearcherModelConfig(
-    name="knowledgator/UTC-DeBERTa-small"
-))
+model = TokenSearcherModel(
+    TokenSearcherModelConfig(
+        device = 'cpu'
+    )
+)
 ```
 
 ### Pipeline
@@ -54,7 +56,7 @@ Now we need to create pipeline to combine stages:
 
 ``` python
 pipeline = (
-    docs.read(GoogleDocsReadConfig())
+    docs.read()
     | ExecuteFunction(get_text)
     | ExecuteFunction(set_prompt)
     | model

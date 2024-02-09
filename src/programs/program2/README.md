@@ -41,25 +41,15 @@ spreadsheet = GoogleSpreadsheetClient(
 To initialize stage use:
 
 ``` python
-spreadsheet.read(
-    GoogleSpreadsheetReadConfig(
-        spreadsheet_id=spreadsheet_id
-    )
-) 
+spreadsheet.read()
 ```
-
-Spreadsheet ID can be found in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0
 
 ### Google Spreadsheet writing stage
 
 Similarly to reading stage initialize writing stage:
 
 ``` python
-spreadsheet.write(
-    GoogleSpreadsheetWriteConfig(
-        spreadsheet_id=spreadsheet_id
-    )
-)
+spreadsheet.write()
 ```
  
 ### Model
@@ -67,12 +57,14 @@ spreadsheet.write(
 Before initializing task we need to initialize model that used by Q&A task.
 
 ``` python
-model = TokenSearcherModel(TokenSearcherModelConfig(
-    name="knowledgator/UTC-DeBERTa-small"
-))
+model = TokenSearcherModel(
+    TokenSearcherModelConfig(
+        device='cpu'
+    )
+)
 ```
 
-### NER task
+### Q&A task
 
 This is the main stage in this program.
 
@@ -93,20 +85,15 @@ Now we need to create pipeline to combine stages:
 
 ``` python
 pipeline = (
-    spreadsheet.read(
-        GoogleSpreadsheetReadConfig(
-            spreadsheet_id=spreadsheet_id
-        )
-    ) 
+    spreadsheet.read() 
     | ExecuteFunction(get_input_for_q_and_a)
     | q_and_a
     | ExecuteFunction(create_table)
-    | AddData({'select_range': 'C1'})
-    | spreadsheet.write(
-        GoogleSpreadsheetWriteConfig(
-            spreadsheet_id=spreadsheet_id
-        )
-    )
+    | AddData({
+        'spreadsheet_id': spreadsheet_id,
+        'select_range': 'C1'
+    })
+    | spreadsheet.write()
 )
 ```
 
@@ -120,10 +107,12 @@ For calling pipeline we need input:
 
 ``` python
 read_input = GoogleSpreadsheetReadInput(
+    spreadsheet_id=spreadsheet_id,
     select_range='A2:B2'
 )
 ```
 
+Spreadsheet ID can be found in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0
 
 To call pipeline use:
 

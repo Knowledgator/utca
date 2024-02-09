@@ -8,9 +8,7 @@ from core.executable_level_1.schema import (
 from implementation.datasources.google_spreadsheet.google_spreadsheet import (
     GoogleSpreadsheetClient, 
     GoogleSpreadsheetClientConfig,
-    GoogleSpreadsheetReadConfig,
     GoogleSpreadsheetReadInput,
-    GoogleSpreadsheetWriteConfig,
 )
 from implementation.datasources.google_spreadsheet.schema import (
     Dimension
@@ -57,7 +55,7 @@ if __name__ == '__main__':
     # model that will be used for Q&A task
     model = TokenSearcherModel(
         TokenSearcherModelConfig(
-            name="knowledgator/UTC-DeBERTa-small"
+            device='cpu'
         )
     )
 
@@ -69,28 +67,25 @@ if __name__ == '__main__':
         model
     )
 
+
     spreadsheet_id = '1k4pSzvMClric29a_2w-pKjJJQvU2Dq59SrZIy6XUVU4'#'your_spread_sheet_id'
     # can be found in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0
-    
+
     # create pipeline with described stages
     pipeline = (
-        spreadsheet.read(
-            GoogleSpreadsheetReadConfig(
-                spreadsheet_id=spreadsheet_id
-            )
-        ) 
+        spreadsheet.read() 
         | ExecuteFunction(get_input_for_q_and_a)
         | q_and_a
         | ExecuteFunction(create_table)
-        | AddData({'select_range': 'C1'}) 
-        | spreadsheet.write(
-            GoogleSpreadsheetWriteConfig(
-                spreadsheet_id=spreadsheet_id
-            )
-        )
+        | AddData({
+            'spreadsheet_id': spreadsheet_id,
+            'select_range': 'C1'
+        }) 
+        | spreadsheet.write()
     )
 
     read_input = GoogleSpreadsheetReadInput(
+        spreadsheet_id=spreadsheet_id,
         select_range='A2:B2'
     )
     Evaluator(pipeline).run(read_input)
