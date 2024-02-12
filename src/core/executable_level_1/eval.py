@@ -4,6 +4,7 @@ from core.executable_level_1.component import Component
 from core.executable_level_1.custom_exceptions import ExecutionSchemaInvalidFirstComponent, ExecutionSchemaInvalidFlow
 
 from core.executable_level_1.executable import Executable
+from core.executable_level_1.memory import Memory
 from core.executable_level_1.schema import (
     Action, 
     Config, 
@@ -11,6 +12,14 @@ from core.executable_level_1.schema import (
     Output,
     Transformable,
 )
+
+# Program tree, where statements are actions
+# {
+#     [Statement]
+# }
+# There should be restart sign  + offset
+
+# rework this classes
 
 TRANSFORM_STATEMENT = List[Union[Executable[Config, Input, Output], Action]]
 INPUT_STATEMENT = List[Executable[Config, Input, Output]] # Executable Executable Executable
@@ -22,12 +31,7 @@ STATEMENT = Union[INPUT_STATEMENT, TRANSFORM_STATEMENT] # Action Action Action A
 
 PROGRAM = List[STATEMENT]
 
-# execute to execute protocol
-# one to one
-class Protocol():
-    # mb start and end executable
-    # ror scheck is it start or end + validation 
-    ...
+
 
 
 class ExecutionSchema():
@@ -84,62 +88,14 @@ class ExecutionSchema():
 
 
 
-class EvaluatorConfigs():
-    pass
-
-# develop further as game engine ?
-class Evaluator():
-    program: PROGRAM
-    transferable_checkpoint: Transformable
-    
-    def __init__(self, schema: ExecutionSchema, cfg: EvaluatorConfigs = EvaluatorConfigs()) -> None:
-        self.program = schema.retieve_program()
-    
-    
-    def run(self, program_input: Input):
-        # execution loop
-        for i, st in enumerate(self.program):
-            if i == 0:
-                self.execute_input_statement(st, program_input)
-            else:
-                self.execute_ordinary_statement(st)
-            print("Executed step: ", i)
-        return self.transferable_checkpoint.extract()
-    
-
-    def execute_ordinary_statement(self, statement: TRANSFORM_STATEMENT):
-        for el in statement:
-            if  isinstance(el, Executable):
-                self.transferable_checkpoint = el.execute(self.transferable_checkpoint, Transformable)
-            else:
-                self.transferable_checkpoint.update_state(el)
-
-
-    def execute_input_statement(self, statement: INPUT_STATEMENT, input: Input):
-        executable = statement[0]
-        self.transferable_checkpoint = executable.execute(input, Transformable)
 
 
 
 
 
-# transformable can NOT be done on static fold
-# how it can dynamic change ?
 
 
-# class Pipeline():
-#     last_exec: Executable[Config, Input, Output]
-#     def __ror__(self, __value: Union[Executable[ConfigType, InputType, OutputType], Transformable])-> int:
-#         # add 2 pipelines
-#         return 3
-#     def __call__(self, *args: Any, **kwds: Any) -> Any:
-#         pass
-#     def run(self) -> None:
-#         pass
-    
-#     def run_protocol(self):
 
-#         pass
 
 
 
