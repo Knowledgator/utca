@@ -4,6 +4,9 @@ from typing import  Callable, TypeVar, Any, Dict, Generic, Type
 from pydantic import BaseModel, ValidationError
 
 from core.executable_level_1.component import Component
+from core.executable_level_1.statements_types import ACTION, STATEMENT_TYPE, Statement
+
+
 
 
 class Input(BaseModel, ABC):
@@ -12,10 +15,16 @@ class Input(BaseModel, ABC):
 InputType = TypeVar('InputType', bound=Input)
 
 
+
 class Action(Component, ABC):
     @abstractmethod
     def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
         ...
+    def generate_statement(self) -> Dict[str, Any]:
+        return {STATEMENT_TYPE: Statement.ACTION_STATEMENT, ACTION: self}
+
+
+
 
 
 class AddData(Action):
@@ -125,7 +134,7 @@ class Validator(Generic[InputType]):
 
 
 # Task №1 - can validate is it right based on input and output class !!!
-class Transformable(Component):
+class Transformable():
     state: Dict[str, Any]
 
     def __init__(self, input: Dict[str, Any]) -> None:

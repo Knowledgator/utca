@@ -40,46 +40,23 @@ class Serializable:
         return obj
 
 
-class Statement():
-    @staticmethod
-    def create_execute_statement():
-        pass
-
-
-class ExecuteStatement():
-    @staticmethod
-    def create_execute_statement():
-        return {"type": "execute_statement", }
-
-
-class TransformStatement():
 
 
 
 
-class InputStatement(Serializable):
-
-    executable: Executable
-    input: Input
-    def __init__(self) -> None:
-        pass
-
+# class IfStatement(Serializable): 
+#     get_memory: GetMemory
+#     bool_executable: Executable
+#     right_branch: ExecuteStatement # how it can catch input
+#     left_branch: ExecuteStatement
 
 
-
-class IfStatement(Serializable): 
-    get_memory: GetMemory
-    bool_executable: Executable
-    right_branch: ExecuteStatement # how it can catch input
-    left_branch: ExecuteStatement
+# class LoopStatement(Serializable):
+#     condition: int 
+#     child: ExecuteStatement
 
 
-class LoopStatement(Serializable):
-    condition: int 
-    child: ExecuteStatement
-
-
-class Function():
+# class Function():
     # abstracts all this components - 4 primary
     pass
     # executable: Executable
@@ -87,17 +64,13 @@ class Function():
     # get_memory: GetMemory
     # transform: Transformable
 
-TRANSFORM_STATEMENT = List[Union[Executable[Config, Input, Output], Action]]
-INPUT_STATEMENT = List[Executable[Config, Input, Output]] # Executable Executable Executable
-STATEMENT = Union[INPUT_STATEMENT, TRANSFORM_STATEMENT] # Action Action Action Action Executable
-# STATEMENTs :  (write some notice)
-# Input Statement : Input -> Executable->Transferable;
-# Intermediate Statement : Transferable->Executable->Transferable;
-# Output Statement :  Transferable->Executable->Output;
 
-PROGRAM: Dict[str, Any]= {
+def generate_skelet() -> Dict[str, Any]:
+    return  {
     "start": []
-}
+    }
+
+
 
 
 
@@ -105,57 +78,65 @@ class ExecutionSchema():
     program: Dict[str, Any]
 
     def __init__(self, comp: Component) -> None:
-        self.program = PROGRAM
+        self.program = generate_skelet()
+        self.add(comp)
         
-        if isinstance(comp, Executable):
-            self.last_executable = comp
-            comp = cast(Executable[Config, Input, Output], comp)
-            self.create_input_statement(comp)
-        else:
-            raise ExecutionSchemaInvalidFirstComponent
         
 
     def add(self, comp: Component):
-        if isinstance(comp, Action):
-            self.actions.append(comp)
-        elif isinstance(comp, Executable):
-            if self.last_executable != None:
-                comp = cast(Executable[Config, Input, Output], comp)
-                self.create_statement(comp)
-                self.last_executable = comp
-                self.actions = []
-            else:
-                raise ExecutionSchemaInvalidFlow()
-        else:
-            raise ValueError(comp)
-    
-    
-    def create_input_statement(
-        self, comp: Executable[Config, Input, Output]
-    ):
-        new_statement: STATEMENT  = []
-        new_statement.append(comp)
-        self.statements.append(new_statement)
+        statement =  comp.generate_statement()
+        self.program["start"].append(statement)
 
-
-    def create_statement(
-        self, executable: Executable[Config, Input, Output]
-    ):
-        # EXECUTABLE + ACTION
-        new_statement: STATEMENT  = []
-        new_statement = new_statement + self.actions
-        new_statement.append(executable)
-        self.statements.append(new_statement)
     
     
     def retieve_program(self):
-        return self.statements
+        return self.program
+    
+    # def __or__(self, comp: Component) -> ExecutionSchema:
+    #     from core.executable_level_1.eval import ExecutionSchema
+    #     if isinstance(self, ExecutionSchema):
+    #         self.add(comp)
+    #         return self
+    #     else:
+    #         e = ExecutionSchema(self)
+    #         e.add(comp)
+    #         return e
+    
+    
+    # def __ror__(self, comp: Union[ExecutionSchema, Component]) -> ExecutionSchema:
+    #     from core.executable_level_1.eval import ExecutionSchema
+    #     if isinstance(comp, ExecutionSchema):
+    #         comp.add(self)
+    #         return comp
+    #     else:
+    #         e = ExecutionSchema(comp)
+    #         e.add(self)
+    #         return e
 
 
 
 
-
-
+# program_structure = {
+#     "start": [
+#         {"statement": lambda ctx: print("Statement 1 execution", ctx)},
+#         {"statement": lambda ctx: print("Statement 2 execution", ctx)},
+#         {"if": {
+#             "condition": lambda ctx: ctx["condition"],
+#             "true_branch": [
+#                 {"statement": lambda ctx: print("True branch statement", ctx)}
+#             ],
+#             "false_branch": [
+#                 {"statement": lambda ctx: print("False branch statement", ctx)}
+#             ]
+#         }},
+#         {"loop": {
+#             "condition": lambda ctx: ctx["loop_condition"](),
+#             "body": [
+#                 {"statement": lambda ctx: print("Loop body statement", ctx) or ctx["loop_actions"]()}
+#             ]
+#         }}
+#     ]
+# }
 
 
 

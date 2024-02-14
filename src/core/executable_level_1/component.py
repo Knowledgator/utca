@@ -1,10 +1,11 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Union
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Any, Dict, Union
 
 if TYPE_CHECKING:
     from core.executable_level_1.eval import ExecutionSchema  # Forward declaration for type checking
 
-class Component:
+class Component(ABC):
     def __or__(self, comp: Component) -> ExecutionSchema:
         from core.executable_level_1.eval import ExecutionSchema
         if isinstance(self, ExecutionSchema):
@@ -26,4 +27,7 @@ class Component:
             e.add(self)
             return e
 
+    @abstractmethod
+    def generate_statement(self) -> Dict[str, Any]:
+        pass
 

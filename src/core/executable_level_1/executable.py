@@ -4,6 +4,7 @@ from abc import ABC,  abstractmethod
 from core.executable_level_1.component import Component
 
 from core.executable_level_1.schema import ConfigType, InputType, OutputType, Transformable, Validator
+from core.executable_level_1.statements_types import EXECUTE, STATEMENT_TYPE, Statement
 
 
 # + and | code
@@ -145,5 +146,8 @@ class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
 
     def getValidator(self) -> Validator[InputType]:
         return Validator(self.input_class)
+    
+    def generate_statement(self) -> Dict[str, Any]:
+        return {STATEMENT_TYPE: Statement.EXECUTE_STATEMENT, EXECUTE: self}
 
 
