@@ -1,12 +1,11 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import  Callable, TypeVar, Any, Dict, Generic, Type
 
 from pydantic import BaseModel, ValidationError
 
 from core.executable_level_1.component import Component
-from core.executable_level_1.statements_types import ACTION, STATEMENT_TYPE, Statement
-
-
+from core.executable_level_1.statements_types import Statement
 
 
 class Input(BaseModel, ABC):
@@ -20,11 +19,10 @@ class Action(Component, ABC):
     @abstractmethod
     def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
         ...
-    def generate_statement(self) -> Dict[str, Any]:
-        return {STATEMENT_TYPE: Statement.ACTION_STATEMENT, ACTION: self}
 
 
-
+    def generate_statement(self) -> Dict[Statement, Action]:
+        return {Statement.ACTION_STATEMENT: self}
 
 
 class AddData(Action):

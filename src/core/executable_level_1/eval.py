@@ -1,3 +1,4 @@
+from __future__ import annotations
 import json
 from sys import executable
 from typing import  Any, Dict, Optional, Type, TypeVar, Union, List, cast
@@ -16,6 +17,7 @@ from core.executable_level_1.schema import (
     Output,
     Transformable,
 )
+from core.executable_level_1.statements_types import Statement
 
 T = TypeVar('T', bound='Serializable')
 
@@ -65,54 +67,39 @@ class Serializable:
     # transform: Transformable
 
 
-def generate_skelet() -> Dict[str, Any]:
-    return  {
-    "start": []
-    }
+# def generate_skelet() -> Dict[str, Any]:
+#     return  {
+#     "start": []
+#     }
 
 
 
 
 
-class ExecutionSchema():
-    program: Dict[str, Any]
+class ExecutionSchema(Component):
+    program: List[Dict[Statement, Any]]
 
     def __init__(self, comp: Component) -> None:
-        self.program = generate_skelet()
+        self.program = []
         self.add(comp)
         
-        
 
-    def add(self, comp: Component):
-        statement =  comp.generate_statement()
-        self.program["start"].append(statement)
+    def add(self, comp: Component) -> ExecutionSchema:
+        statement = comp.generate_statement()
+        self.program.append(statement)
+        return self
 
-    
     
     def retieve_program(self):
         return self.program
     
-    # def __or__(self, comp: Component) -> ExecutionSchema:
-    #     from core.executable_level_1.eval import ExecutionSchema
-    #     if isinstance(self, ExecutionSchema):
-    #         self.add(comp)
-    #         return self
-    #     else:
-    #         e = ExecutionSchema(self)
-    #         e.add(comp)
-    #         return e
-    
-    
-    # def __ror__(self, comp: Union[ExecutionSchema, Component]) -> ExecutionSchema:
-    #     from core.executable_level_1.eval import ExecutionSchema
-    #     if isinstance(comp, ExecutionSchema):
-    #         comp.add(self)
-    #         return comp
-    #     else:
-    #         e = ExecutionSchema(comp)
-    #         e.add(self)
-    #         return e
 
+    def __or__(self, comp: Component) -> ExecutionSchema:
+        return self.add(comp)
+
+
+    def generate_statement(self) -> Dict[Statement, List[Dict[Statement, Any]]]:
+        return {Statement.PIPELINE_STATEMENT: self.program}
 
 
 
