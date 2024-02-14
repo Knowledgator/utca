@@ -1,10 +1,14 @@
-from typing import  Optional, Union, List, cast
+import json
+from sys import executable
+from typing import  Any, Dict, Optional, Type, TypeVar, Union, List, cast
+
+from torch import StorageBase
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.custom_exceptions import ExecutionSchemaInvalidFirstComponent, ExecutionSchemaInvalidFlow
 
 from core.executable_level_1.executable import Executable
-from core.executable_level_1.memory import Memory
+from core.executable_level_1.memory import GetMemory, SetMemory
 from core.executable_level_1.schema import (
     Action, 
     Config, 
@@ -13,13 +17,75 @@ from core.executable_level_1.schema import (
     Transformable,
 )
 
-# Program tree, where statements are actions
-# {
-#     [Statement]
-# }
-# There should be restart sign  + offset
+T = TypeVar('T', bound='Serializable')
 
-# rework this classes
+class Serializable:
+    def to_json(self) -> str:
+        """
+        Serialize the object to a JSON string.
+        """
+        return json.dumps(self.__dict__, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+    @classmethod
+    def from_json(cls: Type[T], json_str: str) -> T:
+        """
+        Deserialize a JSON string to an object of the class.
+
+        :param json_str: A JSON string representing the object.
+        :return: An instance of the class with attributes set according to the JSON string.
+        """
+        attributes = json.loads(json_str)
+        obj = cls()  
+        obj.__dict__.update(attributes)
+        return obj
+
+
+class Statement():
+    @staticmethod
+    def create_execute_statement():
+        pass
+
+
+class ExecuteStatement():
+    @staticmethod
+    def create_execute_statement():
+        return {"type": "execute_statement", }
+
+
+class TransformStatement():
+
+
+
+
+class InputStatement(Serializable):
+
+    executable: Executable
+    input: Input
+    def __init__(self) -> None:
+        pass
+
+
+
+
+class IfStatement(Serializable): 
+    get_memory: GetMemory
+    bool_executable: Executable
+    right_branch: ExecuteStatement # how it can catch input
+    left_branch: ExecuteStatement
+
+
+class LoopStatement(Serializable):
+    condition: int 
+    child: ExecuteStatement
+
+
+class Function():
+    # abstracts all this components - 4 primary
+    pass
+    # executable: Executable
+    # set_memory: SetMemory
+    # get_memory: GetMemory
+    # transform: Transformable
 
 TRANSFORM_STATEMENT = List[Union[Executable[Config, Input, Output], Action]]
 INPUT_STATEMENT = List[Executable[Config, Input, Output]] # Executable Executable Executable
@@ -29,19 +95,18 @@ STATEMENT = Union[INPUT_STATEMENT, TRANSFORM_STATEMENT] # Action Action Action A
 # Intermediate Statement : Transferable->Executable->Transferable;
 # Output Statement :  Transferable->Executable->Output;
 
-PROGRAM = List[STATEMENT]
-
+PROGRAM: Dict[str, Any]= {
+    "start": []
+}
 
 
 
 class ExecutionSchema():
-    last_executable: Optional[Executable[Config, Input, Output]] = None
-    actions: List[Action]
-    statements: PROGRAM
+    program: Dict[str, Any]
 
     def __init__(self, comp: Component) -> None:
-        self.statements = []
-        self.actions = []
+        self.program = PROGRAM
+        
         if isinstance(comp, Executable):
             self.last_executable = comp
             comp = cast(Executable[Config, Input, Output], comp)

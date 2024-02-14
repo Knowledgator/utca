@@ -54,34 +54,6 @@ class Evaluator():
 
 
 
-# def serialize(self):
-#         return {
-#             "action": self.action.__name__,
-#             "children": [child.serialize() for child in self.children],
-#             "restart": self.restart,
-#             "offset": self.offset,
-#             "label": self.label,
-#         }
-
-
-
-
-
-# class ConditionalNode(Node):
-#     def __init__(self, condition, true_branch: Node, false_branch: Node = None, **kwargs):
-#         super().__init__(action=None, **kwargs)  # Conditional node doesn't have a direct action
-#         self.condition = condition  # A function that evaluates to True or False
-#         self.true_branch = true_branch
-#         self.false_branch = false_branch
-
-#     def execute(self, memory: Memory, input_data: Any = None):
-#         condition_result = self.condition(input_data)
-#         if condition_result:
-#             return self.true_branch.execute(memory, input_data)
-#         elif self.false_branch is not None:
-#             return self.false_branch.execute(memory, input_data)
-#         return input_data  # If false_branch is None, just pass the input_data forward
-
 
 # class LoopNode(Node):
 #     def __init__(self, loop_condition, child: Node, **kwargs):
@@ -122,6 +94,9 @@ class Evaluator():
 
 
 # !!!!!!!!
+
+
+
 
 # program_structure = {
 #     "start": [
