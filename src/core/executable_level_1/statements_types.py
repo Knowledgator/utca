@@ -15,3 +15,4 @@ class Statement(Enum):
     PIPELINE_STATEMENT = "pipeline_statement"
     SWITCH_STATEMENT = "switch_statement"
     LOOP_STATEMENT = "loop_statement"
+    PARALLEL_STATEMENT = "parallel_statement"

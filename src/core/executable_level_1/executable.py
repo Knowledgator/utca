@@ -1,5 +1,7 @@
 from __future__ import annotations
-from typing import Any, Generic, Type, Dict, Union, overload, Optional, cast
+from typing import (
+    Any, Type, Dict, Union, overload, Optional, cast, Generic
+)
 from abc import ABC,  abstractmethod
 
 from core.executable_level_1.component import Component
@@ -18,6 +20,7 @@ class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
     def __init__(self, cfg: ConfigType) -> None:
         self.cfg = cfg
 
+    
     @abstractmethod
     def invoke(self, input_data: InputType) -> Dict[str, Any]:
         ...
