@@ -1,7 +1,93 @@
+from __future__ import annotations
+from typing import Dict, Any, List, Tuple, Callable
+from abc import ABC, abstractmethod
+
+from core.executable_level_1.statements_types import Statement
+from core.executable_level_1.component import Component
+from core.executable_level_1.executable import Executable
+from core.executable_level_1.schema import (
+    Config, Input, Output, Action
+)
+
+class Command(ABC):
+    def __init__(self, evaluator: Evaluator) -> None:
+        self.evaluator = evaluator
 
 
-class Evaluator():
-    program: PROGRAM
+    @abstractmethod
+    def __call__(
+        self, task: Any
+    ) -> Evaluator:
+        ...
+
+
+class ActionCommand(Command):
+    def __call__(
+        self, task: Action
+    ) -> Evaluator:
+        self.evaluator.state = task.execute(self.evaluator.state)
+        return self.evaluator
+
+
+class MemoryCommand(Command):
+    def __call__(
+        self, task: Component
+    ) -> Evaluator:
+        ...
+
+
+class ExecuteCommand(Command):
+    def __call__(
+        self, task: Executable[Config, Input, Output]
+    ) -> Evaluator:
+        self.evaluator.state = task.execute(self.evaluator.state)
+        return self.evaluator
+
+
+class PipelineCommand(Command):
+    def __call__(
+        self, task: List[Dict[Statement, Any]]
+    ) -> Evaluator:
+        for stage in task:
+            for statement, sub_task in stage.items():
+                self.evaluator[statement](sub_task)
+
+        return self.evaluator
+
+
+class SwitchCommand(Command):
+    def __call__(
+        self, 
+        task: List[
+            Tuple[
+                Callable[[Dict[str, Any]], bool], 
+                Dict[Statement, Any]
+            ]
+        ]
+    ) -> Evaluator:
+        # TODO: multiple exits
+        for check, stage in task:
+            if check(self.evaluator.state):
+                for statement, sub_task in stage.items(): 
+                    self.evaluator[statement](sub_task)
+                break
+        return self.evaluator
+
+
+class LoopCommand(Command):
+    def __call__(
+        self, task: List[Dict[Statement, Any]]
+    ) -> Evaluator:
+        while condition:
+            for stage in task:
+                for statement, sub_task in stage.items(): 
+                    self.evaluator[statement](sub_task)
+        return self.evaluator
+
+
+class Evaluator:
+    program: Dict[Statement, Any]
+    commands: Dict[Statement, Command]
     transferable_checkpoint: Transformable
     memory: Memory
     # state saver for each stage, stage_name, command -> result
@@ -10,6 +96,11 @@ class Evaluator():
         self.program = schema.retieve_program()
         self.memory = Memory()
     
+
+    def __getitem__(self, command: Statement) -> Command:
+        return self.commands[command]
+
+
     def run(self, program_input: Input):
         # execution loop
         for i, st in enumerate(self.program):
