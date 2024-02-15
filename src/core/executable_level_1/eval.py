@@ -86,13 +86,13 @@ class Pipeline(ExecutionSchema):
 
 
 class Loop(ExecutionSchema):
-    loop: ExecutionSchema
+    loop: Component
     condition: Callable[[Dict[str, Any], int], bool]
 
     def __init__(
         self, 
         cfg: Config,
-        loop: ExecutionSchema,
+        loop: Component,
         condition: Callable[[Dict[str, Any], int], bool]
     ) -> None:
         self.loop = loop
@@ -126,7 +126,7 @@ class Loop(ExecutionSchema):
 
 class Path():
     condition: Callable[[Dict[str, Any]], bool] = lambda _: False
-    executor: ExecutionSchema
+    executor: Component
     exit: bool = True
 
 
@@ -179,9 +179,9 @@ class Switch(ExecutionSchema):
 
 
 class Parallel(ExecutionSchema):
-    paths: List[ExecutionSchema]
+    paths: List[Component]
 
-    def __init__(self, cfg: Config, *path: ExecutionSchema) -> None:
+    def __init__(self, cfg: Config, *path: Component) -> None:
         self.paths = [*path]
         super().__init__(cfg)
 
