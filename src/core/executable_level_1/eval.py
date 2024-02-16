@@ -56,7 +56,7 @@ class Pipeline(ExecutionSchema):
 
     def execute(
         self, input_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    ) -> Dict[str, Any]: # TODO: use actual pipeline structure
         state: Dict[str, Any] = input_data
         for stage in self.stages:
             state = stage.execute(state)
