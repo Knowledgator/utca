@@ -1,145 +1,265 @@
-from typing import  Optional, Union, List, cast
+from __future__ import annotations
+import json
+from typing import (
+    List, Any, Dict, Type, Iterator, Callable, TypeVar, Optional
+)
+from concurrent.futures import ThreadPoolExecutor, Future, as_completed
 
 from core.executable_level_1.component import Component
-from core.executable_level_1.custom_exceptions import ExecutionSchemaInvalidFirstComponent, ExecutionSchemaInvalidFlow
+from core.executable_level_1.schema import Config 
+from core.executable_level_1.statements_types import Statement
 
-from core.executable_level_1.executable import Executable
-from core.executable_level_1.schema import (
-    Action, 
-    Config, 
-    Input,
-    Output,
-    Transformable,
-)
+T = TypeVar('T', bound='Serializable')
 
-TRANSFORM_STATEMENT = List[Union[Executable[Config, Input, Output], Action]]
-INPUT_STATEMENT = List[Executable[Config, Input, Output]] # Executable Executable Executable
-STATEMENT = Union[INPUT_STATEMENT, TRANSFORM_STATEMENT] # Action Action Action Action Executable
-# STATEMENTs :  (write some notice)
-# Input Statement : Input -> Executable->Transferable;
-# Intermediate Statement : Transferable->Executable->Transferable;
-# Output Statement :  Transferable->Executable->Output;
+class Serializable:
+    def to_json(self) -> str:
+        """
+        Serialize the object to a JSON string.
+        """
+        return json.dumps(self.__dict__, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
-PROGRAM = List[STATEMENT]
+    @classmethod
+    def from_json(cls: Type[T], json_str: str) -> T:
+        """
+        Deserialize a JSON string to an object of the class.
 
-# execute to execute protocol
-# one to one
-class Protocol():
-    # mb start and end executable
-    # ror scheck is it start or end + validation 
-    ...
+        :param json_str: A JSON string representing the object.
+        :return: An instance of the class with attributes set according to the JSON string.
+        """
+        attributes = json.loads(json_str)
+        obj = cls()  
+        obj.__dict__.update(attributes)
+        return obj
 
 
-class ExecutionSchema():
-    last_executable: Optional[Executable[Config, Input, Output]] = None
-    actions: List[Action]
-    statements: PROGRAM
+class ExecutionSchema(Component):
+    program: List[Dict[Statement, Any]]
 
     def __init__(self, comp: Component) -> None:
-        self.statements = []
-        self.actions = []
-        if isinstance(comp, Executable):
-            self.last_executable = comp
-            comp = cast(Executable[Config, Input, Output], comp)
-            self.create_input_statement(comp)
-        else:
-            raise ExecutionSchemaInvalidFirstComponent
+        self.program = []
+        self.add(comp)
         
 
-    def add(self, comp: Component):
-        if isinstance(comp, Action):
-            self.actions.append(comp)
-        elif isinstance(comp, Executable):
-            if self.last_executable != None:
-                comp = cast(Executable[Config, Input, Output], comp)
-                self.create_statement(comp)
-                self.last_executable = comp
-                self.actions = []
-            else:
-                raise ExecutionSchemaInvalidFlow()
-        else:
-            raise ValueError(comp)
-    
-    
-    def create_input_statement(
-        self, comp: Executable[Config, Input, Output]
-    ):
-        new_statement: STATEMENT  = []
-        new_statement.append(comp)
-        self.statements.append(new_statement)
+    def add(self, comp: Component) -> ExecutionSchema:
+        statement = comp.generate_statement()
+        self.program.append(statement)
+        return self
 
-
-    def create_statement(
-        self, executable: Executable[Config, Input, Output]
-    ):
-        # EXECUTABLE + ACTION
-        new_statement: STATEMENT  = []
-        new_statement = new_statement + self.actions
-        new_statement.append(executable)
-        self.statements.append(new_statement)
-    
     
     def retieve_program(self):
-        return self.statements
-
-
-
-class EvaluatorConfigs():
-    pass
-
-# develop further as game engine ?
-class Evaluator():
-    program: PROGRAM
-    transferable_checkpoint: Transformable
-    
-    def __init__(self, schema: ExecutionSchema, cfg: EvaluatorConfigs = EvaluatorConfigs()) -> None:
-        self.program = schema.retieve_program()
-    
-    
-    def run(self, program_input: Input):
-        # execution loop
-        for i, st in enumerate(self.program):
-            if i == 0:
-                self.execute_input_statement(st, program_input)
-            else:
-                self.execute_ordinary_statement(st)
-            print("Executed step: ", i)
-        return self.transferable_checkpoint.extract()
+        return self.program
     
 
-    def execute_ordinary_statement(self, statement: TRANSFORM_STATEMENT):
-        for el in statement:
-            if  isinstance(el, Executable):
-                self.transferable_checkpoint = el.execute(self.transferable_checkpoint, Transformable)
-            else:
-                self.transferable_checkpoint.update_state(el)
+    def __or__(self, comp: Component) -> ExecutionSchema:
+        return self.add(comp)
 
 
-    def execute_input_statement(self, statement: INPUT_STATEMENT, input: Input):
-        executable = statement[0]
-        self.transferable_checkpoint = executable.execute(input, Transformable)
+    def generate_statement(self) -> Dict[Statement, List[Dict[Statement, Any]]]:
+        return {Statement.PIPELINE_STATEMENT: self.program}
+        
 
+class Pipeline(Component):
+    stages: List[Component]
 
-
-
-
-# transformable can NOT be done on static fold
-# how it can dynamic change ?
-
-
-# class Pipeline():
-#     last_exec: Executable[Config, Input, Output]
-#     def __ror__(self, __value: Union[Executable[ConfigType, InputType, OutputType], Transformable])-> int:
-#         # add 2 pipelines
-#         return 3
-#     def __call__(self, *args: Any, **kwds: Any) -> Any:
-#         pass
-#     def run(self) -> None:
-#         pass
+    def __init__(
+        self, 
+        cfg: Optional[Config]=None,
+        *stage: Component
+    ) -> None:
+        self.stages = [*stage]
+        super().__init__(cfg)
     
-#     def run_protocol(self):
 
-#         pass
+    def add(self, comp: Component) -> Pipeline:
+        self.stages.append(comp)
+        return self
+    
+
+    def execute(
+        self, input_data: Dict[str, Any]
+    ) -> Dict[str, Any]: # TODO: use actual pipeline structure
+        state: Dict[str, Any] = input_data
+        for stage in self.stages:
+            state = stage.execute(state)
+        return state
+    
+
+    def execute_batch(
+        self, input_data: List[Dict[str, Any]]
+    ) -> Iterator[Dict[str, Any]]:
+        with ThreadPoolExecutor(max_workers=self.cfg.max_workers) as executor:
+            return executor.map(
+                self.execute, *input_data, timeout=self.cfg.timeout
+            )
+
+
+    def generate_statement(self) -> Dict[Statement, List[Dict[Statement, Any]]]:
+        return {
+            Statement.PIPELINE_STATEMENT: [
+                st.generate_statement() for st in self.stages
+            ]
+        }
+
+
+    def __or__(self, comp: Component) -> Pipeline:
+        self.add(comp)
+        return self
+
+
+class Loop(Component):
+    loop: Component
+    condition: Callable[[Dict[str, Any], int], bool]
+
+    def __init__(
+        self, 
+        cfg: Config,
+        loop: Component,
+        condition: Callable[[Dict[str, Any], int], bool]
+    ) -> None:
+        self.loop = loop
+        self.condition = condition
+        super().__init__(cfg)
+
+    
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        state: Dict[str, Any] = input_data
+        count: int = 0
+
+        while self.condition(state, count):
+            state = self.loop.execute(state)
+            count += 1
+        
+        return state
+    
+
+    def execute_batch(
+        self, input_data: List[Dict[str, Any]]
+    ) -> Iterator[Dict[str, Any]]:
+        with ThreadPoolExecutor(max_workers=self.cfg.max_workers) as executor:
+            return executor.map(
+                self.execute, *input_data, timeout=self.cfg.timeout
+            )
+
+
+    def generate_statement(self) -> Dict[Statement, Any]:
+        return {Statement.LOOP_STATEMENT: self.loop.generate_statement()}
+
+
+class Path():
+    condition: Callable[[Dict[str, Any]], bool] = lambda _: False
+    executor: Component
+    exit: bool = True
+
+
+class Switch(Component):
+    paths: List[Path]
+    default: Path
+
+    def __init__(self, cfg: Config, *path: Path, default: Path) -> None:
+        self.paths = [*path]
+        self.default = default
+        super().__init__(cfg)
+
+    
+    def execute(self, input_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        states: List[Any] = []
+        for path in self.paths:
+            if not path.condition(input_data):
+                continue
+            state = path.executor.execute(input_data)
+            if path.exit:
+                return [state]
+            states.append(state)
+        
+        states.append(self.default.executor.execute(input_data))
+        return states
+    
+
+    def execute_batch(
+        self, input_data: List[Dict[str, Any]]
+    ) -> Iterator[List[Dict[str, Any]]]:
+        with ThreadPoolExecutor(max_workers=self.cfg.max_workers) as executor:
+            futures: List[Future[List[Dict[str, Any]]]] = [
+                executor.submit(self.execute, i)
+                for i in input_data
+            ]
+            for future in as_completed(futures, timeout=self.cfg.timeout):
+                yield future.result()
+
+    
+    def generate_statement(self) -> Dict[Statement, Dict[str, Any]]:
+        return {
+            Statement.SWITCH_STATEMENT: dict((
+                *(
+                    (path.condition.__name__, path.executor.generate_statement()) 
+                    for path in self.paths
+                ),
+                ('default', self.default.executor.generate_statement())
+            )),
+        }
+
+
+class Parallel(Component):
+    paths: List[Component]
+
+    def __init__(self, cfg: Config, *path: Component) -> None:
+        self.paths = [*path]
+        super().__init__(cfg)
+
+    
+    def execute(self, input_data: Dict[str, Any]) -> Iterator[Any]:
+        with ThreadPoolExecutor(max_workers=self.cfg.max_workers) as executor:
+            futures: List[Future[Any]] = [
+                executor.submit(path.execute, input_data)
+                for path in self.paths
+            ]
+            for future in as_completed(futures):
+                yield future.result()
+            
+
+    def execute_batch(
+        self, input_data: List[Dict[str, Any]]
+    ) -> List[Iterator[Any]]:
+        states: List[Iterator[Any]] = []
+        for i in input_data:
+            states.append(self.execute(i))
+        return states
+
+
+    def generate_statement(self) -> Dict[Statement, List[Any]]:
+        return {
+            Statement.PARALLEL_STATEMENT: [
+                path.generate_statement() for path in self.paths
+            ]
+        }
+
+
+# program_structure = {
+#     "start": [
+#         {"statement": lambda ctx: print("Statement 1 execution", ctx)},
+#         {"statement": lambda ctx: print("Statement 2 execution", ctx)},
+#         {"if": {
+#             "condition": lambda ctx: ctx["condition"],
+#             "true_branch": [
+#                 {"statement": lambda ctx: print("True branch statement", ctx)}
+#             ],
+#             "false_branch": [
+#                 {"statement": lambda ctx: print("False branch statement", ctx)}
+#             ]
+#         }},
+#         {"loop": {
+#             "condition": lambda ctx: ctx["loop_condition"](),
+#             "body": [
+#                 {"statement": lambda ctx: print("Loop body statement", ctx) or ctx["loop_actions"]()}
+#             ]
+#         }}
+#     ]
+# }
+
+
+
+
+
 
 
 

@@ -1,6 +1,6 @@
 from typing import Dict, Any
 
-from core.executable_level_1.eval import Evaluator
+from core.executable_level_1.eval import Evaluator, ExecutionSchema
 from core.executable_level_1.schema import (
     ExecuteFunction,
     AddData
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     )
 
     # create pipeline with described stages
-    pipeline = (
+    pipeline: ExecutionSchema = (
         read_pdf 
         | ExecuteFunction(get_page) 
         # adapts outputs to inputs 

@@ -1,29 +1,39 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Union
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+# from enum import Enum
 
+from core.executable_level_1.schema import (
+    Config
+)
+from core.executable_level_1.statements_types import Statement
 if TYPE_CHECKING:
     from core.executable_level_1.eval import ExecutionSchema  # Forward declaration for type checking
 
-class Component:
+class Component(ABC):
+    def __init__(self, cfg: Optional[Config] = None) -> None:
+        self.cfg = cfg or Config()
+
+
     def __or__(self, comp: Component) -> ExecutionSchema:
         from core.executable_level_1.eval import ExecutionSchema
-        if isinstance(self, ExecutionSchema):
-            self.add(comp)
-            return self
-        else:
-            e = ExecutionSchema(self)
-            e.add(comp)
-            return e
-    
-    
-    def __ror__(self, comp: Union[ExecutionSchema, Component]) -> ExecutionSchema:
-        from core.executable_level_1.eval import ExecutionSchema
-        if isinstance(comp, ExecutionSchema):
-            comp.add(self)
-            return comp
-        else:
-            e = ExecutionSchema(comp)
-            e.add(self)
-            return e
+        return ExecutionSchema(self).add(comp)
 
 
+    @abstractmethod
+    def execute(
+        self, input_data: Any
+    ) -> Any:
+        ...
+
+
+    @abstractmethod
+    def execute_batch(
+        self, input_data: List[Any], 
+    ) -> Any:
+        ...
+
+
+    @abstractmethod
+    def generate_statement(self) -> Dict[Statement, Any]:
+        ...

@@ -1,9 +1,11 @@
-from abc import ABC, abstractmethod
-from typing import  Callable, TypeVar, Any, Dict, Generic, Type
+from __future__ import annotations
+from abc import ABC
+from typing import  Callable, TypeVar, Any, Dict, Generic, Type, Optional
 
 from pydantic import BaseModel, ValidationError
 
 from core.executable_level_1.component import Component
+from core.executable_level_1.statements_types import Statement
 
 
 class Input(BaseModel, ABC):
@@ -12,10 +14,9 @@ class Input(BaseModel, ABC):
 InputType = TypeVar('InputType', bound=Input)
 
 
-class Action(Component, ABC):
-    @abstractmethod
-    def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        ...
+class Action(Component):
+    def generate_statement(self) -> Dict[Statement, Action]:
+        return {Statement.ACTION_STATEMENT: self}
 
 
 class AddData(Action):
@@ -25,9 +26,9 @@ class AddData(Action):
         self.data = data
 
 
-    def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        state.update(self.data)
-        return state
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data.update(self.data)
+        return input_data
 
 
 class RenameAttribute(Action):
@@ -39,9 +40,9 @@ class RenameAttribute(Action):
         self.new_name = new_name
 
 
-    def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        state[self.new_name] = state.pop(self.old_name)
-        return state
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data[self.new_name] = input_data.pop(self.old_name)
+        return input_data
 
 
 class ChangeValue(Action):
@@ -53,9 +54,9 @@ class ChangeValue(Action):
         self.value = value
 
 
-    def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        state[self.key] = self.value
-        return state
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data[self.key] = self.value
+        return input_data
 
 
 class RenameAttributeQuery(Action):
@@ -67,7 +68,7 @@ class RenameAttributeQuery(Action):
     def __init__(self, query: str) -> None:
         self.query = query
 
-    def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Return the new name."""
         transformation_list = self.query.split(
             self.TRANSFORMATION_DELIMITER
@@ -81,12 +82,12 @@ class RenameAttributeQuery(Action):
             new_name, old_name = [name.strip() for name in parts]
 
             # Check if the old attribute name exists in the state dictionary
-            if old_name not in state:
+            if old_name not in input_data:
                 raise KeyError(f"Attribute '{old_name}' not found in state.")
 
             # Set the new name in the state dictionary with the old value
-            state[new_name] = state.pop(old_name)
-        return state
+            input_data[new_name] = input_data.pop(old_name)
+        return input_data
 
 
 class MergeData(Action):
@@ -97,11 +98,11 @@ class MergeData(Action):
         self.data = data
         self.new_priority = new_priority
 
-    def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         if self.new_priority:
-            state = {**state, **self.data}
+            state = {**input_data, **self.data}
         else:
-            state = {**self.data, **state}
+            state = {**self.data, **input_data}
         return state
 
 
@@ -112,8 +113,8 @@ class ExecuteFunction(Action):
         self.func = func
 
 
-    def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        return self.func(state)
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        return self.func(input_data)
 
 
 class Validator(Generic[InputType]):
@@ -125,7 +126,7 @@ class Validator(Generic[InputType]):
 
 
 # Task №1 - can validate is it right based on input and output class !!!
-class Transformable(Component):
+class Transformable():
     state: Dict[str, Any]
 
     def __init__(self, input: Dict[str, Any]) -> None:
@@ -172,6 +173,9 @@ class Output(BaseModel, ABC):
 
 
 class Config(BaseModel, ABC):
+    max_workers: int = 1
+    timeout: Optional[float] = None 
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.__str__()})"
 
