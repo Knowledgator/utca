@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 # from enum import Enum
 
 from core.executable_level_1.schema import (
@@ -11,8 +11,8 @@ if TYPE_CHECKING:
     from core.executable_level_1.eval import ExecutionSchema  # Forward declaration for type checking
 
 class Component(ABC):
-    def __init__(self, cfg: Config) -> None:
-        self.cfg = cfg
+    def __init__(self, cfg: Optional[Config] = None) -> None:
+        self.cfg = cfg or Config()
 
 
     def __or__(self, comp: Component) -> ExecutionSchema:
