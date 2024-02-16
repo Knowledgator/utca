@@ -8,16 +8,16 @@ from core.executable_level_1.schema import (
 )
 from core.executable_level_1.statements_types import Statement
 if TYPE_CHECKING:
-    from core.executable_level_1.eval import Pipeline  # Forward declaration for type checking
+    from core.executable_level_1.eval import ExecutionSchema  # Forward declaration for type checking
 
 class Component(ABC):
     def __init__(self, cfg: Config) -> None:
         self.cfg = cfg
 
 
-    def __or__(self, comp: Component) -> Pipeline:
-        from core.executable_level_1.eval import Pipeline
-        return Pipeline(None, self).add(comp)
+    def __or__(self, comp: Component) -> ExecutionSchema:
+        from core.executable_level_1.eval import ExecutionSchema
+        return ExecutionSchema(self).add(comp)
 
 
     @abstractmethod

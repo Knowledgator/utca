@@ -33,11 +33,32 @@ class Serializable:
 
 
 class ExecutionSchema(Component):
-    def __init__(self, cfg: Optional[Config]) -> None:
-        super().__init__(cfg or Config())
+    program: List[Dict[Statement, Any]]
+
+    def __init__(self, comp: Component) -> None:
+        self.program = []
+        self.add(comp)
         
 
-class Pipeline(ExecutionSchema):
+    def add(self, comp: Component) -> ExecutionSchema:
+        statement = comp.generate_statement()
+        self.program.append(statement)
+        return self
+
+    
+    def retieve_program(self):
+        return self.program
+    
+
+    def __or__(self, comp: Component) -> ExecutionSchema:
+        return self.add(comp)
+
+
+    def generate_statement(self) -> Dict[Statement, List[Dict[Statement, Any]]]:
+        return {Statement.PIPELINE_STATEMENT: self.program}
+        
+
+class Pipeline(Component):
     stages: List[Component]
 
     def __init__(
@@ -85,7 +106,7 @@ class Pipeline(ExecutionSchema):
         return self
 
 
-class Loop(ExecutionSchema):
+class Loop(Component):
     loop: Component
     condition: Callable[[Dict[str, Any], int], bool]
 
@@ -130,7 +151,7 @@ class Path():
     exit: bool = True
 
 
-class Switch(ExecutionSchema):
+class Switch(Component):
     paths: List[Path]
     default: Path
 
@@ -178,7 +199,7 @@ class Switch(ExecutionSchema):
         }
 
 
-class Parallel(ExecutionSchema):
+class Parallel(Component):
     paths: List[Component]
 
     def __init__(self, cfg: Config, *path: Component) -> None:
