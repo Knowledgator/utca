@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, Optional, TYPE_CHECKING
 # from enum import Enum
 
 from core.executable_level_1.schema import (
@@ -18,20 +18,6 @@ class Component(ABC):
     def __or__(self, comp: Component) -> ExecutionSchema:
         from core.executable_level_1.eval import ExecutionSchema
         return ExecutionSchema(self).add(comp)
-
-
-    @abstractmethod
-    def execute(
-        self, input_data: Any
-    ) -> Any:
-        ...
-
-
-    @abstractmethod
-    def execute_batch(
-        self, input_data: List[Any], 
-    ) -> Any:
-        ...
 
 
     @abstractmethod

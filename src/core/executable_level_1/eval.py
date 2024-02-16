@@ -1,9 +1,8 @@
 from __future__ import annotations
 import json
 from typing import (
-    List, Any, Dict, Type, Iterator, Callable, TypeVar, Optional
+    List, Any, Dict, Type, Callable, TypeVar
 )
-from concurrent.futures import ThreadPoolExecutor, Future, as_completed
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.schema import Config 
@@ -56,54 +55,6 @@ class ExecutionSchema(Component):
 
     def generate_statement(self) -> Dict[Statement, List[Dict[Statement, Any]]]:
         return {Statement.PIPELINE_STATEMENT: self.program}
-        
-
-class Pipeline(Component):
-    stages: List[Component]
-
-    def __init__(
-        self, 
-        cfg: Optional[Config]=None,
-        *stage: Component
-    ) -> None:
-        self.stages = [*stage]
-        super().__init__(cfg)
-    
-
-    def add(self, comp: Component) -> Pipeline:
-        self.stages.append(comp)
-        return self
-    
-
-    def execute(
-        self, input_data: Dict[str, Any]
-    ) -> Dict[str, Any]: # TODO: use actual pipeline structure
-        state: Dict[str, Any] = input_data
-        for stage in self.stages:
-            state = stage.execute(state)
-        return state
-    
-
-    def execute_batch(
-        self, input_data: List[Dict[str, Any]]
-    ) -> Iterator[Dict[str, Any]]:
-        with ThreadPoolExecutor(max_workers=self.cfg.max_workers) as executor:
-            return executor.map(
-                self.execute, *input_data, timeout=self.cfg.timeout
-            )
-
-
-    def generate_statement(self) -> Dict[Statement, List[Dict[Statement, Any]]]:
-        return {
-            Statement.PIPELINE_STATEMENT: [
-                st.generate_statement() for st in self.stages
-            ]
-        }
-
-
-    def __or__(self, comp: Component) -> Pipeline:
-        self.add(comp)
-        return self
 
 
 class Loop(Component):
@@ -119,26 +70,6 @@ class Loop(Component):
         self.loop = loop
         self.condition = condition
         super().__init__(cfg)
-
-    
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        state: Dict[str, Any] = input_data
-        count: int = 0
-
-        while self.condition(state, count):
-            state = self.loop.execute(state)
-            count += 1
-        
-        return state
-    
-
-    def execute_batch(
-        self, input_data: List[Dict[str, Any]]
-    ) -> Iterator[Dict[str, Any]]:
-        with ThreadPoolExecutor(max_workers=self.cfg.max_workers) as executor:
-            return executor.map(
-                self.execute, *input_data, timeout=self.cfg.timeout
-            )
 
 
     def generate_statement(self) -> Dict[Statement, Any]:
@@ -161,32 +92,6 @@ class Switch(Component):
         super().__init__(cfg)
 
     
-    def execute(self, input_data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        states: List[Any] = []
-        for path in self.paths:
-            if not path.condition(input_data):
-                continue
-            state = path.executor.execute(input_data)
-            if path.exit:
-                return [state]
-            states.append(state)
-        
-        states.append(self.default.executor.execute(input_data))
-        return states
-    
-
-    def execute_batch(
-        self, input_data: List[Dict[str, Any]]
-    ) -> Iterator[List[Dict[str, Any]]]:
-        with ThreadPoolExecutor(max_workers=self.cfg.max_workers) as executor:
-            futures: List[Future[List[Dict[str, Any]]]] = [
-                executor.submit(self.execute, i)
-                for i in input_data
-            ]
-            for future in as_completed(futures, timeout=self.cfg.timeout):
-                yield future.result()
-
-    
     def generate_statement(self) -> Dict[Statement, Dict[str, Any]]:
         return {
             Statement.SWITCH_STATEMENT: dict((
@@ -205,25 +110,6 @@ class Parallel(Component):
     def __init__(self, cfg: Config, *path: Component) -> None:
         self.paths = [*path]
         super().__init__(cfg)
-
-    
-    def execute(self, input_data: Dict[str, Any]) -> Iterator[Any]:
-        with ThreadPoolExecutor(max_workers=self.cfg.max_workers) as executor:
-            futures: List[Future[Any]] = [
-                executor.submit(path.execute, input_data)
-                for path in self.paths
-            ]
-            for future in as_completed(futures):
-                yield future.result()
-            
-
-    def execute_batch(
-        self, input_data: List[Dict[str, Any]]
-    ) -> List[Iterator[Any]]:
-        states: List[Iterator[Any]] = []
-        for i in input_data:
-            states.append(self.execute(i))
-        return states
 
 
     def generate_statement(self) -> Dict[Statement, List[Any]]:
