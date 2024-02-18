@@ -124,7 +124,7 @@ class ExecuteFunction(Action):
         return self.func(input_data)
 
 
-class ImageAction(Action):
+class ImageAction(Action): # TODO: add more and revisit structure
     ...
 
 
