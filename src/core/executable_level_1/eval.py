@@ -1,11 +1,10 @@
 from __future__ import annotations
 import json
 from typing import (
-    List, Any, Dict, Type, Callable, TypeVar
+    List, Any, Dict, Type,  TypeVar
 )
 
 from core.executable_level_1.component import Component
-from core.executable_level_1.schema import Config 
 from core.executable_level_1.statements_types import Statement
 
 T = TypeVar('T', bound='Serializable')
@@ -32,7 +31,7 @@ class Serializable:
 
 
 class ExecutionSchema(Component):
-    program: List[Dict[Statement, Any]]
+    program: List[Dict[str, Any]]
 
     def __init__(self, comp: Component) -> None:
         self.program = []
@@ -40,12 +39,12 @@ class ExecutionSchema(Component):
         
 
     def add(self, comp: Component) -> ExecutionSchema:
-        statement = comp.generate_statement()
+        statement: Dict[str, Any] = comp.generate_statement()
         self.program.append(statement)
         return self
 
     
-    def retieve_program(self):
+    def retrieve_program(self) -> List[Dict[str, Any]]:
         return self.program
     
 
@@ -53,71 +52,71 @@ class ExecutionSchema(Component):
         return self.add(comp)
 
 
-    def generate_statement(self) -> Dict[Statement, List[Dict[Statement, Any]]]:
-        return {Statement.PIPELINE_STATEMENT: self.program}
+    def generate_statement(self) -> Dict[str, Any]:
+        return {"type": Statement.PIPELINE_STATEMENT, Statement.PIPELINE_STATEMENT.value: self.program}
 
 
-class Loop(Component):
-    loop: Component
-    condition: Callable[[Dict[str, Any], int], bool]
+# class Loop(Component):
+#     loop: Component
+#     condition: Callable[[Dict[str, Any], int], bool]
 
-    def __init__(
-        self, 
-        cfg: Config,
-        loop: Component,
-        condition: Callable[[Dict[str, Any], int], bool]
-    ) -> None:
-        self.loop = loop
-        self.condition = condition
-        super().__init__(cfg)
-
-
-    def generate_statement(self) -> Dict[Statement, Any]:
-        return {Statement.LOOP_STATEMENT: self.loop.generate_statement()}
+#     def __init__(
+#         self, 
+#         cfg: Config,
+#         loop: Component,
+#         condition: Callable[[Dict[str, Any], int], bool]
+#     ) -> None:
+#         self.loop = loop
+#         self.condition = condition
+#         super().__init__(cfg)
 
 
-class Path():
-    condition: Callable[[Dict[str, Any]], bool] = lambda _: False
-    executor: Component
-    exit: bool = True
+#     def generate_statement(self) -> Dict[Statement, Any]:
+#         return {Statement.LOOP_STATEMENT: self.loop.generate_statement()}
 
 
-class Switch(Component):
-    paths: List[Path]
-    default: Path
+# class Path():
+#     condition: Callable[[Dict[str, Any]], bool] = lambda _: False
+#     executor: Component
+#     exit: bool = True
 
-    def __init__(self, cfg: Config, *path: Path, default: Path) -> None:
-        self.paths = [*path]
-        self.default = default
-        super().__init__(cfg)
+
+# class Switch(Component):
+#     paths: List[Path]
+#     default: Path
+
+#     def __init__(self, cfg: Config, *path: Path, default: Path) -> None:
+#         self.paths = [*path]
+#         self.default = default
+#         super().__init__(cfg)
 
     
-    def generate_statement(self) -> Dict[Statement, Dict[str, Any]]:
-        return {
-            Statement.SWITCH_STATEMENT: dict((
-                *(
-                    (path.condition.__name__, path.executor.generate_statement()) 
-                    for path in self.paths
-                ),
-                ('default', self.default.executor.generate_statement())
-            )),
-        }
+#     def generate_statement(self) -> Dict[Statement, Dict[str, Any]]:
+#         return {
+#             Statement.SWITCH_STATEMENT: dict((
+#                 *(
+#                     (path.condition.__name__, path.executor.generate_statement()) 
+#                     for path in self.paths
+#                 ),
+#                 ('default', self.default.executor.generate_statement())
+#             )),
+#         }
 
 
-class Parallel(Component):
-    paths: List[Component]
+# class Parallel(Component):
+#     paths: List[Component]
 
-    def __init__(self, cfg: Config, *path: Component) -> None:
-        self.paths = [*path]
-        super().__init__(cfg)
+#     def __init__(self, cfg: Config, *path: Component) -> None:
+#         self.paths = [*path]
+#         super().__init__(cfg)
 
 
-    def generate_statement(self) -> Dict[Statement, List[Any]]:
-        return {
-            Statement.PARALLEL_STATEMENT: [
-                path.generate_statement() for path in self.paths
-            ]
-        }
+#     def generate_statement(self) -> Dict[Statement, List[Any]]:
+#         return {
+#             Statement.PARALLEL_STATEMENT: [
+#                 path.generate_statement() for path in self.paths
+#             ]
+#         }
 
 
 # program_structure = {

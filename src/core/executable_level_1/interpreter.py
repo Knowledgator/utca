@@ -1,128 +1,84 @@
 from __future__ import annotations
-from typing import Dict, Any, List, Tuple, Callable
-from abc import ABC, abstractmethod
+from typing import Dict, Any, List, Optional
+
+from core.executable_level_1.eval import ExecutionSchema
+from core.executable_level_1.memory import Memory
 
 from core.executable_level_1.statements_types import Statement
-from core.executable_level_1.component import Component
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
-    Config, Input, Output, Action
+    Config, Input, Output, Action, Transformable
 )
 
-class Command(ABC):
-    def __init__(self, evaluator: Evaluator) -> None:
-        self.evaluator = evaluator
 
+INPUT = "input"
 
-    @abstractmethod
-    def __call__(
-        self, task: Any
-    ) -> Evaluator:
-        ...
+class EvaluatorConfigs():
+    pass
 
-
-class ActionCommand(Command):
-    def __call__(
-        self, task: Action
-    ) -> Evaluator:
-        self.evaluator.state = task.execute(self.evaluator.state)
-        return self.evaluator
-
-
-class MemoryCommand(Command):
-    def __call__(
-        self, task: Component
-    ) -> Evaluator:
-        ...
-
-
-class ExecuteCommand(Command):
-    def __call__(
-        self, task: Executable[Config, Input, Output]
-    ) -> Evaluator:
-        self.evaluator.state = task.execute(self.evaluator.state)
-        return self.evaluator
-
-
-class PipelineCommand(Command):
-    def __call__(
-        self, task: List[Dict[Statement, Any]]
-    ) -> Evaluator:
-        for stage in task:
-            for statement, sub_task in stage.items():
-                self.evaluator[statement](sub_task)
-
-        return self.evaluator
-
-
-class SwitchCommand(Command):
-    def __call__(
-        self, 
-        task: List[
-            Tuple[
-                Callable[[Dict[str, Any]], bool], 
-                Dict[Statement, Any]
-            ]
-        ]
-    ) -> Evaluator:
-        # TODO: multiple exits
-        for check, stage in task:
-            if check(self.evaluator.state):
-                for statement, sub_task in stage.items(): 
-                    self.evaluator[statement](sub_task)
-                break
-        return self.evaluator
-
-
-class LoopCommand(Command):
-    def __call__(
-        self, task: List[Dict[Statement, Any]]
-    ) -> Evaluator:
-        while condition:
-            for stage in task:
-                for statement, sub_task in stage.items(): 
-                    self.evaluator[statement](sub_task)
-        return self.evaluator
 
 
 class Evaluator:
-    program: Dict[Statement, Any]
-    commands: Dict[Statement, Command]
+    program: List[Dict[str, Any]]  # Corrected typo in 'retrieve'
+    memory = Memory()
     transferable_checkpoint: Transformable
-    memory: Memory
-    # state saver for each stage, stage_name, command -> result
-
     def __init__(self, schema: ExecutionSchema, cfg: EvaluatorConfigs = EvaluatorConfigs()) -> None:
-        self.program = schema.retieve_program()
+        self.program = schema.retrieve_program()  # Corrected typo in 'retrieve'
         self.memory = Memory()
-    
+        self.transferable_checkpoint: Transformable = Transformable({})  # Initialized but must be set properly
 
-    def __getitem__(self, command: Statement) -> Command:
-        return self.commands[command]
+    def set_initial_input(self, program_input: Input) -> None:
+        """Sets the initial input for the program."""
+        self.transferable_checkpoint = program_input.generate_transformable()  # Assuming this method correctly instantiates a Transformable
 
-
-    def run(self, program_input: Input):
-        # execution loop
+    def eval_program(self, program_input: Optional[Input] = None) -> Any:
+        """Evaluates the program based on the input provided."""
+        if program_input is not None:
+            self.set_initial_input(program_input)
+        # Execution loop
         for i, st in enumerate(self.program):
-            if i == 0:
-                self.execute_input_statement(st, program_input)
-            else:
-                self.execute_ordinary_statement(st)
-            print("Executed step: ", i)
-        return self.transferable_checkpoint.extract()
+            try:
+                self.eval(st)
+            except Exception as e:
+                print(f"Error at step {i}: {e}")
+        return self.transferable_checkpoint.extract()  # Assuming this method extracts the final result
+
+    def eval(self, st: Dict[str, Any]) -> None:
+        """Evaluates a single statement."""
+        if st["type"] == Statement.EXECUTE_STATEMENT:
+            comp = st[Statement.EXECUTE_STATEMENT.value]
+            self.eval_execute(comp)  # Assuming comp is an executable; this needs to match the method definition
+        elif st["type"] == Statement.ACTION_STATEMENT:
+            comp = st[Statement.ACTION_STATEMENT.value]
+            self.eval_action(comp)  # Assuming comp is an action; this needs to match the method definition
+
+    def eval_action(self, action: Action) -> None:
+        """Evaluates an action statement."""
+        # Update the transferable_checkpoint state based on the action
+        self.transferable_checkpoint.update_state(action)
+
+    def eval_execute(self, executable: Executable[Config, Input, Output]) -> None:
+        """Evaluates an execute statement."""
+        # Execute the executable and update the transferable_checkpoint accordingly
+        self.transferable_checkpoint = executable.execute(self.transferable_checkpoint, Transformable)
+
     
+    #### memory handling 
 
-    def execute_ordinary_statement(self, statement: TRANSFORM_STATEMENT):
-        for el in statement:
-            if  isinstance(el, Executable):
-                self.transferable_checkpoint = el.execute(self.transferable_checkpoint, Transformable)
-            else:
-                self.transferable_checkpoint.update_state(el)
+   
+    # def execute_ordinary_statement(self, statement: TRANSFORM_STATEMENT):
+    #     for el in statement:
+    #         if  isinstance(el, Executable):
+    #             self.transferable_checkpoint = el.execute(self.transferable_checkpoint, Transformable)
+    #         else:
+    #             self.transferable_checkpoint.update_state(el)
 
 
-    def execute_input_statement(self, statement: INPUT_STATEMENT, input: Input):
-        executable = statement[0]
-        self.transferable_checkpoint = executable.execute(input, Transformable)
+    # def execute_input_statement(self, statement: INPUT_STATEMENT, input: Input):
+    #     executable = statement[0]
+    #     self.transferable_checkpoint = executable.execute(input, Transformable)
+
+
 
 
 # class EvaluatorCycleEvaluator:
@@ -189,30 +145,72 @@ class Evaluator:
 
 
 
-# program_structure = {
-#     "start": [
-#         {"statement": lambda ctx: print("Statement 1 execution", ctx)},
-#         {"statement": lambda ctx: print("Statement 2 execution", ctx)},
-#         {"if": {
-#             "condition": lambda ctx: ctx["condition"],
-#             "true_branch": [
-#                 {"statement": lambda ctx: print("True branch statement", ctx)}
-#             ],
-#             "false_branch": [
-#                 {"statement": lambda ctx: print("False branch statement", ctx)}
-#             ]
-#         }},
-#         {"loop": {
-#             "condition": lambda ctx: ctx["loop_condition"](),
-#             "body": [
-#                 {"statement": lambda ctx: print("Loop body statement", ctx) or ctx["loop_actions"]()}
-#             ]
-#         }}
-#     ]
-# }
+# class Command(ABC):
+#     def __init__(self, evaluator: Evaluator) -> None:
+#         self.evaluator = evaluator
 
-# !!!!!!!!!!
 
-# class InputStatement()
-#     ex: Executable
-#     tr: Transforms
+#     @abstractmethod
+#     def __call__(
+#         self, task: Any
+#     ) -> Evaluator:
+#         ...
+
+
+# class ActionCommand(Command):
+#     def __call__(
+#         self, task: Action
+#     ) -> Evaluator:
+#         self.evaluator.state = task.execute(self.evaluator.state)
+#         return self.evaluator
+
+
+# class MemoryCommand(Command):
+#     def __call__(
+#         self, task: Component, task2: Component
+#     ) -> Evaluator:
+#         ...
+
+ 
+
+
+
+# class PipelineCommand(Command):
+#     def __call__(
+#         self, task: List[Dict[Statement, Any]]
+#     ) -> Evaluator:
+#         for stage in task:
+#             for statement, sub_task in stage.items():
+#                 self.evaluator[statement](sub_task)
+
+#         return self.evaluator
+
+
+# class SwitchCommand(Command):
+#     def __call__(
+#         self, 
+#         task: List[
+#             Tuple[
+#                 Callable[[Dict[str, Any]], bool], 
+#                 Dict[Statement, Any]
+#             ]
+#         ]
+#     ) -> Evaluator:
+#         # TODO: multiple exits
+#         for check, stage in task:
+#             if check(self.evaluator.state):
+#                 for statement, sub_task in stage.items(): 
+#                     self.evaluator[statement](sub_task)
+#                 break
+#         return self.evaluator
+
+
+# class LoopCommand(Command):
+#     def __call__(
+#         self, task: List[Dict[Statement, Any]]
+#     ) -> Evaluator:
+#         while condition:
+#             for stage in task:
+#                 for statement, sub_task in stage.items(): 
+#                     self.evaluator[statement](sub_task)
+#         return self.evaluator

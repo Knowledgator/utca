@@ -6,7 +6,6 @@ from typing import Any, Dict, Optional, TYPE_CHECKING
 from core.executable_level_1.schema import (
     Config
 )
-from core.executable_level_1.statements_types import Statement
 if TYPE_CHECKING:
     from core.executable_level_1.eval import ExecutionSchema  # Forward declaration for type checking
 
@@ -21,5 +20,5 @@ class Component(ABC):
 
 
     @abstractmethod
-    def generate_statement(self) -> Dict[Statement, Any]:
+    def generate_statement(self) -> Dict[str, Any]:
         ...
