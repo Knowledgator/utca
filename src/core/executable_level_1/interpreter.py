@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Dict, Any, List, Optional
 
 from core.executable_level_1.eval import ExecutionSchema
-from core.executable_level_1.memory import Memory
+from core.executable_level_1.memory import GetMemory,  MemoryManager, SetMemory
 
 from core.executable_level_1.statements_types import Statement
 from core.executable_level_1.executable import Executable
@@ -20,18 +20,19 @@ class EvaluatorConfigs():
 
 class Evaluator:
     program: List[Dict[str, Any]]  # Corrected typo in 'retrieve'
-    memory = Memory()
-    transferable_checkpoint: Transformable
+    memory_manager: MemoryManager
+    register: Transformable
     def __init__(self, schema: ExecutionSchema, cfg: EvaluatorConfigs = EvaluatorConfigs()) -> None:
         self.program = schema.retrieve_program()  # Corrected typo in 'retrieve'
-        self.memory = Memory()
-        self.transferable_checkpoint: Transformable = Transformable({})  # Initialized but must be set properly
+        self.memory_manager = MemoryManager(None)
+        self.register: Transformable = Transformable({})  # Initialized but must be set properly
 
     def set_initial_input(self, program_input: Input) -> None:
         """Sets the initial input for the program."""
-        self.transferable_checkpoint = program_input.generate_transformable()  # Assuming this method correctly instantiates a Transformable
-
-    def eval_program(self, program_input: Optional[Input] = None) -> Any:
+        self.register = program_input.generate_transformable()  # Assuming this method correctly instantiates a Transformable
+    def run_program(self, program_input: Optional[Input]):
+        self.eval_program(self.program, program_input)
+    def eval_program(self, program: List[Dict[str, Any]], program_input: Optional[Input] = None) -> Any:
         """Evaluates the program based on the input provided."""
         if program_input is not None:
             self.set_initial_input(program_input)
@@ -41,7 +42,7 @@ class Evaluator:
                 self.eval(st)
             except Exception as e:
                 print(f"Error at step {i}: {e}")
-        return self.transferable_checkpoint.extract()  # Assuming this method extracts the final result
+        return self.register.extract()  # Assuming this method extracts the final result
 
     def eval(self, st: Dict[str, Any]) -> None:
         """Evaluates a single statement."""
@@ -51,33 +52,34 @@ class Evaluator:
         elif st["type"] == Statement.ACTION_STATEMENT:
             comp = st[Statement.ACTION_STATEMENT.value]
             self.eval_action(comp)  # Assuming comp is an action; this needs to match the method definition
-
+        elif st["type"] == Statement.SET_MEMORY_STATEMENT:
+            comp = st[Statement.SET_MEMORY_STATEMENT.value]
+            self.eval_set_memory(comp)
+        elif st["type"] == Statement.GET_MEMORY_STATEMENT:
+            comp = st[Statement.GET_MEMORY_STATEMENT.value]
+            self.eval_get_memory(comp)
+        elif st["type"] == Statement.PIPELINE_STATEMENT:
+            comp = st[Statement.PIPELINE_STATEMENT.value]
+            self.eval_pipeline(comp)
     def eval_action(self, action: Action) -> None:
         """Evaluates an action statement."""
-        # Update the transferable_checkpoint state based on the action
-        self.transferable_checkpoint.update_state(action)
+        # Update the register state based on the action
+        self.register.update_state(action)
 
     def eval_execute(self, executable: Executable[Config, Input, Output]) -> None:
         """Evaluates an execute statement."""
-        # Execute the executable and update the transferable_checkpoint accordingly
-        self.transferable_checkpoint = executable.execute(self.transferable_checkpoint, Transformable)
+        # Execute the executable and update the register accordingly
+        self.register = executable.execute(self.register, Transformable)
+    def eval_set_memory(self, get_memory_command: GetMemory):
+        self.register = self.memory_manager.resolve_get_memory(get_memory_command, self.register)
+    def eval_get_memory(self, set_memory_command: SetMemory):
+        self.register = self.memory_manager.resolve_set_memory(set_memory_command, self.register)
+    def eval_pipeline(self, pipeline: List[Dict[str, Any]]):
+        self.eval_program(pipeline, None)
 
-    
-    #### memory handling 
+
 
    
-    # def execute_ordinary_statement(self, statement: TRANSFORM_STATEMENT):
-    #     for el in statement:
-    #         if  isinstance(el, Executable):
-    #             self.transferable_checkpoint = el.execute(self.transferable_checkpoint, Transformable)
-    #         else:
-    #             self.transferable_checkpoint.update_state(el)
-
-
-    # def execute_input_statement(self, statement: INPUT_STATEMENT, input: Input):
-    #     executable = statement[0]
-    #     self.transferable_checkpoint = executable.execute(input, Transformable)
-
 
 
 
