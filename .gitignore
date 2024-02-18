@@ -1,6 +1,7 @@
 # CUSTOM
 token.*
 credentials.*
+poetry.lock
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
