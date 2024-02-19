@@ -17,10 +17,6 @@ class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
     input_class: Type[InputType]
     output_class: Type[OutputType]
 
-    def __init__(self, cfg: ConfigType) -> None:
-        self.cfg = cfg
-
-    
     @abstractmethod
     def invoke(self, input_data: InputType) -> Dict[str, Any]:
         ...

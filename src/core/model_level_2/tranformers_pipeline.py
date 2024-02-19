@@ -1,4 +1,4 @@
-from typing import Type, TypeVar, Any, Dict
+from typing import TypeVar, Any, Dict
 
 from transformers import ( # type: ignore
     pipeline, Pipeline # type: ignore
@@ -29,9 +29,7 @@ class TransformersPipeline(
         InputType, 
         OutputType
     ]
-):
-    input_data_type: Type[InputType]
-    
+):  
     def __init__(self, cfg: TransformersPipelineConfigType) -> None:        
         pipeline_parameters = cfg.model_dump()
         pipeline_parameters.pop('name')
@@ -39,7 +37,5 @@ class TransformersPipeline(
         super().__init__(cfg)
 
 
-    def get_predictions(
-        self, inputs: Any
-    ) -> Any:
+    def get_predictions(self, inputs: Any) -> Any:
         return self.pipeline(inputs) # type: ignore

@@ -76,10 +76,6 @@ class PDFWrite(DatasourceAction[
 ]):
     input_class: Type[PDFWriteInput] = PDFWriteInput 
     output_class: Type[PDFWriteOutput] = PDFWriteOutput
-    
-    def __init__(self, cfg: Optional[PDFWriteConfig]=None) -> None:
-        super().__init__(cfg or PDFWriteConfig())
-
 
     def invoke(self, input_data: PDFWriteInput) -> Dict[str, Any]:
         canvas = Canvas(

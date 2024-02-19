@@ -1,3 +1,6 @@
+from typing import Any
+from abc import abstractmethod
+
 from core.executable_level_1.executable import Executable
 from core.model_level_2.schema import (
     ModelInputType,
@@ -55,7 +58,9 @@ from core.model_level_2.schema import (
 
 
 class Model(Executable[ModelConfigType, ModelInputType, ModelOutputType]):
-    ...
+    @abstractmethod
+    def get_predictions(self, inputs: Any) -> Any:
+        ...
 
 
 class PromptModel(Model[ModelConfigType, ModelInputType, ModelOutputType]):

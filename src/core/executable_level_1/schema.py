@@ -1,12 +1,14 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import  Callable, TypeVar, Any, Dict, Generic, Type, Optional
+from typing import (
+    Tuple, Callable, TypeVar, Any, Dict, Generic, Type, Optional, cast
+)
 
 from pydantic import BaseModel, ValidationError
+from PIL import Image, ImageOps
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.statements_types import Statement
-
 
 class Input(BaseModel, ABC):
     def generate_transformable(self):
@@ -121,9 +123,67 @@ class ExecuteFunction(Action):
         return self.func(input_data)
 
 
+class ImageAction(Action): # TODO: add more and revisit structure
+    ...
+
+
+class RotateImage(ImageAction):
+    def __init__(self, rotation: float) -> None:
+        self.rotation = rotation
+
+
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data['image'] = cast(
+            Image.Image, input_data['image']
+        ).rotate(self.rotation)
+        return input_data
+    
+
+class ResizeImage(ImageAction):
+    def __init__(self, width: int, height: int) -> None:
+        self.height = height
+        self.width = width
+
+
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data['image'] = cast(
+            Image.Image, input_data['image']
+        ).resize((self.width, self.height))
+        return input_data
+    
+
+class PadImage(ImageAction):
+    def __init__(self, width: int, height: int, color: Optional[str]=None) -> None:
+        self.height = height
+        self.width = width
+        self.color = color
+
+
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data['image'] = ImageOps.pad(
+            cast(Image.Image, input_data['image']),
+            (self.width, self.height),
+            color=self.color
+        )
+        return input_data
+    
+
+class CropImage(ImageAction):
+    def __init__(self, box: Tuple[int, int, int, int]) -> None:
+        self.box = box
+
+
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data['image'] = cast(
+            Image.Image, input_data['image']
+        ).crop(self.box)
+        return input_data
+
+
 class Validator(Generic[InputType]):
     def __init__(self, input_validation: Type[InputType]) -> None:
         self.input_validation = input_validation
+
 
     def validate(self, toValidate: Dict[str, Any]) -> InputType:
         return self.input_validation(**toValidate)
