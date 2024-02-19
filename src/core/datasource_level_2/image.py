@@ -1,4 +1,4 @@
-from typing import Dict, Any, Type, Optional
+from typing import Dict, Any, Type, Optional, Union
 
 from PIL import Image as PILImage
 
@@ -20,6 +20,26 @@ class ImageReadOutput(DatasourceOutput):
 
     def __setattr__(self, name: str, value: Any) -> None: # disable pydantic
         self.__dict__[name] = value
+
+
+    def model_dump(
+        self, 
+        *, 
+        mode: str='python', 
+        include: Optional[Union[
+            set[int], set[str], dict[int, Any], dict[str, Any]
+        ]]=None,
+        exclude: Optional[Union[
+            set[int], set[str], dict[int, Any], dict[str, Any]
+        ]]=None,
+        by_alias: bool=False, 
+        exclude_unset: bool=False,
+        exclude_defaults: bool=False,
+        exclude_none: bool=False, 
+        round_trip: bool=False,
+        warnings: bool=True
+    ) -> Dict[str, Any]:
+        return {'image': self.image}
 
 
 class ImageRead(DatasourceAction[

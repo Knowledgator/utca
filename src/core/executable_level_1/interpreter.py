@@ -31,7 +31,7 @@ class Evaluator:
         """Sets the initial input for the program."""
         self.register = program_input.generate_transformable()  # Assuming this method correctly instantiates a Transformable
     def run_program(self, program_input: Optional[Input]):
-        self.eval_program(self.program, program_input)
+        return self.eval_program(self.program, program_input)
     def eval_program(self, program: List[Dict[str, Any]], program_input: Optional[Input] = None) -> Any:
         """Evaluates the program based on the input provided."""
         if program_input is not None:
