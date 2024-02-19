@@ -44,5 +44,5 @@ pipeline = (
 # Image of German Shepherd Dog
 input = ImageReadInput(path_to_file='test.jpg')
 
-result = cast(Dict[str, Any], Evaluator(pipeline).run(input))
+result = cast(Dict[str, Any], Evaluator(pipeline).run_program(input))
 print(result)
