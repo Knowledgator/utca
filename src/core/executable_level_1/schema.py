@@ -154,7 +154,7 @@ class ResizeImage(ImageAction):
     
 
 class PadImage(ImageAction):
-    def __init__(self, width: int, height: int, color: Optional[str]) -> None:
+    def __init__(self, width: int, height: int, color: Optional[str]=None) -> None:
         self.height = height
         self.width = width
         self.color = color

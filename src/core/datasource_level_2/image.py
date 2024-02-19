@@ -14,7 +14,12 @@ class ImageReadInput(DatasourceInput):
 
 
 class ImageReadOutput(DatasourceOutput):
-    image: PILImage.Image
+    def __init__(self, *, image: PILImage.Image):
+        self.image = image
+
+
+    def __setattr__(self, name: str, value: Any) -> None: # disable pydantic
+        self.__dict__[name] = value
 
 
 class ImageRead(DatasourceAction[
@@ -34,8 +39,13 @@ class ImageRead(DatasourceAction[
 
 
 class ImageWriteInput(DatasourceInput):
-    path_to_file: str
-    image: PILImage.Image
+    def __init__(self, *, path_to_file: str, image: PILImage.Image):
+        self.image = image
+        self.path_to_file = path_to_file
+
+
+    def __setattr__(self, name: str, value: Any) -> None: # disable pydantic
+        self.__dict__[name] = value
 
 
 class ImageWriteOutput(DatasourceOutput):
