@@ -155,9 +155,9 @@ class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
     def generate_statement(
         self
     ) -> Dict[
-        Statement, 
-        Executable[ConfigType, InputType, OutputType]
+        str, 
+        Any
     ]:
-        return {Statement.EXECUTE_STATEMENT: self}
+        return {"type": Statement.EXECUTE_STATEMENT,  Statement.EXECUTE_STATEMENT.value: self}
 
 

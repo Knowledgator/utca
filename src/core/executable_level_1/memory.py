@@ -3,6 +3,8 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from core.executable_level_1.component import Component
+from core.executable_level_1.schema import Transformable
+from core.executable_level_1.statements_types import Statement
 
 INPUT: str = 'input'
 
@@ -18,8 +20,8 @@ class Memory:
         if directory:
             os.makedirs(directory, exist_ok=True)
 
-    def add_input(self, input_state: Dict[str, Any]):
-        self.add_store(INPUT, input_state)
+    # def add_input(self, input_state: Dict[str, Any]):
+    #     self.add_store(INPUT, input_state)
     def _get_file_path(self, identifier: str) -> str:
         """Constructs a file path for a given identifier."""
         if not self.directory:
@@ -61,40 +63,99 @@ class Memory:
 
 class MemorySetInstruction(Enum):
     SET_AND_GO = "setandgo" # set and continue
-    FLUSH = "flush" # clean all objects
-    FLUSH_AND_RESTORE_INPUT = "restoreinput" # clean all objects + set initial input state
-    FLUSH_AND_GET_STATE = "flushandgetstate" # clean and set other state
-    FLUSH_AND_GET_MP_STATE = "flushandgetmpstate" # clean and get many merged states
+    SET_AND_FLUSH = "flush" # clean all objects
+
+    # FLUSH_AND_RESTORE_INPUT = "restoreinput" # clean all objects + set initial input state
+
 
 
 
 class SetMemory(Component):
-    set_name: str
-    memory_instruction: Optional[MemorySetInstruction]
-    get_states: Optional[List[str]]
+    identifier: str
+    memory_instruction: MemorySetInstruction
     def __init__(self, set_name: str,
-                 memory_instruction: Optional[MemorySetInstruction] = MemorySetInstruction.SET_AND_GO,
-                 get_states: Optional[List[str]] = None) -> None:
+                 memory_instruction: MemorySetInstruction = MemorySetInstruction.SET_AND_GO,
+                 ) -> None:
         super().__init__()
         self.set_name = set_name
         self.memory_instruction = memory_instruction
-        self.get_states = get_states if get_states is not None else []
+    def get_identifier(self):
+        return self.identifier
+    def get_memory_instruction(self):
+        return self.memory_instruction
 
-
+    def generate_statement(self) -> Dict[str, Any]:
+        return {"type": Statement.SET_MEMORY_STATEMENT, Statement.SET_MEMORY_STATEMENT.value: self}
 
 
 class MemoryGetInstruction(Enum):
     GET_AND_GO = "getandgo" # get and merge
     FLUSH_AND_GET = "flushandget" # clean all objects and get
-    MP_GET_AND_GO = "mpgetandgo" # mp get and merge
-    FLUSH_AND_MP_GET = "flushandmpget" # clean all objects and mp get
 
 
 class GetMemory(Component):
-    get_name: List[str]
-    memory_instruction: Optional[MemoryGetInstruction]
-    def __init__(self, get_name: List[str],
-                 memory_instruction: Optional[MemoryGetInstruction] = MemoryGetInstruction.GET_AND_GO):
+    identifiers: List[str]
+    memory_instruction: MemoryGetInstruction
+    def __init__(self, identifiers: List[str],
+                 memory_instruction: MemoryGetInstruction = MemoryGetInstruction.GET_AND_GO):
         super().__init__()
-        self.get_name = get_name
+        self.identifiers = identifiers
         self.memory_instruction = memory_instruction
+    def get_identifiers(self):
+        return self.identifiers
+    def get_memory_instruction(self):
+        return self.memory_instruction
+    def generate_statement(self) -> Dict[str, Any]:
+        return {"type": Statement.GET_MEMORY_STATEMENT, Statement.GET_MEMORY_STATEMENT.value: self}
+    
+class MemoryManager():
+    memory: Memory
+    def __init__(self, path: Optional[str]) -> None:
+        if path:
+            self.memory = Memory(path)
+        else:
+            self.memory = Memory()
+
+    # get memory commands
+
+    def resolve_get_memory(self, command: GetMemory, register: Transformable):
+        ## TODO: refactor redundant transformable and dict transversion
+        registerDict = register.extract()
+        instr = command.get_memory_instruction()
+        identifiers = command.get_identifiers()
+        if instr == MemoryGetInstruction.GET_AND_GO:
+            registerDict = self.get_and_go(registerDict, identifiers)
+        elif  instr == MemoryGetInstruction.FLUSH_AND_GET: 
+            registerDict = self.flush_and_get(identifiers)
+        return Transformable(registerDict)
+
+        
+    def get_and_go(self, register: Dict[str, Any], identifiers: List[str]):
+        for identifier in identifiers:
+            register.update(self.memory.retrieve_store(identifier))
+        return register
+    def flush_and_get(self, identifiers: List[str]):
+        return self.get_and_go({}, identifiers)
+
+
+     # set memory commands
+
+    def resolve_set_memory(self, command: SetMemory, register: Transformable):
+        ## TODO: refactor redundant transformable and dict transversion
+        registerDict = register.extract()
+        instr = command.get_memory_instruction()
+        identifiers = command.get_identifier()
+
+        if instr == MemorySetInstruction.SET_AND_GO:
+            self.set_and_go(registerDict, identifiers)
+        elif  instr == MemorySetInstruction.SET_AND_FLUSH: 
+            registerDict = self.set_and_flush(registerDict, identifiers)
+        return Transformable(registerDict)
+
+    def set_and_go(self, register: Dict[str, Any], identifier: str):
+        self.memory.add_store(identifier, register)
+    def set_and_flush(self, register: Dict[str, Any], identifier: str) -> Dict[str, Any]:
+        self.set_and_go(register, identifier)
+        return {}
+
+        

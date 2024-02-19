@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import  Callable, TypeVar, Any, Dict, Generic, Type, Optional
 
 from pydantic import BaseModel, ValidationError
@@ -9,14 +9,18 @@ from core.executable_level_1.statements_types import Statement
 
 
 class Input(BaseModel, ABC):
-    ...
+    def generate_transformable(self):
+        return Transformable(self.model_dump())
 
 InputType = TypeVar('InputType', bound=Input)
 
 
 class Action(Component):
-    def generate_statement(self) -> Dict[Statement, Action]:
-        return {Statement.ACTION_STATEMENT: self}
+    def generate_statement(self) -> Dict[str, Any]:
+        return {"type": Statement.ACTION_STATEMENT,  Statement.ACTION_STATEMENT.value: self}
+    @abstractmethod
+    def execute(self, input_data: Any) -> Dict[str, Any]:
+        pass
 
 
 class AddData(Action):
