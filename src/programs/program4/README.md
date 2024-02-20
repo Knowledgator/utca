@@ -6,6 +6,19 @@ Basic image classification.
 
 ## Stages and pipeline
 
+Program consists from:
+
+- Image reading stage
+- Image preprocessing
+- Image classification
+- Results iterpretation
+
+### Image reading stage
+
+``` python
+Image().read()
+```
+
 ### Pipeline
 
 Now we need to create pipeline to combine stages:
