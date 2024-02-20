@@ -5,7 +5,7 @@ from transformers import ( # type: ignore
 )
 
 from core.executable_level_1.schema import Input, Output
-from core.model_level_2.tranformers_pipeline import (
+from core.model_level_2.transformers_pipeline import (
     TransformersPipelineConfig
 )
 

@@ -28,10 +28,10 @@ model_stage = TransformersImageClassification( # type: ignore
 )
 
 def interpret_results(model_ouput: Dict[str, Any]) -> Dict[str, Any]:
-    with open('programs/program4/test_labels.json', 'r') as f:
+    with open("programs/program4/test_labels.json", "r") as f:
         labels = json.load(f)
-    predicted_class_idx = model_ouput['outputs']['logits'].argmax().item()
-    return {'label': labels[predicted_class_idx]}
+    predicted_class_idx = model_ouput["outputs"]["logits"].argmax().item()
+    return {"label": labels[predicted_class_idx]}
 
 
 pipeline = (
@@ -42,7 +42,7 @@ pipeline = (
 )
 
 # Image of German Shepherd Dog
-input = ImageReadInput(path_to_file='programs/program4/test.jpg')
+image_input = ImageReadInput(path_to_file="programs/program4/test.jpg")
 
-result = cast(Dict[str, Any], Evaluator(pipeline).run_program(input))
+result = cast(Dict[str, Any], Evaluator(pipeline).run_program(image_input))
 print(result)

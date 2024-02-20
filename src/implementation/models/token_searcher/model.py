@@ -1,7 +1,7 @@
-from typing import Dict, Type, Any, Optional
+from typing import Dict, Type, Any, Optional, List
 
 from core.model_level_2.model import PromptModel
-from core.model_level_2.tranformers_pipeline import (
+from core.model_level_2.transformers_pipeline import (
     TransformersPipeline
 )
 from implementation.models.token_searcher.schema import (
@@ -41,6 +41,6 @@ class TokenSearcherModel(
     
 
     def invoke_batch(
-        self, input_data: list[TokenSearcherModelInput]
-    ) -> list[Dict[str, Any]]:
+        self, input_data: List[TokenSearcherModelInput]
+    ) -> List[Dict[str, Any]]:
         raise Exception('TODO!')

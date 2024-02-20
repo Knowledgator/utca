@@ -42,7 +42,7 @@ class AudioRead(DatasourceAction[
 class AudioWriteInput(DatasourceInput):
     path_to_file: str
     audio_data: List[Any]
-    sample_rate: int
+    sampling_rate: int
 
 
 class AudioWriteOutput(DatasourceOutput):
@@ -61,7 +61,7 @@ class AudioWrite(DatasourceAction[
         sf.write( # type: ignore
             input_data.path_to_file, 
             np.ravel(input_data.audio_data),
-            input_data.sample_rate
+            input_data.sampling_rate
         )
         return {}
 
