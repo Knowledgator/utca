@@ -73,16 +73,24 @@ class MemorySetInstruction(Enum):
 class SetMemory(Component):
     identifier: str
     memory_instruction: MemorySetInstruction
-    def __init__(self, set_name: str,
-                 memory_instruction: MemorySetInstruction = MemorySetInstruction.SET_AND_GO,
-                 ) -> None:
+
+    def __init__(
+        self, 
+        identifier: str,
+        memory_instruction: MemorySetInstruction=MemorySetInstruction.SET_AND_GO,
+    ) -> None:
         super().__init__()
-        self.set_name = set_name
+        self.identifier = identifier
         self.memory_instruction = memory_instruction
+
+
     def get_identifier(self):
         return self.identifier
+    
+    
     def get_memory_instruction(self):
         return self.memory_instruction
+
 
     def generate_statement(self) -> Dict[str, Any]:
         return {"type": Statement.SET_MEMORY_STATEMENT, Statement.SET_MEMORY_STATEMENT.value: self}
@@ -132,7 +140,7 @@ class MemoryManager():
         
     def get_and_go(self, register: Dict[str, Any], identifiers: List[str]):
         for identifier in identifiers:
-            register.update(self.memory.retrieve_store(identifier))
+            register[identifier] = (self.memory.retrieve_store(identifier))
         return register
     def flush_and_get(self, identifiers: List[str]):
         return self.get_and_go({}, identifiers)

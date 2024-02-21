@@ -21,6 +21,8 @@ InputType = TypeVar('InputType', bound=Input)
 class Action(Component):
     def generate_statement(self) -> Dict[str, Any]:
         return {"type": Statement.ACTION_STATEMENT,  Statement.ACTION_STATEMENT.value: self}
+    
+    
     @abstractmethod
     def execute(self, input_data: Any) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         pass
@@ -115,7 +117,11 @@ class MergeData(Action):
 
 class ExecuteFunction(Action):
     def __init__(
-        self, func: Callable[[Dict[str, Any]], Union[Dict[str, Any], List[Dict[str, Any]]]]
+        self, 
+        func: Callable[
+            [Union[Dict[str, Any], List[Dict[str, Any]]]], 
+            Union[Dict[str, Any], List[Dict[str, Any]]]
+        ]
     ) -> None:
         self.func = func
 
@@ -221,13 +227,7 @@ class Transformable():
         
     
     def update_state(self, action: Action) -> None:
-        if not self.is_batch:
-            self.state = action.execute(self.state)
-        else:
-            self.state = [
-                cast(Dict[str, Any], res) for s in self.state
-                if (res:=action.execute(s))
-            ]
+        self.state = action.execute(self.state)
 
         
     @property

@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Dict, Any, List, Optional
+import logging
 
 from core.executable_level_1.eval import ExecutionSchema
 from core.executable_level_1.memory import GetMemory,  MemoryManager, SetMemory
@@ -22,16 +23,22 @@ class Evaluator:
     program: List[Dict[str, Any]]  # Corrected typo in 'retrieve'
     memory_manager: MemoryManager
     register: Transformable
+    
     def __init__(self, schema: ExecutionSchema, cfg: EvaluatorConfigs = EvaluatorConfigs()) -> None:
         self.program = schema.retrieve_program()  # Corrected typo in 'retrieve'
         self.memory_manager = MemoryManager(None)
         self.register: Transformable = Transformable({})  # Initialized but must be set properly
 
+    
     def set_initial_input(self, program_input: Input) -> None:
         """Sets the initial input for the program."""
         self.register = program_input.generate_transformable()  # Assuming this method correctly instantiates a Transformable
+    
+    
     def run_program(self, program_input: Optional[Input]):
         return self.eval_program(self.program, program_input)
+    
+    
     def eval_program(self, program: List[Dict[str, Any]], program_input: Optional[Input] = None) -> Any:
         """Evaluates the program based on the input provided."""
         if program_input is not None:
@@ -42,7 +49,9 @@ class Evaluator:
                 self.eval(st)
             except Exception as e:
                 print(f"Error at step {i}: {e}")
+                logging.exception(e)
         return self.register.extract()  # Assuming this method extracts the final result
+
 
     def eval(self, st: Dict[str, Any]) -> None:
         """Evaluates a single statement."""
@@ -61,10 +70,13 @@ class Evaluator:
         elif st["type"] == Statement.PIPELINE_STATEMENT:
             comp = st[Statement.PIPELINE_STATEMENT.value]
             self.eval_pipeline(comp)
+
+
     def eval_action(self, action: Action) -> None:
         """Evaluates an action statement."""
         # Update the register state based on the action
         self.register.update_state(action)
+
 
     def eval_execute(self, executable: Executable[Config, Input, Output]) -> None:
         """Evaluates an execute statement."""
@@ -73,10 +85,16 @@ class Evaluator:
             self.register = executable.execute_batch(self.register, Transformable)
         else:
             self.register = executable.execute(self.register, Transformable)
-    def eval_set_memory(self, get_memory_command: GetMemory):
-        self.register = self.memory_manager.resolve_get_memory(get_memory_command, self.register)
-    def eval_get_memory(self, set_memory_command: SetMemory):
+    
+    
+    def eval_set_memory(self, set_memory_command: SetMemory):
         self.register = self.memory_manager.resolve_set_memory(set_memory_command, self.register)
+    
+    
+    def eval_get_memory(self, get_memory_command: GetMemory):
+        self.register = self.memory_manager.resolve_get_memory(get_memory_command, self.register)
+    
+    
     def eval_pipeline(self, pipeline: List[Dict[str, Any]]):
         self.eval_program(pipeline, None)
 
