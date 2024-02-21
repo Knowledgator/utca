@@ -1,7 +1,8 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import (
-    Tuple, Callable, TypeVar, Any, Dict, Generic, Type, Optional, cast
+    Tuple, Callable, TypeVar, Any, Dict, Generic, Type, Optional, cast,
+    List, Union
 )
 
 from pydantic import BaseModel, ValidationError
@@ -21,7 +22,7 @@ class Action(Component):
     def generate_statement(self) -> Dict[str, Any]:
         return {"type": Statement.ACTION_STATEMENT,  Statement.ACTION_STATEMENT.value: self}
     @abstractmethod
-    def execute(self, input_data: Any) -> Dict[str, Any]:
+    def execute(self, input_data: Any) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         pass
 
 
@@ -114,12 +115,12 @@ class MergeData(Action):
 
 class ExecuteFunction(Action):
     def __init__(
-        self, func: Callable[[Dict[str, Any]], Dict[str, Any]]
+        self, func: Callable[[Dict[str, Any]], Union[Dict[str, Any], List[Dict[str, Any]]]]
     ) -> None:
         self.func = func
 
 
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, input_data: Dict[str, Any]) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         return self.func(input_data)
 
 
@@ -191,9 +192,9 @@ class Validator(Generic[InputType]):
 
 # Task №1 - can validate is it right based on input and output class !!!
 class Transformable():
-    state: Dict[str, Any]
+    state: Union[Dict[str, Any], List[Dict[str, Any]]]
 
-    def __init__(self, input: Dict[str, Any]) -> None:
+    def __init__(self, input: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
         self.state = input
 
     
@@ -220,8 +221,18 @@ class Transformable():
         
     
     def update_state(self, action: Action) -> None:
-        self.state = action.execute(self.state)
+        if not self.is_batch:
+            self.state = action.execute(self.state)
+        else:
+            self.state = [
+                cast(Dict[str, Any], res) for s in self.state
+                if (res:=action.execute(s))
+            ]
 
+        
+    @property
+    def is_batch(self):
+        return isinstance(self.state, List)
 
 # input | model(transform) + Data(dict) + Alter("query") | model | db
 

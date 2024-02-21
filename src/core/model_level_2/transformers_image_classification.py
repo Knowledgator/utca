@@ -1,4 +1,4 @@
-from typing import Type, Any, Dict
+from typing import Type, Any, Dict, List
 
 from PIL import Image
 
@@ -58,6 +58,6 @@ class TransformersImageClassification(
     
 
     def invoke_batch(
-        self, input_data: list[TransformersImageClassificationInput]
-    ) -> list[Dict[str, Any]]:
-        raise Exception('TODO!')
+        self, input_data: List[TransformersImageClassificationInput]
+    ) -> List[Dict[str, Any]]:
+        return [self.invoke(i) for i in input_data]

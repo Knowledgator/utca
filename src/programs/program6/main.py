@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import List, Dict, Any
 
 from PIL import Image
 from transformers import ( # type: ignore
@@ -17,8 +17,8 @@ from core.datasource_level_2.video import (
     Video,
     VideoReadInput
 )
-# from core.executable_level_1.interpreter import Evaluator
-# from core.executable_level_1.schema import AddData, ExecuteFunction
+from core.executable_level_1.interpreter import Evaluator
+from core.executable_level_1.schema import AddData, ExecuteFunction
 
 model_name = "trpakov/vit-face-expression"
 
@@ -40,17 +40,15 @@ reader_output = Video().read().execute(
 )
 
 
-def prepare_batch_image_classification_input(state: Dict[str, Any]) -> Dict[str, Any]:
-    frames: List[TransformersImageClassificationInput] = []
-    ok, frame = reader_output.video_data.read()
+def prepare_batch_image_classification_input(state: Dict[str, Any]) -> List[Dict[str, Any]]:
+    frames: List[Dict[str, Any]] = []
+    ok, frame = state['video_data'].read()
     while ok:
-        frames.append({'image': TransformersImageClassificationInput(
-            Image.fromarray(frame) # type: ignore
-        )})
-        ok, frame = reader_output.video_data.read()
-    return frames
+        frames.append({'image': Image.fromarray(frame)}) # type: ignore
+        ok, frame = state['video_data'].read()
+    half = len(frames) // 2
+    return [frames[0], frames[half//2], frames[half]]
 
-outputs = model_stage.get_predictions(frames)
 
 def interpret_results(model_ouput: Dict[str, Any]) -> Dict[str, Any]:
     probabilities = torch.nn.functional.softmax(
@@ -67,18 +65,15 @@ def interpret_results(model_ouput: Dict[str, Any]) -> Dict[str, Any]:
 
 
 
-# pipeline = (
-#     model_stage
-#     | ExecuteFunction(lambda state: {
-#         'audio_data': state['outputs']['audio'],
-#         'sampling_rate': state['outputs']['sampling_rate']
-#     })
-#     | AddData({'path_to_file': 'programs/program5/test.wav'})
-#     | Audio().write()
-# )
+pipeline = (
+    Video().read()
+    | ExecuteFunction(prepare_batch_image_classification_input)
+    | model_stage
+    | ExecuteFunction(interpret_results)
+)
 
-# text_to_speech_input = TransformersTextToSpeechInput(
-#     text='Hello world!'
-# )
+video_input = VideoReadInput(
+    path_to_file='programs/program6/White Chicks - short.mp4'
+)
 
-# Evaluator(pipeline).run_program(text_to_speech_input)
+print(Evaluator(pipeline).run_program(video_input))

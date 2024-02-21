@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import (
-    Any, Type, Dict, Union, overload, Optional, cast, Generic
+    Any, List, Type, Dict, Union, overload, Optional, cast, Generic
 )
 from abc import ABC,  abstractmethod
 
@@ -28,15 +28,35 @@ class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
 
 
     def validate_input(
-        self, input_data: Union[Dict[str, Any], InputType, Transformable]
-    ) -> InputType:
+        self, input_data: Union[
+            Dict[str, Any], 
+            InputType,
+            Transformable,
+            List[Dict[str, Any]],
+            List[InputType]
+        ]
+    ) -> Union[InputType, List[InputType]]:
         if isinstance(input_data, Transformable):
-            extracted_dict = input_data.extract()
-            return self.input_class(**extracted_dict)
-        elif isinstance(input_data, Dict):
+            input_data = input_data.extract()
+
+        if isinstance(input_data, Dict):
             return self.input_class(**input_data)
-        else:
+        elif isinstance(input_data, List):
+            if not input_data:
+                return cast(List[InputType], input_data)
+            if all(isinstance(i, Dict) for i in input_data):
+                return [
+                    self.input_class(
+                        **cast(Dict[str, Any], i)
+                    ) for i in input_data # ?
+                ]
+            elif all(isinstance(i, self.input_class) for i in input_data):
+                return cast(List[InputType], input_data)
+            else:
+                raise ValueError("Inconsistent input!")
+        elif isinstance(input_data, self.input_class):
             return input_data
+        raise ValueError("Inconsistent input!")
 
 
     def validate_output(self, output_data: Dict[str, Any]) -> OutputType:
@@ -90,7 +110,7 @@ class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
         return_type: Optional[Type[Union[Dict[str, Any], Transformable]]]=None
     ) -> Union[Dict[str, Any], OutputType, Transformable]:
         try:
-            validated_input = self.validate_input(input_data)
+            validated_input = cast(InputType, self.validate_input(input_data))
             result: Dict[str, Any] = self.invoke(validated_input)
             return self.prepare_output(result, return_type)
         except Exception as e:
@@ -100,42 +120,42 @@ class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
     @overload
     def execute_batch(
         self, 
-        input_data: list[Union[Dict[str, Any], InputType, Transformable]], 
+        input_data: Union[List[Dict[str, Any]], List[InputType], Transformable], 
         return_type: Type[Dict[str, Any]]
-    ) -> list[Dict[str, Any]]:
+    ) -> List[Dict[str, Any]]:
         ...
 
 
     @overload
     def execute_batch(
         self, 
-        input_data: list[Union[Dict[str, Any], InputType, Transformable]], 
+        input_data: Union[List[Dict[str, Any]], List[InputType], Transformable], 
         return_type: None=None
-    ) -> list[OutputType]:
+    ) -> List[OutputType]:
         ...
 
 
     @overload
     def execute_batch(
         self, 
-        input_data: list[Union[Dict[str, Any], InputType, Transformable]], 
+        input_data: Union[List[Dict[str, Any]], List[InputType], Transformable], 
         return_type: Type[Transformable]
-    ) -> list[Transformable]:
+    ) -> Transformable:
         ...
 
 
     def execute_batch(
         self, 
-        input_data: list[Union[Dict[str, Any], InputType, Transformable]], 
+        input_data: Union[List[Dict[str, Any]], List[InputType], Transformable], 
         return_type: Optional[Type[Union[Dict[str, Any], Transformable]]]=None
-    ) -> Union[list[Dict[str, Any]], list[OutputType], list[Transformable]]:
+    ) -> Union[List[Dict[str, Any]], List[OutputType], Transformable]:
         try:
-            validated_input = [
-                self.validate_input(i) for i in input_data
-            ]
+            validated_input = cast(List[InputType], self.validate_input(input_data))
             result: list[Dict[str, Any]] = self.invoke_batch(validated_input)
+            if return_type is Transformable:
+                return Transformable(result)
             return cast(
-                Union[list[Dict[str, Any]], list[OutputType], list[Transformable]],
+                Union[List[Dict[str, Any]], List[OutputType]],
                 [
                     self.prepare_output(r, return_type) for r in result
                 ]

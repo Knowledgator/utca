@@ -69,7 +69,10 @@ class Evaluator:
     def eval_execute(self, executable: Executable[Config, Input, Output]) -> None:
         """Evaluates an execute statement."""
         # Execute the executable and update the register accordingly
-        self.register = executable.execute(self.register, Transformable)
+        if self.register.is_batch:
+            self.register = executable.execute_batch(self.register, Transformable)
+        else:
+            self.register = executable.execute(self.register, Transformable)
     def eval_set_memory(self, get_memory_command: GetMemory):
         self.register = self.memory_manager.resolve_get_memory(get_memory_command, self.register)
     def eval_get_memory(self, set_memory_command: SetMemory):
