@@ -1,9 +1,9 @@
-from core.model_level_2.transformers_text_to_speech import (
+from implementation.predictors.transformers.transformers_text_to_speech import (
     TransformersTextToSpeechConfig,
     TransformersTextToSpeechInput,
     TransformersTextToSpeechPipeline
 )
-from core.datasource_level_2.audio import (
+from implementation.datasources.audio.audio import (
     Audio
 )
 from core.executable_level_1.interpreter import Evaluator

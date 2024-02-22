@@ -1,6 +1,6 @@
 from typing import Dict, Any
 
-from core.executable_level_1.eval import Evaluator
+from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import (
     ExecuteFunction,
 )
@@ -9,8 +9,8 @@ from implementation.datasources.google_docs.google_docs import (
     GoogleDocsClient,
     GoogleDocsReadInput,
 )
-from implementation.models.token_searcher.model import (
-    TokenSearcherModel, TokenSearcherModelConfig
+from implementation.predictors.token_searcher.predictor import (
+    TokenSearcherPredictor, TokenSearcherPredictorConfig
 )
 
 def get_text(input: Dict[str, Any]) -> Dict[str, Any]:
@@ -46,8 +46,8 @@ if __name__ == '__main__':
     )
 
     # model that will be used
-    model = TokenSearcherModel(
-        TokenSearcherModelConfig(
+    model = TokenSearcherPredictor(
+        TokenSearcherPredictorConfig(
             device = 'cpu'
         )
     )
@@ -66,5 +66,5 @@ if __name__ == '__main__':
     read_input = GoogleDocsReadInput(
         document_id=document_id
     )
-    print(Evaluator(pipeline).run(read_input))
+    print(Evaluator(pipeline).run_program(read_input))
     # result should be written to specified spreadsheet

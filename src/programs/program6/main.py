@@ -1,20 +1,19 @@
 from typing import List, Dict, Any
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 from transformers import ( # type: ignore
     AutoFeatureExtractor, 
     AutoModelForImageClassification,
     AutoConfig
 )
 import torch
-import cv2
 import numpy as np
 
-from core.model_level_2.transformers_image_classification import (
+from implementation.predictors.transformers.transformers_image_classification import (
     TransformersImageClassificationConfig,
     TransformersImageClassification
 )
-from core.datasource_level_2.video import (
+from implementation.datasources.video.video import (
     Video,
     VideoReadInput
 )
@@ -87,11 +86,11 @@ def prepare_sample(state: Dict[str, Any]) -> Dict[str, Any]:
     
     width, height = state["frames"][0]["image"].size
     return {
-        "path_to_file": "programs/program6/sample.avi",
+        "path_to_file": "programs/program6/sample.ogg",
         "frames": video_frames,
         "width": width,
         "height": height,
-        "fourcc": "XVID", # https://fourcc.org/codecs.php
+        "fourcc": "THEO", # https://fourcc.org/codecs.php
         "fps": 0.5
     }
 

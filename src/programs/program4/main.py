@@ -6,12 +6,12 @@ from transformers import ( # type: ignore
     AutoConfig
 )
 
-from core.model_level_2.transformers_image_classification import (
+from implementation.predictors.transformers.transformers_image_classification import (
     TransformersImageClassificationConfig,
     TransformersImageClassification
 )
 from core.executable_level_1.schema import ExecuteFunction, PadImage
-from core.datasource_level_2.image import (
+from implementation.datasources.image.image import (
     ImageReadInput,
     Image
 )

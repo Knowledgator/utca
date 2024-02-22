@@ -1,16 +1,17 @@
 from typing import Dict, Any
 
-from core.executable_level_1.eval import Evaluator, ExecutionSchema
+from core.executable_level_1.interpreter import Evaluator
+from core.executable_level_1.eval import ExecutionSchema
 from core.executable_level_1.schema import (
     ExecuteFunction,
     AddData
 )
-from core.datasource_level_2.pdf import (
+from implementation.datasources.pdf.pdf import (
     PDFReadInput,
     PDFFile
 )
-from implementation.models.token_searcher.model import (
-    TokenSearcherModel, TokenSearcherModelConfig
+from implementation.predictors.token_searcher.predictor import (
+    TokenSearcherPredictor, TokenSearcherPredictorConfig
 )
 from implementation.tasks.clean_text.token_searcher import (
     TokenSearcherTextCleanerTask, TokenSearcherTextCleanerConfig
@@ -32,7 +33,7 @@ if __name__ == '__main__':
     read_pdf = PDFFile().read()
 
     # model that will be used for clean text and NER tasks
-    model = TokenSearcherModel(TokenSearcherModelConfig(
+    model = TokenSearcherPredictor(TokenSearcherPredictorConfig(
         device = 'cpu'
     ))
 
@@ -70,6 +71,6 @@ if __name__ == '__main__':
     )
 
     # call pipeline
-    res = Evaluator(pipeline).run(read_input)
+    res = Evaluator(pipeline).run_program(read_input)
 
     print(res)

@@ -1,6 +1,6 @@
 from typing import Dict, Any
 
-from core.executable_level_1.eval import Evaluator
+from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import (
     ExecuteFunction,
     AddData
@@ -13,8 +13,8 @@ from implementation.datasources.google_spreadsheet.google_spreadsheet import (
 from implementation.datasources.google_spreadsheet.schema import (
     Dimension
 )
-from implementation.models.token_searcher.model import (
-    TokenSearcherModel, TokenSearcherModelConfig
+from implementation.predictors.token_searcher.predictor import (
+    TokenSearcherPredictor, TokenSearcherPredictorConfig
 )
 from implementation.tasks.q_and_a.token_searcher import (
     TokenSearcherQandAConfig, TokenSearcherQandATask
@@ -53,8 +53,8 @@ if __name__ == '__main__':
     )
 
     # model that will be used for Q&A task
-    model = TokenSearcherModel(
-        TokenSearcherModelConfig(
+    model = TokenSearcherPredictor(
+        TokenSearcherPredictorConfig(
             device='cpu'
         )
     )
@@ -88,5 +88,5 @@ if __name__ == '__main__':
         spreadsheet_id=spreadsheet_id,
         select_range='A2:B2'
     )
-    Evaluator(pipeline).run(read_input)
+    Evaluator(pipeline).run_program(read_input)
     # result should be written to specified spreadsheet
