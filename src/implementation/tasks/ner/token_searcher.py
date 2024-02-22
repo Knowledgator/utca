@@ -2,6 +2,7 @@ from typing import Tuple, Any, Dict, Optional, cast, Type
 
 from pydantic import PrivateAttr
 
+from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
     InputWithThreshold, 
@@ -14,10 +15,13 @@ from core.task_level_3.utils import (
 from core.task_level_3.objects.objects import (
     ClassifiedEntity
 )
-from implementation.models.token_searcher.schema import (
-    TokenSearcherModelConfig, 
-    TokenSearcherModelInput, 
-    TokenSearcherModelOutput
+from implementation.predictors.token_searcher.schema import (
+    TokenSearcherPredictorConfig, 
+    TokenSearcherPredictorInput, 
+    TokenSearcherPredictorOutput
+)
+from implementation.predictors.token_searcher.predictor import (
+    TokenSearcherPredictor
 )
 
 class TokenSearcherNERInput(InputWithThreshold):
@@ -69,9 +73,9 @@ class TokenSearcherNERTask(
         TokenSearcherNERConfig,
         TokenSearcherNERInput, 
         TokenSearcherNEROutput,
-        TokenSearcherModelConfig, 
-        TokenSearcherModelInput, 
-        TokenSearcherModelOutput
+        TokenSearcherPredictorConfig, 
+        TokenSearcherPredictorInput, 
+        TokenSearcherPredictorOutput
     ]
 ):
     input_class: Type[TokenSearcherNERInput] = TokenSearcherNERInput
@@ -82,6 +86,22 @@ Identify entities in the text having the following classes:
 {label}
 Text:
  """
+    
+    def __init__(
+        self,
+        cfg: Optional[TokenSearcherNERConfig]=None, 
+        predictor: Optional[Predictor[
+            TokenSearcherPredictorConfig, 
+            TokenSearcherPredictorInput, 
+            TokenSearcherPredictorOutput
+        ]]=None
+    ) -> None:
+        if not cfg:
+            cfg = TokenSearcherNERConfig()
+        self.cfg = cfg
+        if not predictor:
+            self.predictor = TokenSearcherPredictor()
+
     
     def get_last_sentence_id(self, i: int, sentences_len: int) -> int:
         return min(i + self.cfg.sents_batch, sentences_len) - 1
@@ -139,7 +159,7 @@ Text:
         self, input_data: TokenSearcherNERInput
     ) -> Dict[str, Any]:
         input_data = self._preprocess(input_data)
-        predicts = self.model.execute(
+        predicts = self.predictor.execute(
             {'inputs': input_data.inputs}, Dict[str, Any]
         )
         return self._postprocess(

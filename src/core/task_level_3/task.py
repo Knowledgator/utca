@@ -5,8 +5,8 @@ from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
     InputType, OutputType, ConfigType
 )
-from core.model_level_2.model import Model
-from core.model_level_2.schema import ModelConfigType, ModelInputType, ModelOutputType
+from core.predictor_level_2.predictor import Predictor
+from core.predictor_level_2.schema import PredictorConfigType, PredictorInputType, PredictorOutputType
 from core.task_level_3.schema import (
     InputWithThresholdType, NERConfigType, NEROutputType
 )
@@ -15,14 +15,14 @@ class Task(
     Executable[ConfigType, InputType, OutputType],
     Generic[
         ConfigType, InputType, OutputType,
-        ModelConfigType, ModelInputType, ModelOutputType
+        PredictorConfigType, PredictorInputType, PredictorOutputType
     ]
 ):
     def __init__(
-        self, cfg: ConfigType, model: Model[ModelConfigType, ModelInputType, ModelOutputType] 
+        self, cfg: ConfigType, Predictor: Predictor[PredictorConfigType, PredictorInputType, PredictorOutputType] 
     ) -> None:
         super().__init__(cfg)
-        self.model = model
+        self.predictor = Predictor
 
 
     @abstractmethod
@@ -44,7 +44,7 @@ class Task(
 class NERTask(
     Task[
         NERConfigType, InputWithThresholdType, NEROutputType,
-        ModelConfigType, ModelInputType, ModelOutputType
+        PredictorConfigType, PredictorInputType, PredictorOutputType
     ]
 ):
     def choose_threshold(self, input_data: InputWithThresholdType) -> float:

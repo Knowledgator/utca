@@ -2,6 +2,7 @@ from typing import Any, cast, Type, Dict, Optional
 
 from pydantic import PrivateAttr
 
+from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
     InputWithThreshold, 
@@ -14,10 +15,13 @@ from core.task_level_3.utils import (
 from core.task_level_3.objects.objects import (
     Entity
 )
-from implementation.models.token_searcher.schema import (
-    TokenSearcherModelConfig, 
-    TokenSearcherModelInput, 
-    TokenSearcherModelOutput
+from implementation.predictors.token_searcher.schema import (
+    TokenSearcherPredictorConfig, 
+    TokenSearcherPredictorInput, 
+    TokenSearcherPredictorOutput
+)
+from implementation.predictors.token_searcher.predictor import (
+    TokenSearcherPredictor
 )
 
 class TokenSearcherTextCleanerInput(InputWithThreshold):
@@ -48,9 +52,9 @@ class TokenSearcherTextCleanerTask(
         TokenSearcherTextCleanerConfig,
         TokenSearcherTextCleanerInput, 
         TokenSearcherTextCleanerOutput,
-        TokenSearcherModelConfig, 
-        TokenSearcherModelInput, 
-        TokenSearcherModelOutput
+        TokenSearcherPredictorConfig, 
+        TokenSearcherPredictorInput, 
+        TokenSearcherPredictorOutput
     ]
 ):
     input_class: Type[TokenSearcherTextCleanerInput] = TokenSearcherTextCleanerInput
@@ -60,6 +64,21 @@ Clean the following text extracted from the web matching not relevant parts:
 
 {text}
 """
+    def __init__(
+        self,
+        cfg: Optional[TokenSearcherTextCleanerConfig]=None, 
+        predictor: Optional[Predictor[
+            TokenSearcherPredictorConfig, 
+            TokenSearcherPredictorInput, 
+            TokenSearcherPredictorOutput
+        ]]=None
+    ) -> None:
+        if not cfg:
+            cfg = TokenSearcherTextCleanerConfig()
+        self.cfg = cfg
+        if not predictor:
+            self.predictor = TokenSearcherPredictor()
+
 
     def _preprocess(
         self, input_data: TokenSearcherTextCleanerInput
@@ -78,7 +97,7 @@ Clean the following text extracted from the web matching not relevant parts:
         self, input_data: TokenSearcherTextCleanerInput
     ) -> Dict[str, Any]:
         self._preprocess(input_data)
-        predcits = self.model.execute(
+        predcits = self.predictor.execute(
             {'inputs': [input_data.prompt]}, Dict[str, Any]
         )
         return self._postprocess(input_data, predcits)

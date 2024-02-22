@@ -2,6 +2,7 @@ from typing import Any, cast, Type, Dict, Optional
 
 from pydantic import PrivateAttr
 
+from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
     InputWithThreshold, 
@@ -14,10 +15,13 @@ from core.task_level_3.utils import (
 from core.task_level_3.objects.objects import (
     Entity
 )
-from implementation.models.token_searcher.schema import (
-    TokenSearcherModelConfig, 
-    TokenSearcherModelInput, 
-    TokenSearcherModelOutput
+from implementation.predictors.token_searcher.schema import (
+    TokenSearcherPredictorConfig, 
+    TokenSearcherPredictorInput, 
+    TokenSearcherPredictorOutput
+)
+from implementation.predictors.token_searcher.predictor import (
+    TokenSearcherPredictor
 )
 
 class TokenSearcherQandAInput(InputWithThreshold):
@@ -48,9 +52,9 @@ class TokenSearcherQandATask(
         TokenSearcherQandAConfig, 
         TokenSearcherQandAInput, 
         TokenSearcherQandAOutput,
-        TokenSearcherModelConfig, 
-        TokenSearcherModelInput, 
-        TokenSearcherModelOutput
+        TokenSearcherPredictorConfig, 
+        TokenSearcherPredictorInput, 
+        TokenSearcherPredictorOutput
     ]
 ):
     input_class: Type[TokenSearcherQandAInput] = TokenSearcherQandAInput
@@ -59,6 +63,22 @@ class TokenSearcherQandATask(
     prompt: str = """{question}
 Text:
  """
+    
+    def __init__(
+        self,
+        cfg: Optional[TokenSearcherQandAConfig]=None, 
+        predictor: Optional[Predictor[
+            TokenSearcherPredictorConfig, 
+            TokenSearcherPredictorInput, 
+            TokenSearcherPredictorOutput
+        ]]=None
+    ) -> None:
+        if not cfg:
+            cfg = TokenSearcherQandAConfig()
+        self.cfg = cfg
+        if not predictor:
+            self.predictor = TokenSearcherPredictor()
+
     def _preprocess(
         self, input_data: TokenSearcherQandAInput
     ) -> TokenSearcherQandAInput:
@@ -73,7 +93,7 @@ Text:
         self, input_data: TokenSearcherQandAInput
     ) -> Dict[str, Any]:
         input_data = self._preprocess(input_data)
-        predicts = self.model.execute(
+        predicts = self.predictor.execute(
             {'inputs': [input_data.prompt]}, Dict[str, Any]
         )
         return self._postprocess(input_data, predicts)
