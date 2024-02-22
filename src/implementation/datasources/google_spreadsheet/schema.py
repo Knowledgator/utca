@@ -1,12 +1,10 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 from enum import Enum
 
 from pydantic import BaseModel
 
-from core.datasource_level_2.schema import DatasourceInput, DatasourceOutput
 from implementation.apis.google_cloud.schema import (
     GoogleCloudClientConfig,
-    GoogleCloudDatasourceServiceConfig
 )
 
 class Sheet(BaseModel):
@@ -25,6 +23,8 @@ class GoogleSpreadsheetClientConfig(GoogleCloudClientConfig):
     scopes: list[str] = [
         "https://www.googleapis.com/auth/spreadsheets" ##################################################
     ]
+    service: str="sheets"
+    version: str="v4"
 
 
 class Dimension(Enum):
@@ -40,67 +40,3 @@ class InputOption(Enum):
 class InsertDataOption(Enum):
     INSERT_ROWS = 'INSERT_ROWS'
     OVERWRITE = 'OVERWRITE'
-
-
-class GoogleSpreadsheetReadConfig(GoogleCloudDatasourceServiceConfig):
-    dimension: Dimension = Dimension.ROWS
-
-
-class GoogleSpreadsheetReadInput(DatasourceInput):
-    spreadsheet_id: str
-    sheet_name: Optional[str]=None
-    select_range: Optional[str]=None
-
-    @property
-    def cells_range(self) -> str:
-        if not (self.sheet_name or self.select_range):
-            raise ValueError(f'page_name or select_range should be provided')
-        return '!'.join((i for i in (self.sheet_name, self.select_range) if i))
-
-
-class GoogleSpreadsheetReadOutput(DatasourceOutput):
-    table: list[list[Any]]
-
-
-class GoogleSpreadsheetWriteConfig(GoogleCloudDatasourceServiceConfig):
-    value_input_option: InputOption = InputOption.USER_ENTERED
-
-
-class GoogleSpreadsheetWriteInput(DatasourceInput):
-    spreadsheet_id: str
-    sheet_name: Optional[str]=None
-    select_range: Optional[str]=None
-    table: list[list[str]]
-    dimension: Dimension = Dimension.ROWS
-
-    @property
-    def cells_range(self) -> Dict[str, Any]:
-        if not (self.sheet_name or self.select_range):
-            raise ValueError(f'page_name or select_range should be provided')
-        return {
-            'range': '!'.join((i for i in (self.sheet_name, self.select_range) if i)),
-            'values': self.table,
-            'majorDimension': self.dimension.value,
-            
-        }
-
-
-class GoogleSpreadsheetWriteOutput(DatasourceOutput):
-    ...
-
-
-class GoogleSpreadsheetAppendConfig(GoogleSpreadsheetWriteConfig):
-    insert_data_option: InsertDataOption = InsertDataOption.OVERWRITE
-
-
-class GoogleSpreadsheetCreateConfig(GoogleCloudDatasourceServiceConfig):
-    ...
-
-
-class GoogleSpreadsheetCreateInput(DatasourceInput):
-    title: str
-    sheets: Optional[list[Sheet]] = None
-
-
-class GoogleSpreadsheetCreateOutput(DatasourceOutput):
-    spreadsheet_id: str

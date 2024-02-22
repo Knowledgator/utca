@@ -1,14 +1,17 @@
 from typing import Dict, Any
 
 from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.schema import (
+from core.executable_level_1.actions import (
     ExecuteFunction,
     AddData
 )
-from implementation.datasources.google_spreadsheet.google_spreadsheet import (
-    GoogleSpreadsheetClient, 
+from implementation.apis.google_cloud.client import GoogleCloudClient
+from implementation.datasources.google_spreadsheet.schema import (
     GoogleSpreadsheetClientConfig,
-    GoogleSpreadsheetReadInput,
+)
+from implementation.datasources.google_spreadsheet.actions import (
+    GoogleSpreadsheetRead,
+    GoogleSpreadsheetWrite
 )
 from implementation.datasources.google_spreadsheet.schema import (
     Dimension
@@ -39,18 +42,16 @@ def create_table(input: Dict[str, Any]) -> Dict[str, Any]:
 
 if __name__ == '__main__':
     # Google Spreadsheet client
-    spreadsheet = GoogleSpreadsheetClient(
-        GoogleSpreadsheetClientConfig(
-            credentials='credentials.json',
-            # path to your credentials. 
-            # Can be not provided if you are using 
-            # environment credentials for Google cloud.
-            scopes = [
-                "https://www.googleapis.com/auth/spreadsheets"
-                # read and write scope
-            ]
-        )
-    )
+    client = GoogleCloudClient(GoogleSpreadsheetClientConfig(
+        credentials='credentials.json',
+        # path to your credentials. 
+        # Can be not provided if you are using 
+        # environment credentials for Google cloud.
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets"
+            # read and write scope
+        ]
+    ))
 
     # model that will be used for Q&A task
     model = TokenSearcherPredictor(
@@ -73,7 +74,7 @@ if __name__ == '__main__':
 
     # create pipeline with described stages
     pipeline = (
-        spreadsheet.read() 
+        GoogleSpreadsheetRead(client) 
         | ExecuteFunction(get_input_for_q_and_a)
         | q_and_a
         | ExecuteFunction(create_table)
@@ -81,12 +82,11 @@ if __name__ == '__main__':
             'spreadsheet_id': spreadsheet_id,
             'select_range': 'C1'
         }) 
-        | spreadsheet.write()
+        | GoogleSpreadsheetWrite(client)
     )
 
-    read_input = GoogleSpreadsheetReadInput(
-        spreadsheet_id=spreadsheet_id,
-        select_range='A2:B2'
-    )
-    Evaluator(pipeline).run_program(read_input)
+    Evaluator(pipeline).run_program({
+        "spreadsheet_id": spreadsheet_id,
+        "select_range": "A2:B2"
+    })
     # result should be written to specified spreadsheet

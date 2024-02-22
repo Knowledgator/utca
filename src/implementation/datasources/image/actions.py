@@ -1,46 +1,69 @@
-from typing import Type, Dict, Any
+from typing import Dict, Any, Optional, Tuple, cast
 
-from PIL import Image
+from PIL import Image, ImageOps
 
-from core.datasource_level_2.datasource import DatasourceAction
-from core.datasource_level_2.schema import DatasourceConfig
-from implementation.datasources.image.schema import (
-    ImageReadInput,
-    ImageReadOutput,
-    ImageWriteInput,
-    ImageWriteOutput
-)
+from core.executable_level_1.actions import Action
 
-class ImageRead(DatasourceAction[
-    DatasourceConfig,
-    ImageReadInput,
-    ImageReadOutput
-]):
-    input_class: Type[ImageReadInput] = ImageReadInput
-    output_class: Type[ImageReadOutput] = ImageReadOutput
-
-    def invoke(self, input_data: ImageReadInput) -> Dict[str, Any]:
-        return {'image': Image.open(input_data.path_to_file)}
+class ImageRead(Action):
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data['image'] = Image.open(input_data['path_to_file'])
+        return input_data
 
 
-    def invoke_batch(self, input_data: list[ImageReadInput]) -> list[Dict[str, Any]]:
-        return [self.invoke(i) for i in input_data]
+class ImageWrite(Action):
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data['image'].save(input_data['path_to_file'])
+        return input_data
 
 
-class ImageWrite(DatasourceAction[
-    DatasourceConfig,
-    ImageWriteInput,
-    ImageWriteOutput
-]):
-    input_class: Type[ImageWriteInput] = ImageWriteInput 
-    output_class: Type[ImageWriteOutput] = ImageWriteOutput
-
-    def invoke(self, input_data: ImageWriteInput) -> Dict[str, Any]:
-        input_data.image.save(input_data.path_to_file)
-        return {}
+class RotateImage(Action):
+    def __init__(self, rotation: float) -> None:
+        self.rotation = rotation
 
 
-    def invoke_batch(self, input_data: list[ImageWriteInput]) -> list[Dict[str, Any]]:
-        for i in input_data:
-            self.invoke(i)
-        return []
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data['image'] = cast(
+            Image.Image, input_data['image']
+        ).rotate(self.rotation)
+        return input_data
+    
+
+class ResizeImage(Action):
+    def __init__(self, width: int, height: int) -> None:
+        self.height = height
+        self.width = width
+
+
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data['image'] = cast(
+            Image.Image, input_data['image']
+        ).resize((self.width, self.height))
+        return input_data
+    
+
+class PadImage(Action):
+    def __init__(self, width: int, height: int, color: Optional[str]=None) -> None:
+        self.height = height
+        self.width = width
+        self.color = color
+
+
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data['image'] = ImageOps.pad(
+            cast(Image.Image, input_data['image']),
+            (self.width, self.height),
+            color=self.color
+        )
+        return input_data
+    
+
+class CropImage(Action):
+    def __init__(self, box: Tuple[int, int, int, int]) -> None:
+        self.box = box
+
+
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        input_data['image'] = cast(
+            Image.Image, input_data['image']
+        ).crop(self.box)
+        return input_data

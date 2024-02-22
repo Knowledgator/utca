@@ -13,12 +13,12 @@ from implementation.predictors.transformers.transformers_image_classification im
     TransformersImageClassificationConfig,
     TransformersImageClassification
 )
-from implementation.datasources.video.video import (
-    Video,
-    VideoReadInput
+from implementation.datasources.video.actions import (
+    VideoRead,
+    VideoWrite
 )
 from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.schema import ExecuteFunction
+from core.executable_level_1.actions import ExecuteFunction
 from core.executable_level_1.memory import SetMemory, GetMemory
 
 model_name = "trpakov/vit-face-expression"
@@ -35,11 +35,6 @@ model_stage = TransformersImageClassification( # type: ignore
         feature_extractor=AutoFeatureExtractor.from_pretrained(model_name) # type: ignore
     )
 )
-
-reader_output = Video().read().execute(
-    VideoReadInput(path_to_file="programs/program6/White Chicks - short.mp4")
-)
-
 
 def prepare_batch_image_classification_input(state: Dict[str, Any]) -> List[Dict[str, Any]]:
     frames: List[Dict[str, Any]] = []
@@ -94,26 +89,18 @@ def prepare_sample(state: Dict[str, Any]) -> Dict[str, Any]:
         "fps": 0.5
     }
 
+if __name__ == "__main__":
+    pipeline = (
+        VideoRead()
+        | ExecuteFunction(prepare_batch_image_classification_input)
+        | SetMemory("frames")
+        | model_stage
+        | ExecuteFunction(interpret_results)
+        | GetMemory(["frames"])
+        | ExecuteFunction(prepare_sample)
+        | VideoWrite()
+    )
 
-# # Save the modified image
-# image.save("output_image.jpg")
-
-# # Close the image file
-# image.close()
-
-pipeline = (
-    Video().read()
-    | ExecuteFunction(prepare_batch_image_classification_input)
-    | SetMemory("frames")
-    | model_stage
-    | ExecuteFunction(interpret_results)
-    | GetMemory(["frames"])
-    | ExecuteFunction(prepare_sample)
-    | Video().write()
-)
-
-video_input = VideoReadInput(
-    path_to_file="programs/program6/White Chicks - short.mp4"
-)
-
-print(Evaluator(pipeline).run_program(video_input))
+    print(Evaluator(pipeline).run_program({
+        "path_to_file": "programs/program6/White Chicks - short.mp4"
+    }))

@@ -1,16 +1,8 @@
-from typing import Any, Dict, Type
+from typing import Any, Dict
 
-from core.datasource_level_2.datasource import DatasourceAction
-from implementation.datasources.google_docs.schema import (
-    GoogleDocsReadConfig,
-    GoogleDocsReadInput,
-    GoogleDocsReadOutput,
-    GoogleDocsWriteConfig,
-    GoogleDocsWriteInput,
-    GoogleDocsWriteOutput,
-    GoogleDocsCreateConfig,
-    GoogleDocsCreateInput,
-    GoogleDocsCreateOutput
+from core.executable_level_1.actions import Action
+from implementation.apis.google_cloud.client import (
+    GoogleCloudClient
 )
 
 # TODO: docs templating (casual update but with copying file and update copy)
@@ -33,96 +25,52 @@ from implementation.datasources.google_docs.schema import (
 #     }
 # ]
 
-class GoogleDocsCreate(
-    DatasourceAction[
-        GoogleDocsCreateConfig,
-        GoogleDocsCreateInput,
-        GoogleDocsCreateOutput
-    ]
-):
-    input_class: Type[GoogleDocsCreateInput] = GoogleDocsCreateInput
-    output_class: Type[GoogleDocsCreateOutput] = GoogleDocsCreateOutput
-    
-    def invoke(self, input_data: GoogleDocsCreateInput) -> Dict[str, Any]: # type: ignore
+class GoogleDocsAction(Action):
+    def __init__(self, client: GoogleCloudClient) -> None:
+        self.docs_service = client.service.documents()
+
+
+class GoogleDocsCreate(GoogleDocsAction):
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             doc_id: str = ( # type: ignore
                 docs_service # type: ignore
                 .create(
                     body={
-                        'title': input_data.title
+                        'title': input_data["title"]
                     },
-                    fields='spreadsheetId'
+                    fields='documentId'
                 )
                 .execute()
             )
             return {'doc_id': doc_id}
         except Exception as e:
             raise ValueError(f'Unable to create doc: {e}')
-        
-    
-    def invoke_batch(self, input_data: list[GoogleDocsCreateInput]) -> list[Dict[str, Any]]:
-        raise Exception('Not implemented')
-        
 
-class GoogleDocsWrite(
-    DatasourceAction[
-        GoogleDocsWriteConfig,
-        GoogleDocsWriteInput,
-        GoogleDocsWriteOutput,
-    ]
-):
-    input_class: Type[GoogleDocsWriteInput] = GoogleDocsWriteInput
-    output_class: Type[GoogleDocsWriteOutput] = GoogleDocsWriteOutput
 
-    def invoke(self, input_data: GoogleDocsWriteInput) -> Dict[str, Any]: # type: ignore
+class GoogleDocsWrite(GoogleDocsAction):
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
-            (
+            input_data["document"] = (
                 self.cfg.service # type: ignore
                 .batchUpdate(
-                    documentId=input_data.document_id, 
-                    body={'requests': [input_data.action]}
+                    documentId=input_data["document_id"], 
+                    body={'requests': input_data["actions"]}
                 ).execute()
             )
-            return {}
+            return input_data
         except Exception as e:
             raise ValueError(f'Unable to update doc: {e}')
 
 
-    def invoke_batch(self, input_data: list[GoogleDocsWriteInput]) -> list[Dict[str, Any]]:
-        try:
-            (
-                self.cfg.service # type: ignore
-                .batchUpdate(
-                    documentId=input_data[0].document_id, ############################ 
-                    body={'requests': [i.action for i in input_data]}
-                ).execute()
-            )
-            return []
-        except Exception as e:
-            raise ValueError(f'Unable to update doc: {e}')
-
-
-class GoogleDocsRead(
-    DatasourceAction[
-        GoogleDocsReadConfig,
-        GoogleDocsReadInput,
-        GoogleDocsReadOutput,
-    ]
-):
-    input_class: Type[GoogleDocsReadInput] = GoogleDocsReadInput
-    output_class: Type[GoogleDocsReadOutput] = GoogleDocsReadOutput
-
-    def invoke(self, input_data: GoogleDocsReadInput) -> Dict[str, Any]:
+class GoogleDocsRead(GoogleDocsAction):
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             return (
                 self.cfg.service # type: ignore
                 .get(
-                    documentId=input_data.document_id
+                    documentId=input_data["document_id"]
                 ).execute()
             )
         except Exception as e:
             raise ValueError(f'Unable to read doc: {e}')
-        
-    
-    def invoke_batch(self, input_data: list[GoogleDocsReadInput]) -> list[Dict[str, Any]]:
-        raise Exception('Not implemented')

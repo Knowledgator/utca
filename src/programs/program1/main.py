@@ -2,13 +2,12 @@ from typing import Dict, Any
 
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.eval import ExecutionSchema
-from core.executable_level_1.schema import (
+from core.executable_level_1.actions import (
     ExecuteFunction,
     AddData
 )
-from implementation.datasources.pdf.pdf import (
-    PDFReadInput,
-    PDFFile
+from implementation.datasources.pdf.actions import (
+    PDFRead
 )
 from implementation.predictors.token_searcher.predictor import (
     TokenSearcherPredictor, TokenSearcherPredictorConfig
@@ -21,20 +20,17 @@ from implementation.tasks.ner.token_searcher import (
 )
 
 def get_page(input: Dict[str, Any]) -> Dict[str, Any]:
-    return {'text': input['texts'][0]}
+    return {"text": input["texts"][0]}
 
 
 def get_ner_input(input: Dict[str, Any]) -> Dict[str, Any]:
-    return {'text': input['cleaned_text']}
+    return {"text": input["cleaned_text"]}
 
 
-if __name__ == '__main__':
-    # stage for PDF reading
-    read_pdf = PDFFile().read()
-
+if __name__ == "__main__":
     # model that will be used for clean text and NER tasks
     model = TokenSearcherPredictor(TokenSearcherPredictorConfig(
-        device = 'cpu'
+        device = "cpu"
     ))
 
     # clean text stage
@@ -53,24 +49,21 @@ if __name__ == '__main__':
 
     # create pipeline with described stages
     pipeline: ExecutionSchema = (
-        read_pdf 
+        PDFRead()
         | ExecuteFunction(get_page) 
         # adapts outputs to inputs 
         
         | clean_task 
         | ExecuteFunction(get_ner_input)         
-        | AddData({'labels': ['person', 'framework']}) 
+        | AddData({"labels": ["person", "framework"]}) 
         # add labels that will be used by NER task
         
         | ner_task
     )
 
-    # parameters for pdf file reading
-    read_input = PDFReadInput(
-        path_to_file='programs/program1/test.pdf'
-    )
-
     # call pipeline
-    res = Evaluator(pipeline).run_program(read_input)
+    res = Evaluator(pipeline).run_program({
+        "path_to_file": "programs/program1/test.pdf"
+    })
 
     print(res)
