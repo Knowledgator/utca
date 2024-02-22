@@ -1,41 +1,25 @@
-from typing import Dict, Any, Type, Optional
+from typing import Type, Dict, Any
 
 import PyPDF2
 from reportlab.pdfgen.canvas import Canvas # type: ignore
 from reportlab.lib.units import cm # type: ignore
-from reportlab.lib.pagesizes import A4 # type: ignore
 
-from core.datasource_level_2.datasource import DatasourceManager, DatasourceAction
-from core.datasource_level_2.schema import (
-    DatasourceConfig,
-    DatasourceInput,
-    DatasourceOutput
+from core.datasource_level_2.schema import DatasourceConfig
+from core.datasource_level_2.datasource import DatasourceAction
+from implementation.datasources.pdf.schema import (
+    PDFReadInput,
+    PDFReadOutput,
+    PDFWriteInput,
+    PDFWriteOutput
 )
 
-class PDFReadConfig(DatasourceConfig):
-    ...
-
-
-class PDFReadInput(DatasourceInput):
-    path_to_file: str
-    pages: Optional[list[int]] = None
-
-
-class PDFReadOutput(DatasourceOutput):
-    texts: Dict[int, str]
-
-
 class PDFRead(DatasourceAction[
-    PDFReadConfig,
+    DatasourceConfig,
     PDFReadInput,
     PDFReadOutput
 ]):
     input_class: Type[PDFReadInput] = PDFReadInput 
     output_class: Type[PDFReadOutput] = PDFReadOutput
-
-    def __init__(self, cfg: Optional[PDFReadConfig]=None) -> None:
-        super().__init__(cfg or PDFReadConfig())
-
 
     def invoke(self, input_data: PDFReadInput) -> Dict[str, Any]:
         with open(input_data.path_to_file, 'rb') as f:
@@ -52,25 +36,8 @@ class PDFRead(DatasourceAction[
         return [self.invoke(i) for i in input_data]
 
 
-class PDFWriteConfig(DatasourceConfig):
-    ...
-
-
-class PDFWriteInput(DatasourceInput):
-    path_to_file: str
-    text: str
-    x_pending: float = 1
-    y_pending: float = 1
-    page_width: float = A4[0]
-    page_height: float = A4[1]
-
-
-class PDFWriteOutput(DatasourceOutput):
-    ...
-
-
 class PDFWrite(DatasourceAction[
-    PDFWriteConfig,
+    DatasourceConfig,
     PDFWriteInput,
     PDFWriteOutput
 ]):
@@ -95,24 +62,3 @@ class PDFWrite(DatasourceAction[
         for i in input_data:
             self.invoke(i)
         return []
-
-
-class PDFFile(DatasourceManager[
-    PDFReadConfig,
-    PDFReadInput,
-    PDFReadOutput,
-
-    PDFWriteConfig,
-    PDFWriteInput,
-    PDFWriteOutput,
-]):
-    def read(
-        self, cfg: Optional[PDFReadConfig]=None,
-    ) -> PDFRead:
-        return PDFRead(cfg)
-
-    
-    def write(
-        self, cfg: Optional[PDFWriteConfig]=None,
-    ) -> PDFWrite:
-        return PDFWrite(cfg)
