@@ -5,11 +5,11 @@ from transformers import ( # type: ignore
 )
 
 from core.executable_level_1.schema import Input, Output
-from core.model_level_2.transformers_pipeline import (
+from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipelineConfig
 )
 
-class TokenSearcherModelConfig(TransformersPipelineConfig):
+class TokenSearcherPredictorConfig(TransformersPipelineConfig):
     name: str
     
     def __init__(
@@ -29,10 +29,10 @@ class TokenSearcherModelConfig(TransformersPipelineConfig):
         )
 
 
-class TokenSearcherModelInput(Input):
+class TokenSearcherPredictorInput(Input):
     inputs: list[str]
 
 
-class TokenSearcherModelOutput(Output):
+class TokenSearcherPredictorOutput(Output):
     inputs: list[str]
     outputs: list[list[Dict[str, Any]]]

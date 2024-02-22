@@ -1,15 +1,10 @@
-from implementation.models.token_searcher.model import (
-    TokenSearcherModel
-)
-from implementation.models.token_searcher.schema import (
-    TokenSearcherModelConfig
+from implementation.predictors.token_searcher.predictor import (
+    TokenSearcherPredictor
 )
 
 def test_tokensearcher():
-    cfg = TokenSearcherModelConfig()
-
-    model = TokenSearcherModel(cfg)
-    actual_ouput = model.execute({
+    predictor = TokenSearcherPredictor()
+    actual_ouput = predictor.execute({
         "inputs": [(
             "Identify organizations mentioned in the text:"
             " The National Aeronautics and Space Administration"
