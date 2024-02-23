@@ -31,7 +31,7 @@ class GoogleCloudClient: # TODO: issue with missmatched scopes
                 "token.json", scopes
             )
 
-        if not creds or not creds.valid or not all(s in cfg.scopes for s in creds.scopes): # type: ignore
+        if not creds or not creds.valid or not all(s in scopes for s in creds.scopes): # type: ignore
             if creds and creds.expired and creds.refresh_token: # type: ignore
                 creds.refresh(Request()) # type: ignore
             else:

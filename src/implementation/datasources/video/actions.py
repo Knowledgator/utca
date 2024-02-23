@@ -16,7 +16,7 @@ class VideoWrite(Action):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         w = cv2.VideoWriter(
             input_data["path_to_file"],
-            cv2.VideoWriter_fourcc(*input_data.fourcc), # type: ignore
+            cv2.VideoWriter_fourcc(*input_data["fourcc"]), # type: ignore
             input_data["fps"], 
             (input_data["width"], input_data["height"])
         )

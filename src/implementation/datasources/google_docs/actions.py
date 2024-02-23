@@ -34,7 +34,7 @@ class GoogleDocsCreate(GoogleDocsAction):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             doc_id: str = ( # type: ignore
-                docs_service # type: ignore
+                self.docs_service # type: ignore
                 .create(
                     body={
                         'title': input_data["title"]
@@ -52,7 +52,7 @@ class GoogleDocsWrite(GoogleDocsAction):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             input_data["document"] = (
-                self.cfg.service # type: ignore
+                self.docs_service # type: ignore
                 .batchUpdate(
                     documentId=input_data["document_id"], 
                     body={'requests': input_data["actions"]}
@@ -67,7 +67,7 @@ class GoogleDocsRead(GoogleDocsAction):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             return (
-                self.cfg.service # type: ignore
+                self.docs_service # type: ignore
                 .get(
                     documentId=input_data["document_id"]
                 ).execute()

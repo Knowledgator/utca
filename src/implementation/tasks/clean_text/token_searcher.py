@@ -2,6 +2,7 @@ from typing import Any, cast, Type, Dict, Optional
 
 from pydantic import PrivateAttr
 
+from core.executable_level_1.schema import Transformable
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
@@ -73,11 +74,8 @@ Clean the following text extracted from the web matching not relevant parts:
             TokenSearcherPredictorOutput
         ]]=None
     ) -> None:
-        if not cfg:
-            cfg = TokenSearcherTextCleanerConfig()
-        self.cfg = cfg
-        if not predictor:
-            self.predictor = TokenSearcherPredictor()
+        self.cfg = cfg or TokenSearcherTextCleanerConfig()
+        self.predictor = predictor or TokenSearcherPredictor()
 
 
     def _preprocess(
@@ -97,8 +95,11 @@ Clean the following text extracted from the web matching not relevant parts:
         self, input_data: TokenSearcherTextCleanerInput
     ) -> Dict[str, Any]:
         self._preprocess(input_data)
-        predcits = self.predictor.execute(
-            {'inputs': [input_data.prompt]}, Dict[str, Any]
+        predcits = cast(
+            Dict[str, Any], 
+            self.predictor.execute(
+                Transformable({'inputs': [input_data.prompt]})
+            ).extract()
         )
         return self._postprocess(input_data, predcits)
     

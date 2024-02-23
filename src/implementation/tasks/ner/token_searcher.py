@@ -2,6 +2,7 @@ from typing import Tuple, Any, Dict, Optional, cast, Type
 
 from pydantic import PrivateAttr
 
+from core.executable_level_1.schema import Transformable
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
@@ -96,12 +97,8 @@ Text:
             TokenSearcherPredictorOutput
         ]]=None
     ) -> None:
-        if not cfg:
-            cfg = TokenSearcherNERConfig()
-        self.cfg = cfg
-        if not predictor:
-            self.predictor = TokenSearcherPredictor()
-
+        self.cfg = cfg or TokenSearcherNERConfig()
+        self.predictor = predictor or TokenSearcherPredictor()
     
     def get_last_sentence_id(self, i: int, sentences_len: int) -> int:
         return min(i + self.cfg.sents_batch, sentences_len) - 1
@@ -159,8 +156,11 @@ Text:
         self, input_data: TokenSearcherNERInput
     ) -> Dict[str, Any]:
         input_data = self._preprocess(input_data)
-        predicts = self.predictor.execute(
-            {'inputs': input_data.inputs}, Dict[str, Any]
+        predicts = cast(
+            Dict[str, Any], 
+            self.predictor.execute(
+                Transformable({'inputs': input_data.inputs})
+            ).extract()
         )
         return self._postprocess(
             input_data, predicts

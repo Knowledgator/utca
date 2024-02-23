@@ -17,7 +17,7 @@ class TransformersImageClassificationConfig(Config):
 
 
 class TransformersImageClassificationInput(Input):
-    def __init__(self, image: Image.Image):
+    def __init__(self, image: Image.Image, *_: Any, **__: Any):
         self.image: Image.Image = image
 
 

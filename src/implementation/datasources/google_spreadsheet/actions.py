@@ -72,7 +72,7 @@ class GoogleSpreadsheetWrite(GoogleSpreadsheetAction):
                             "dimension", Dimension.ROWS
                         ).value,
                     },
-                    range=input_data["cells_ranges"]
+                    range=input_data["cells_range"]
                 )
                 .execute()
             )
@@ -114,7 +114,7 @@ class GoogleSpreadsheetAppend(GoogleSpreadsheetAction):
                     valueInputOption=input_data.get(
                         "value_input_option", InputOption.USER_ENTERED
                     ).value,
-                    valueInsertDataOption=input_data.get(
+                    insertDataOption=input_data.get(
                         "insert_data_option", InsertDataOption.OVERWRITE
                     ).value,
                     body={
@@ -123,7 +123,7 @@ class GoogleSpreadsheetAppend(GoogleSpreadsheetAction):
                             "dimension", Dimension.ROWS
                         ).value,
                     },
-                    range=input_data["cells_ranges"]
+                    range=input_data["cells_range"]
                 )
                 .execute()
             )
