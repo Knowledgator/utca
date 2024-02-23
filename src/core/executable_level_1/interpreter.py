@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 import logging
 
 from core.executable_level_1.eval import ExecutionSchema
@@ -30,21 +30,25 @@ class Evaluator:
         self.register: Transformable = Transformable({})  # Initialized but must be set properly
 
     
-    def set_initial_input(self, program_input: Input) -> None:
+    def set_initial_input(self, program_input: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
         """Sets the initial input for the program."""
-        self.register = program_input.generate_transformable()  # Assuming this method correctly instantiates a Transformable
+        self.register = Transformable(program_input)  # Assuming this method correctly instantiates a Transformable
     
     
-    def run_program(self, program_input: Optional[Input]):
-        return self.eval_program(self.program, program_input)
+    def run_program(self, *program_input_list: Dict[str, Any], **program_input_map: Any):
+        return self.eval_program(self.program, program_input_map or list(program_input_list) or None)
     
     
-    def eval_program(self, program: List[Dict[str, Any]], program_input: Optional[Input] = None) -> Any:
+    def eval_program(
+        self, 
+        program: List[Dict[str, Any]], 
+        program_input: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]
+    ) -> Any:
         """Evaluates the program based on the input provided."""
         if program_input is not None:
             self.set_initial_input(program_input)
         # Execution loop
-        for i, st in enumerate(self.program):
+        for i, st in enumerate(program):
             try:
                 self.eval(st)
             except Exception as e:
@@ -82,9 +86,9 @@ class Evaluator:
         """Evaluates an execute statement."""
         # Execute the executable and update the register accordingly
         if self.register.is_batch:
-            self.register = executable.execute_batch(self.register, Transformable)
+            self.register = executable.execute_batch(self.register)
         else:
-            self.register = executable.execute(self.register, Transformable)
+            self.register = executable.execute(self.register)
     
     
     def eval_set_memory(self, set_memory_command: SetMemory):
