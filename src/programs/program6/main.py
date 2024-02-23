@@ -81,11 +81,11 @@ def prepare_sample(state: Dict[str, Any]) -> Dict[str, Any]:
     
     width, height = state["frames"][0]["image"].size
     return {
-        "path_to_file": "programs/program6/sample.ogg",
+        "path_to_file": "programs/program6/sample.avi",
         "frames": video_frames,
         "width": width,
         "height": height,
-        "fourcc": "THEO", # https://fourcc.org/codecs.php
+        "fourcc": "XVID", # https://fourcc.org/codecs.php
         "fps": 0.5
     }
 
@@ -101,6 +101,6 @@ if __name__ == "__main__":
         | VideoWrite()
     )
 
-    print(Evaluator(pipeline).run_program({
+    Evaluator(pipeline).run_program({
         "path_to_file": "programs/program6/White Chicks - short.mp4"
-    }))
+    })

@@ -80,13 +80,13 @@ if __name__ == '__main__':
         | ExecuteFunction(create_table)
         | AddData({
             'spreadsheet_id': spreadsheet_id,
-            'select_range': 'C1'
+            'cells_range': 'C1'
         }) 
         | GoogleSpreadsheetWrite(client)
     )
 
     Evaluator(pipeline).run_program({
         "spreadsheet_id": spreadsheet_id,
-        "select_range": "A2:B2"
+        "cells_range": "A2:B2"
     })
     # result should be written to specified spreadsheet
