@@ -16,15 +16,15 @@ def test_spreadsheet():
     SAMPLE_RANGE_NAME = "Sheet1"
 
     cfg = GoogleSpreadsheetClientConfig(
-        credentials='__test__/credentials.json'
+        credentials="src/implementation/datasources/google_spreadsheet/__test__/credentials.json"
     )
     client = GoogleCloudClient(cfg)
 
 
     GoogleSpreadsheetAppend(client).execute({
         "spreadsheet_id": SAMPLE_SPREADSHEET_ID,
-        "sheet_name": SAMPLE_RANGE_NAME,
-        "table": [['A1', 'A2'], ['E', 'E']],
+        "cells_range": SAMPLE_RANGE_NAME,
+        "table": [["A1", "A2"], ["E", "E"]],
         "dimension": Dimension.ROWS
     })
 

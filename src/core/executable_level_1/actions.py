@@ -1,10 +1,11 @@
 from abc import abstractmethod
 from typing import (
-    Callable, Any, Dict, List, Union
+    Callable, Any, Dict, List, Union, Generic
 )
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.statements_types import Statement
+from core.executable_level_1.schema import State
 
 class Action(Component):    
     @abstractmethod
@@ -103,16 +104,16 @@ class MergeData(Action):
         return state
 
 
-class ExecuteFunction(Action):
+class ExecuteFunction(Generic[State], Action):
     def __init__(
         self, 
-        func: Callable[
-            [Union[Dict[str, Any], List[Dict[str, Any]]]], 
-            Union[Dict[str, Any], List[Dict[str, Any]]]
+        func: Union[
+            Callable[[State], Dict[str, Any]],
+            Callable[[State], List[Dict[str, Any]]],
         ]
     ) -> None:
         self.func = func
 
 
-    def execute(self, input_data: Dict[str, Any]) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    def execute(self, input_data: State) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         return self.func(input_data)

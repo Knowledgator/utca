@@ -47,6 +47,13 @@ class NERTask(
         PredictorConfigType, PredictorInputType, PredictorOutputType
     ]
 ):
+    def __init__(
+        self, cfg: NERConfigType, Predictor: Predictor[PredictorConfigType, PredictorInputType, PredictorOutputType] 
+    ) -> None:
+        self.cfg = cfg
+        self.predictor = Predictor
+
+
     def choose_threshold(self, input_data: InputWithThresholdType) -> float:
         return (
             input_data.threshold 

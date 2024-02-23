@@ -8,8 +8,9 @@ from core.executable_level_1.memory import GetMemory,  MemoryManager, SetMemory
 from core.executable_level_1.statements_types import Statement
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
-    Config, Input, Output, Action, Transformable
+    Config, Input, Output, Transformable
 )
+from core.executable_level_1.actions import Action
 
 
 INPUT = "input"
@@ -35,15 +36,15 @@ class Evaluator:
         self.register = Transformable(program_input)  # Assuming this method correctly instantiates a Transformable
     
     
-    def run_program(self, *program_input_list: Dict[str, Any], **program_input_map: Any):
-        return self.eval_program(self.program, program_input_map or list(program_input_list) or None)
+    def run_program(self, program_input: Union[Dict[str, Any], List[Dict[str, Any]]]):
+        return self.eval_program(self.program, program_input)
     
     
     def eval_program(
         self, 
         program: List[Dict[str, Any]], 
         program_input: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]
-    ) -> Any:
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """Evaluates the program based on the input provided."""
         if program_input is not None:
             self.set_initial_input(program_input)

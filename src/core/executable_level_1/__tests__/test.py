@@ -1,6 +1,8 @@
 # Example subclass implementation
-from typing import Any, Dict
+from typing import Any, Dict, List
+
 from core.executable_level_1.executable import Executable
+from core.executable_level_1.schema import Transformable
 from core.executable_level_1.schema import Input, Output, Config
 
 
@@ -21,7 +23,12 @@ class MyExecutable(Executable[Config, MyInput, MyOutput]):
         # Implementation of the processing logic
         return {"f": 5}
     
+
+    def invoke_batch(self, input_data: List[MyInput]) -> List[Dict[str, Any]]:
+        # Implementation of the processing logic
+        return [{"f": 5}]
+    
 input = {"f": 4}
 example = MyExecutable(Config())
 
-print(example.execute(input, Dict[str, Any]))
+print(example.execute(Transformable(input)))

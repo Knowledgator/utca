@@ -14,7 +14,7 @@ def test_docs():
     DOCUMENT_ID = "1qDrWeHqblOOakVCIc7FJUr8u2rAhRdj2YSb4SgTz96g"
     client = GoogleCloudClient(
         GoogleDocsClientConfig(
-            credentials="__test__/credentials.json"
+            credentials="src/implementation/datasources/google_docs/__test__/credentials.json"
         )
     )
 

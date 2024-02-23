@@ -1,12 +1,14 @@
 from __future__ import annotations
 from abc import ABC
 from typing import (
-    TypeVar, Any, Dict, Generic, Type, Optional, List, Union
+    TypeVar, Any, Dict, Generic, Type, Optional, List, Union,
+    TYPE_CHECKING
 )
 
 from pydantic import BaseModel, ValidationError
 
-from core.executable_level_1.actions import Action
+if TYPE_CHECKING:
+    from core.executable_level_1.actions import Action
 
 class Input(BaseModel, ABC):
     def generate_transformable(self):
@@ -85,3 +87,4 @@ class Config(BaseModel, ABC):
 
 OutputType = TypeVar('OutputType', bound=Output)
 ConfigType = TypeVar('ConfigType', bound=Config, contravariant=True)
+State = TypeVar("State", Dict[str, Any], List[Dict[str, Any]])
