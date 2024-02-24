@@ -20,7 +20,11 @@ from implementation.predictors.token_searcher.predictor import (
     TokenSearcherPredictor, TokenSearcherPredictorConfig
 )
 from implementation.tasks.q_and_a.token_searcher import (
-    TokenSearcherQandAConfig, TokenSearcherQandATask
+    TokenSearcherQandATask
+)
+from implementation.tasks.q_and_a.actions import (
+    TokenSearcherQandAPostprocessor,
+    TokenSearcherQandAPostprocessorConfig
 )
 
 def get_input_for_q_and_a(input: Dict[str, Any]) -> Dict[str, Any]:
@@ -62,10 +66,12 @@ if __name__ == '__main__':
 
     # Q&A stage
     q_and_a = TokenSearcherQandATask(
-        TokenSearcherQandAConfig(
-            threshold=0.7
-        ),
-        model
+        predictor=model,
+        postprocess=TokenSearcherQandAPostprocessor(
+            TokenSearcherQandAPostprocessorConfig(
+                threshold=0.7
+            )
+        )
     )
 
 

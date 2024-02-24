@@ -1,17 +1,12 @@
-from typing import Any, cast, Type, Dict, Optional
+from typing import Type, Optional
 
-from pydantic import PrivateAttr
-
-from core.executable_level_1.schema import Transformable
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
     InputWithThreshold, 
     NEROutput,
     NERConfig 
-)
-from core.task_level_3.utils import (
-    build_entity
 )
 from core.task_level_3.objects.objects import (
     Entity
@@ -24,19 +19,14 @@ from implementation.predictors.token_searcher.schema import (
 from implementation.predictors.token_searcher.predictor import (
     TokenSearcherPredictor
 )
+from implementation.tasks.q_and_a.actions import (
+    TokenSearcherQandAPreprocessor,
+    TokenSearcherQandAPostprocessor
+)
 
 class TokenSearcherQandAInput(InputWithThreshold):
     question: str
     text: str
-    _prompt: Optional[str] = PrivateAttr()
-
-    def set_inputs(self, prompt: str) -> None:
-        self._prompt = prompt
-
-
-    @property
-    def prompt(self) -> str:
-        return cast(str, self._prompt)
 
 
 class TokenSearcherQandAOutput(NEROutput[Entity]):
@@ -44,13 +34,9 @@ class TokenSearcherQandAOutput(NEROutput[Entity]):
     question: str
 
 
-class TokenSearcherQandAConfig(NERConfig):
-    ...
-
-
 class TokenSearcherQandATask(
     NERTask[
-        TokenSearcherQandAConfig, 
+        NERConfig, 
         TokenSearcherQandAInput, 
         TokenSearcherQandAOutput,
         TokenSearcherPredictorConfig, 
@@ -60,67 +46,19 @@ class TokenSearcherQandATask(
 ):
     input_class: Type[TokenSearcherQandAInput] = TokenSearcherQandAInput
     output_class: Type[TokenSearcherQandAOutput] = TokenSearcherQandAOutput
-
-    prompt: str = """{question}
-Text:
- """
     
     def __init__(
         self,
-        cfg: Optional[TokenSearcherQandAConfig]=None, 
+        cfg: Optional[NERConfig]=None, 
         predictor: Optional[Predictor[
             TokenSearcherPredictorConfig, 
             TokenSearcherPredictorInput, 
             TokenSearcherPredictorOutput
-        ]]=None
+        ]]=None,
+        preprocess: Optional[Action]=None,
+        postprocess: Optional[Action]=None
     ) -> None:
-        self.cfg = cfg or TokenSearcherQandAConfig()
+        self.cfg = cfg or NERConfig()
         self.predictor = predictor or TokenSearcherPredictor()
-
-
-    def _preprocess(
-        self, input_data: TokenSearcherQandAInput
-    ) -> TokenSearcherQandAInput:
-        input_data = super()._preprocess(input_data)
-        input_data.set_inputs(
-            self.prompt.format(question=input_data.question) + input_data.text
-        )
-        return input_data
-
-
-    def invoke(
-        self, input_data: TokenSearcherQandAInput
-    ) -> Dict[str, Any]:
-        input_data = self._preprocess(input_data)
-        predicts = cast(
-            Dict[str, Any], 
-            self.predictor.execute(
-                Transformable({'inputs': [input_data.prompt]})
-            ).extract()
-        )
-        return self._postprocess(input_data, predicts)
-    
-
-    def invoke_batch(
-        self, input_data: list[TokenSearcherQandAInput]
-    ) -> list[Dict[str, Any]]:
-        raise Exception('TODO!')
-
-
-    def _postprocess(
-        self, 
-        input_data: TokenSearcherQandAInput, 
-        output_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        return {
-            'text': input_data.text,
-            'question': input_data.question,
-            'output': [
-                entity
-                for output in output_data['outputs']
-                for ent in output 
-                if (entity := build_entity(
-                    input_data.prompt, ent, cast(float, input_data.threshold)
-                ))
-            ]
-        }
+        self._preprocess = preprocess or TokenSearcherQandAPreprocessor()
+        self._postprocess = postprocess or TokenSearcherQandAPostprocessor()

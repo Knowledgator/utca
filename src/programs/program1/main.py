@@ -13,10 +13,19 @@ from implementation.predictors.token_searcher.predictor import (
     TokenSearcherPredictor, TokenSearcherPredictorConfig
 )
 from implementation.tasks.clean_text.token_searcher import (
-    TokenSearcherTextCleanerTask, TokenSearcherTextCleanerConfig
+    TokenSearcherTextCleanerTask
+)
+from implementation.tasks.clean_text.actions import (
+    TokenSearcherTextCleanerPostprocessor,
+    TokenSearcherTextCleanerPostprocessorConfig
 )
 from implementation.tasks.ner.token_searcher import (
-    TokenSearcherNERConfig, TokenSearcherNERTask
+    TokenSearcherNERTask
+)
+from implementation.tasks.ner.actions import (
+    TokenSearcherNERPostprocessor,
+    TokenSearcherNERPostprocessorConfig
+
 )
 
 def get_page(input: Dict[str, Any]) -> Dict[str, Any]:
@@ -35,16 +44,21 @@ if __name__ == "__main__":
 
     # clean text stage
     clean_task = TokenSearcherTextCleanerTask(
-        TokenSearcherTextCleanerConfig(clean=True),
-        model
+        predictor=model,
+        postprocess=TokenSearcherTextCleanerPostprocessor(
+            TokenSearcherTextCleanerPostprocessorConfig(clean=True),
+        )
     )
 
     # NER stage
     ner_task = TokenSearcherNERTask(
-        TokenSearcherNERConfig(
-            threshold=0.8
-        ),
-        model
+        predictor=model,
+        postprocess=TokenSearcherNERPostprocessor(
+            TokenSearcherNERPostprocessorConfig(
+                threshold=0.8
+            )
+        )
+
     )
 
     # create pipeline with described stages
