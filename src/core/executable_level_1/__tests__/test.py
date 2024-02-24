@@ -1,10 +1,13 @@
 # Example subclass implementation
 from typing import Any, Dict, List
+import logging
 
 from core.executable_level_1.executable import Executable
+from core.executable_level_1.interpreter import EvaluatorLogger
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.schema import Input, Output, Config
 
+EvaluatorLogger.level = logging.DEBUG
 
 class MyInput(Input):
     # Input class implementation goes here

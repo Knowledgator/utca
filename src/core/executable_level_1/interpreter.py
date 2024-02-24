@@ -12,6 +12,7 @@ from core.executable_level_1.schema import (
 )
 from core.executable_level_1.actions import Action
 
+EvaluatorLogger = logging.Logger("EvaluatorLogger", logging.INFO)
 
 INPUT = "input"
 
@@ -52,9 +53,10 @@ class Evaluator:
         for i, st in enumerate(program):
             try:
                 self.eval(st)
+                EvaluatorLogger.info(f"Step {i} executed successfully.")
             except Exception as e:
-                print(f"Error at step {i}: {e}")
-                logging.exception(e)
+                EvaluatorLogger.error(f"Error at step {i}: {e}")
+                EvaluatorLogger.exception(e)
         return self.register.extract()  # Assuming this method extracts the final result
 
 
