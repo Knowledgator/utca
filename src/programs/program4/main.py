@@ -13,7 +13,7 @@ from implementation.predictors.transformers.transformers_image_classification im
 from core.executable_level_1.actions import ExecuteFunction
 from implementation.datasources.image.actions import (
     ImageRead,
-    PadImage,
+    ImagePad,
 )
 from core.executable_level_1.interpreter import Evaluator
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     pipeline = (
         ImageRead()
-        | PadImage(width=224, height=224)
+        | ImagePad(width=224, height=224)
         | model_stage
         | ExecuteFunction(interpret_results)
     )

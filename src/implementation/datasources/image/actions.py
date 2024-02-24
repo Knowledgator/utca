@@ -16,7 +16,7 @@ class ImageWrite(Action):
         return input_data
 
 
-class RotateImage(Action):
+class ImageRotate(Action):
     def __init__(self, rotation: float) -> None:
         self.rotation = rotation
 
@@ -28,7 +28,7 @@ class RotateImage(Action):
         return input_data
     
 
-class ResizeImage(Action):
+class ImageResize(Action):
     def __init__(self, width: int, height: int) -> None:
         self.height = height
         self.width = width
@@ -41,7 +41,7 @@ class ResizeImage(Action):
         return input_data
     
 
-class PadImage(Action):
+class ImagePad(Action):
     def __init__(self, width: int, height: int, color: Optional[str]=None) -> None:
         self.height = height
         self.width = width
@@ -57,7 +57,7 @@ class PadImage(Action):
         return input_data
     
 
-class CropImage(Action):
+class ImageCrop(Action):
     def __init__(self, box: Tuple[int, int, int, int]) -> None:
         self.box = box
 
