@@ -4,7 +4,8 @@ from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.eval import ExecutionSchema
 from core.executable_level_1.actions import (
     ExecuteFunction,
-    AddData
+    AddData,
+    RenameAttribute
 )
 from implementation.datasources.pdf.actions import (
     PDFRead
@@ -30,10 +31,6 @@ from implementation.tasks.ner.actions import (
 
 def get_page(input: Dict[str, Any]) -> Dict[str, Any]:
     return {"text": input["texts"][0]}
-
-
-def get_ner_input(input: Dict[str, Any]) -> Dict[str, Any]:
-    return {"text": input["cleaned_text"]}
 
 
 if __name__ == "__main__":
@@ -68,7 +65,7 @@ if __name__ == "__main__":
         # adapts outputs to inputs 
         
         | clean_task 
-        | ExecuteFunction(get_ner_input)         
+        | RenameAttribute("cleaned_text", "text")         
         | AddData({"labels": ["person", "framework"]}) 
         # add labels that will be used by NER task
         
