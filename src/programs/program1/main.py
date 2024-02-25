@@ -42,19 +42,19 @@ if __name__ == "__main__":
     # clean text stage
     clean_task = TokenSearcherTextCleanerTask(
         predictor=model,
-        postprocess=TokenSearcherTextCleanerPostprocessor(
+        postprocess=[TokenSearcherTextCleanerPostprocessor(
             TokenSearcherTextCleanerPostprocessorConfig(clean=True),
-        )
+        )]
     )
 
     # NER stage
     ner_task = TokenSearcherNERTask(
         predictor=model,
-        postprocess=TokenSearcherNERPostprocessor(
+        postprocess=[TokenSearcherNERPostprocessor(
             TokenSearcherNERPostprocessorConfig(
                 threshold=0.8
             )
-        )
+        )]
 
     )
 

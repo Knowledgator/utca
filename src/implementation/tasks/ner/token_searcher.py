@@ -1,4 +1,4 @@
-from typing import Optional, Type
+from typing import Optional, Type, List
 
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
@@ -54,10 +54,10 @@ class TokenSearcherNERTask(
             TokenSearcherPredictorInput, 
             TokenSearcherPredictorOutput
         ]]=None,
-        preprocess: Optional[Action]=None,
-        postprocess: Optional[Action]=None
+        preprocess: Optional[List[Action]]=None,
+        postprocess: Optional[List[Action]]=None
     ) -> None:
         self.cfg = cfg or NERConfig()
         self.predictor = predictor or TokenSearcherPredictor()
-        self._preprocess = preprocess or TokenSearcherNERPreprocessor()
-        self._postprocess = postprocess or TokenSearcherNERPostprocessor()
+        self._preprocess = preprocess or [TokenSearcherNERPreprocessor()]
+        self._postprocess = postprocess or [TokenSearcherNERPostprocessor()]

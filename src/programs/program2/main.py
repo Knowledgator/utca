@@ -67,11 +67,11 @@ if __name__ == '__main__':
     # Q&A stage
     q_and_a = TokenSearcherQandATask(
         predictor=model,
-        postprocess=TokenSearcherQandAPostprocessor(
+        postprocess=[TokenSearcherQandAPostprocessor(
             TokenSearcherQandAPostprocessorConfig(
                 threshold=0.7
             )
-        )
+        )]
     )
 
 
