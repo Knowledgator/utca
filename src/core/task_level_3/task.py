@@ -26,8 +26,8 @@ class Task(
             PredictorInputType, 
             PredictorOutputType
         ],
-        preprocess: Action,
-        postprocess: Action
+        preprocess: List[Action],
+        postprocess: List[Action]
     ) -> None:
         super().__init__(cfg)
         self.predictor = Predictor
@@ -35,20 +35,32 @@ class Task(
         self._postprocess = postprocess
 
     
+    def process(
+        self, state: Dict[str, Any], actions: List[Action]
+    ) -> Dict[str, Any]:
+        tmp = state
+        for action in actions:
+            tmp = action.execute(tmp)
+        return cast(Dict[str, Any], tmp)
+
+
     def invoke(
         self, input_data: InputType
     ) -> Dict[str, Any]:
         processed_input = cast(
             Dict[str, Any],
-            self._preprocess.execute(input_data.model_dump())
+            self.process(input_data.model_dump(), self._preprocess)
         )
         predicts = cast(Dict[str, Any], self.predictor.execute(
             Transformable({"inputs": processed_input["inputs"]})
         ).extract())
-        return cast(Dict[str, Any], self._postprocess.execute({
-            "inputs": processed_input,
-            "outputs": predicts["outputs"]
-        }))
+        return self.process(
+            {
+                "inputs": processed_input,
+                "outputs": predicts["outputs"]
+            }, 
+            self._postprocess
+        )
     
 
     def invoke_batch(
