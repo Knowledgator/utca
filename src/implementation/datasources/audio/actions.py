@@ -6,7 +6,7 @@ import numpy as np
 from core.executable_level_1.actions import Action, OneToOne
 
 @OneToOne
-class AudioRead(Action):
+class AudioRead(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         audio_data, samplerate = sf.read(input_data["path_to_file"]) # type: ignore 
         return {
@@ -16,7 +16,7 @@ class AudioRead(Action):
 
 
 @OneToOne
-class AudioWrite(Action):
+class AudioWrite(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         sf.write( # type: ignore
             input_data["path_to_file"], 

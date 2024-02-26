@@ -1,39 +1,40 @@
 from abc import abstractmethod
 from typing import (
-    Callable, Any, Dict, List, Union, Generic, TypeVar, Type
+    Callable, Any, Dict, List, Generic, TypeVar, Type
 )
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.statements_types import Statement
-from core.executable_level_1.schema import State
 
+InputState = TypeVar("InputState", Dict[str, Any], List[Dict[str, Any]])
+OutputState = TypeVar("OutputState", Dict[str, Any], List[Dict[str, Any]])
 
-class Action(Component):    
+class Action(Generic[InputState, OutputState], Component):    
     @abstractmethod
-    def execute(self, input_data: Any) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    def execute(self, input_data: InputState) -> OutputState:
         pass
 
 
     def generate_statement(self) -> Dict[str, Any]:
         return {"type": Statement.ACTION_STATEMENT,  Statement.ACTION_STATEMENT.value: self}
 
-InputState = TypeVar("InputState", Dict[str, Any], List[Dict[str, Any]])
-OutputState = TypeVar("OutputState", Dict[str, Any], List[Dict[str, Any]])
 
 class ActionDecorator(Generic[InputState, OutputState]):
+    action: Action[InputState, OutputState]
+    
     def __init__(
         self, 
-        action: Type[Action]
+        action: Type[Action[InputState, OutputState]]
     ) -> None:
-        self.action = action
+        self.action_type = action
 
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        return self.action(*args, **kwargs)
+        self.action = self.action_type(*args, **kwargs)
 
 
-    def execute(self, *args: Any, **kwargs: Any) -> Any:
-        return self.action.execute(*args, **kwargs)
+    def execute(self, input_data: InputState) -> OutputState:
+        return self.action.execute(input_data)
 
 
 class ManyToMany(ActionDecorator[List[Dict[str, Any]], List[Dict[str, Any]]]):
@@ -53,7 +54,7 @@ class OneToMany(ActionDecorator[Dict[str, Any], List[Dict[str, Any]]]):
 
 
 @OneToOne
-class AddData(Action):
+class AddData(Action[Dict[str, Any], Dict[str, Any]]):
     data: Dict[str, Any]
 
     def __init__(self, data: Dict[str, Any]) -> None:
@@ -66,7 +67,7 @@ class AddData(Action):
 
 
 @OneToOne
-class RenameAttribute(Action):
+class RenameAttribute(Action[Dict[str, Any], Dict[str, Any]]):
     old_name: str
     new_name: str
 
@@ -81,7 +82,7 @@ class RenameAttribute(Action):
 
 
 @OneToOne
-class ChangeValue(Action):
+class ChangeValue(Action[Dict[str, Any], Dict[str, Any]]):
     key: str
     value: Any
 
@@ -96,7 +97,7 @@ class ChangeValue(Action):
 
 
 @OneToOne
-class RenameAttributeQuery(Action):
+class RenameAttributeQuery(Action[Dict[str, Any], Dict[str, Any]]):
     TRANSFORMATION_DELIMITER = ";"
     TRANSFORMATION_POINTER = "<-"
     
@@ -128,7 +129,7 @@ class RenameAttributeQuery(Action):
 
 
 @OneToOne
-class MergeData(Action):
+class MergeData(Action[Dict[str, Any], Dict[str, Any]]):
     data: Dict[str, Any]
     new_priority: bool
 
@@ -144,16 +145,25 @@ class MergeData(Action):
         return state
 
 
-class ExecuteFunction(Generic[State], Action):
+class ExecuteFunction(Action[InputState, OutputState]):
     def __init__(
         self, 
-        func: Union[
-            Callable[[State], Dict[str, Any]],
-            Callable[[State], List[Dict[str, Any]]],
-        ]
+        func: Callable[[InputState], OutputState]
     ) -> None:
         self.func = func
 
 
-    def execute(self, input_data: State) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    def execute(self, input_data: InputState) -> OutputState:
         return self.func(input_data)
+    
+
+@ManyToMany
+class BatchAdapter(Action[List[Dict[str, Any]], List[Dict[str, Any]]]):
+    def __init__(self, action: OneToOne):
+        self.action = action
+
+    
+    def execute(self, input_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        return [
+            self.action.execute(i) for i in input_data
+        ]

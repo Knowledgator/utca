@@ -1,6 +1,8 @@
 from typing import Any, Dict
 
-from core.executable_level_1.actions import Action, OneToOne
+from core.executable_level_1.actions import (
+    Action, OneToOne, InputState, OutputState
+)
 from implementation.apis.google_cloud.client import (
     GoogleCloudClient
 )
@@ -25,13 +27,13 @@ from implementation.apis.google_cloud.client import (
 #     }
 # ]
 
-class GoogleDocsAction(Action):
+class GoogleDocsAction(Action[InputState, OutputState]):
     def __init__(self, client: GoogleCloudClient) -> None:
         self.docs_service = client.service.documents()
 
 
 @OneToOne
-class GoogleDocsCreate(GoogleDocsAction):
+class GoogleDocsCreate(GoogleDocsAction[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             doc_id: str = ( # type: ignore
@@ -50,7 +52,7 @@ class GoogleDocsCreate(GoogleDocsAction):
 
 
 @OneToOne
-class GoogleDocsWrite(GoogleDocsAction):
+class GoogleDocsWrite(GoogleDocsAction[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             input_data["document"] = (
@@ -66,7 +68,7 @@ class GoogleDocsWrite(GoogleDocsAction):
 
 
 @OneToOne
-class GoogleDocsRead(GoogleDocsAction):
+class GoogleDocsRead(GoogleDocsAction[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             return (

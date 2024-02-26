@@ -17,7 +17,7 @@ from core.executable_level_1.actions import (
 )
 
 @OneToOne
-class PDFRead(Action):
+class PDFRead(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         pdfReader = pdfplumber.open(
             input_data['path_to_file'], 
@@ -31,7 +31,7 @@ class PDFRead(Action):
         }
 
 
-class PDFExtractTexts(Action):
+class PDFExtractTexts(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
             "pdf_texts": {
@@ -42,7 +42,7 @@ class PDFExtractTexts(Action):
     
 
 @OneToOne
-class PDFExtractTextsFormatted(Action):
+class PDFExtractTextsFormatted(Action[Dict[str, Any], Dict[str, Any]]):
     def process_page(
         self, 
         page: Page, 
@@ -151,7 +151,7 @@ class PDFExtractTextsFormatted(Action):
 
 
 @OneToOne
-class PDFExtractTables(Action):
+class PDFExtractTables(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
             "pdf_tables": {
@@ -162,7 +162,7 @@ class PDFExtractTables(Action):
     
 
 @OneToOne
-class PDFExtractImages(Action):
+class PDFExtractImages(Action[Dict[str, Any], Dict[str, Any]]):
     def extract_images_from_page(self, page: Page) -> Iterator[Image.Image]:
         page_height = page.height
 
@@ -184,7 +184,7 @@ class PDFExtractImages(Action):
 
 
 @OneToOne
-class PDFWrite(Action):
+class PDFWrite(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         canvas = Canvas(
             input_data['path_to_file'], 

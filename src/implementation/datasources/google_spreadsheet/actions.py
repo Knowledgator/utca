@@ -1,7 +1,9 @@
 from __future__ import annotations
 from typing import Any, Dict, List, cast
 
-from core.executable_level_1.actions import Action, OneToOne, OneToMany
+from core.executable_level_1.actions import (
+    Action, OneToOne, OneToMany, InputState, OutputState
+)
 from implementation.apis.google_cloud.client import (
     GoogleCloudClient
 )
@@ -12,13 +14,13 @@ from implementation.datasources.google_spreadsheet.schema import (
 )
 
 
-class GoogleSpreadsheetAction(Action):
+class GoogleSpreadsheetAction(Action[InputState, OutputState]):
     def __init__(self, client: GoogleCloudClient) -> None:
         self.sheet_service = client.service.spreadsheets()
 
 
 @OneToOne
-class GoogleSpreadsheetRead(GoogleSpreadsheetAction):
+class GoogleSpreadsheetRead(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             result = cast(Dict[str, Any], (
@@ -37,7 +39,7 @@ class GoogleSpreadsheetRead(GoogleSpreadsheetAction):
 
 
 @OneToMany
-class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction):
+class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction[Dict[str, Any], List[Dict[str, Any]]]):
     def execute(self, input_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         try:
             result = cast(Dict[str, Any], (
@@ -58,7 +60,7 @@ class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction):
 
 
 @OneToOne
-class GoogleSpreadsheetWrite(GoogleSpreadsheetAction):
+class GoogleSpreadsheetWrite(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             input_data["spreadsheet"] = (
@@ -85,7 +87,7 @@ class GoogleSpreadsheetWrite(GoogleSpreadsheetAction):
 
 
 @OneToOne
-class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction):
+class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             input_data["spreadsheet"] = (
@@ -108,7 +110,7 @@ class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction):
 
 
 @OneToOne
-class GoogleSpreadsheetAppend(GoogleSpreadsheetAction):
+class GoogleSpreadsheetAppend(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             (
@@ -138,7 +140,7 @@ class GoogleSpreadsheetAppend(GoogleSpreadsheetAction):
 
 
 @OneToOne
-class GoogleSpreadsheetCreate(GoogleSpreadsheetAction):
+class GoogleSpreadsheetCreate(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             input_data["spreadsheet_id"] = (

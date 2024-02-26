@@ -10,7 +10,7 @@ from core.task_level_3.objects.objects import (
 )
 
 @OneToOne
-class TokenSeatcherTextCleanerPreprocessor(Action):
+class TokenSeatcherTextCleanerPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     prompt: str = """
 Clean the following text extracted from the web matching not relevant parts:
 
@@ -30,7 +30,7 @@ class TokenSearcherTextCleanerPostprocessorConfig(Config):
 
 
 @OneToOne
-class TokenSearcherTextCleanerPostprocessor(Action):
+class TokenSearcherTextCleanerPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
         cfg: Optional[TokenSearcherTextCleanerPostprocessorConfig] = None

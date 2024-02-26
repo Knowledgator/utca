@@ -14,7 +14,7 @@ class TokenSearcherNERPreprocessorConfig(Config):
 
 
 @OneToOne
-class TokenSearcherNERPreprocessor(Action):
+class TokenSearcherNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     prompt: str = """
 Identify entities in the text having the following classes:
 {label}
@@ -83,7 +83,7 @@ class TokenSearcherNERPostprocessorConfig(Config):
 
 
 @OneToOne
-class TokenSearcherNERPostprocessor(Action):
+class TokenSearcherNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
         cfg: Optional[TokenSearcherNERPostprocessorConfig]=None

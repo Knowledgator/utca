@@ -7,7 +7,7 @@ from core.task_level_3.utils import (
 )
 
 @OneToOne
-class TokenSearcherQandAPreprocessor(Action):
+class TokenSearcherQandAPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     prompt: str = """{question}
 Text:
  """
@@ -26,7 +26,7 @@ class TokenSearcherQandAPostprocessorConfig(Config):
 
 
 @OneToOne
-class TokenSearcherQandAPostprocessor(Action):
+class TokenSearcherQandAPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
         cfg: Optional[TokenSearcherQandAPostprocessorConfig]=None

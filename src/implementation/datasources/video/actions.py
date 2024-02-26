@@ -5,7 +5,7 @@ import cv2
 from core.executable_level_1.actions import Action, OneToOne
 
 @OneToOne
-class VideoRead(Action):
+class VideoRead(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         video = cv2.VideoCapture(input_data["path_to_file"])
         # video.release() TODO: need to be called?
@@ -14,7 +14,7 @@ class VideoRead(Action):
 
 
 @OneToOne
-class VideoWrite(Action):
+class VideoWrite(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         w = cv2.VideoWriter(
             input_data["path_to_file"],
@@ -29,7 +29,7 @@ class VideoWrite(Action):
 
 
 @OneToOne
-class VideoReleaseCapture(Action):
+class VideoReleaseCapture(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         video = input_data.pop("video_data")
         video.release()

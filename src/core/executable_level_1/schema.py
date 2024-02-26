@@ -87,4 +87,3 @@ class Config(BaseModel, ABC):
 
 OutputType = TypeVar('OutputType', bound=Output)
 ConfigType = TypeVar('ConfigType', bound=Config, contravariant=True)
-State = TypeVar("State", Dict[str, Any], List[Dict[str, Any]])
