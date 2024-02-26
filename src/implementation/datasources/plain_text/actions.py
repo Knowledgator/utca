@@ -1,7 +1,8 @@
 from typing import Dict, Any
 
-from core.executable_level_1.actions import Action
+from core.executable_level_1.actions import Action, OneToOne
 
+@OneToOne
 class PlainTextRead(Action):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         with open(input_data["path_to_file"], "r") as f:
@@ -10,6 +11,7 @@ class PlainTextRead(Action):
             }
 
 
+@OneToOne
 class PlainTextWrite(Action):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         with open(input_data["path_to_file"], "w") as f:
@@ -17,6 +19,7 @@ class PlainTextWrite(Action):
         return input_data
     
 
+@OneToOne
 class PlainTextAppend(Action):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         with open(input_data["path_to_file"], "a") as f:

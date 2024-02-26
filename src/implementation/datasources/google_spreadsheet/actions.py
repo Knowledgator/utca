@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, Dict, List, cast
 
-from core.executable_level_1.actions import Action
+from core.executable_level_1.actions import Action, OneToOne, OneToMany
 from implementation.apis.google_cloud.client import (
     GoogleCloudClient
 )
@@ -17,6 +17,7 @@ class GoogleSpreadsheetAction(Action):
         self.sheet_service = client.service.spreadsheets()
 
 
+@OneToOne
 class GoogleSpreadsheetRead(GoogleSpreadsheetAction):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
@@ -35,6 +36,7 @@ class GoogleSpreadsheetRead(GoogleSpreadsheetAction):
             raise ValueError(f"Unable to read specified sheet: {e}")
 
 
+@OneToMany
 class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction):
     def execute(self, input_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         try:
@@ -55,6 +57,7 @@ class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction):
             raise ValueError(f"Unable to read specified sheet: {e}")
 
 
+@OneToOne
 class GoogleSpreadsheetWrite(GoogleSpreadsheetAction):
    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
@@ -81,6 +84,7 @@ class GoogleSpreadsheetWrite(GoogleSpreadsheetAction):
             raise ValueError(f"An error occurred: {e}")
 
 
+@OneToOne
 class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
@@ -103,6 +107,7 @@ class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction):
             raise ValueError(f"An error occurred: {e}")
 
 
+@OneToOne
 class GoogleSpreadsheetAppend(GoogleSpreadsheetAction):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
@@ -132,6 +137,7 @@ class GoogleSpreadsheetAppend(GoogleSpreadsheetAction):
             raise ValueError(f"An error occurred: {e}")
 
 
+@OneToOne
 class GoogleSpreadsheetCreate(GoogleSpreadsheetAction):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:

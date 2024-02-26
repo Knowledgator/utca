@@ -1,11 +1,12 @@
 from abc import abstractmethod
 from typing import (
-    Callable, Any, Dict, List, Union, Generic
+    Callable, Any, Dict, List, Union, Generic, TypeVar, Type
 )
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.statements_types import Statement
 from core.executable_level_1.schema import State
+
 
 class Action(Component):    
     @abstractmethod
@@ -15,8 +16,43 @@ class Action(Component):
 
     def generate_statement(self) -> Dict[str, Any]:
         return {"type": Statement.ACTION_STATEMENT,  Statement.ACTION_STATEMENT.value: self}
-    
 
+InputState = TypeVar("InputState", Dict[str, Any], List[Dict[str, Any]])
+OutputState = TypeVar("OutputState", Dict[str, Any], List[Dict[str, Any]])
+
+class ActionDecorator(Generic[InputState, OutputState]):
+    def __init__(
+        self, 
+        action: Type[Action]
+    ) -> None:
+        self.action = action
+
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        return self.action(*args, **kwargs)
+
+
+    def execute(self, *args: Any, **kwargs: Any) -> Any:
+        return self.action.execute(*args, **kwargs)
+
+
+class ManyToMany(ActionDecorator[List[Dict[str, Any]], List[Dict[str, Any]]]):
+    ...
+
+
+class OneToOne(ActionDecorator[Dict[str, Any], Dict[str, Any]]):
+    ...
+
+
+class ManyToOne(ActionDecorator[List[Dict[str, Any]], Dict[str, Any]]):
+    ...
+
+
+class OneToMany(ActionDecorator[Dict[str, Any], List[Dict[str, Any]]]):
+    ...
+
+
+@OneToOne
 class AddData(Action):
     data: Dict[str, Any]
 
@@ -29,6 +65,7 @@ class AddData(Action):
         return input_data
 
 
+@OneToOne
 class RenameAttribute(Action):
     old_name: str
     new_name: str
@@ -43,6 +80,7 @@ class RenameAttribute(Action):
         return input_data
 
 
+@OneToOne
 class ChangeValue(Action):
     key: str
     value: Any
@@ -57,6 +95,7 @@ class ChangeValue(Action):
         return input_data
 
 
+@OneToOne
 class RenameAttributeQuery(Action):
     TRANSFORMATION_DELIMITER = ";"
     TRANSFORMATION_POINTER = "<-"
@@ -88,6 +127,7 @@ class RenameAttributeQuery(Action):
         return input_data
 
 
+@OneToOne
 class MergeData(Action):
     data: Dict[str, Any]
     new_priority: bool

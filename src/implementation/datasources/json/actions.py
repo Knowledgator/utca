@@ -1,8 +1,9 @@
 from typing import Dict, Any
 import json
 
-from core.executable_level_1.actions import Action
+from core.executable_level_1.actions import Action, OneToOne
 
+@OneToOne
 class JSONRead(Action):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         with open(input_data["path_to_file"], "r") as f:
@@ -11,6 +12,7 @@ class JSONRead(Action):
             }
 
 
+@OneToOne
 class JSONWrite(Action):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         with open(input_data["path_to_file"], "w") as f:

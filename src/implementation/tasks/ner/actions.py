@@ -1,7 +1,7 @@
 from typing import Any, Dict, Tuple, Optional, cast
 
 from core.executable_level_1.schema import Config
-from core.executable_level_1.actions import Action
+from core.executable_level_1.actions import Action, OneToOne
 from core.task_level_3.objects.objects import (
     ClassifiedEntity
 )
@@ -13,6 +13,7 @@ class TokenSearcherNERPreprocessorConfig(Config):
     sents_batch: int=10
 
 
+@OneToOne
 class TokenSearcherNERPreprocessor(Action):
     prompt: str = """
 Identify entities in the text having the following classes:
@@ -81,6 +82,7 @@ class TokenSearcherNERPostprocessorConfig(Config):
     threshold: float = 0.
 
 
+@OneToOne
 class TokenSearcherNERPostprocessor(Action):
     def __init__(
         self, 

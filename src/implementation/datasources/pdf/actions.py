@@ -11,30 +11,42 @@ from reportlab.pdfgen.canvas import Canvas # type: ignore
 from reportlab.lib.units import cm # type: ignore
 from reportlab.lib.pagesizes import A4 # type: ignore
 
-from core.executable_level_1.actions import Action
+from core.executable_level_1.actions import (
+    OneToOne,
+    Action
+)
 
+@OneToOne
 class PDFRead(Action):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        pdfReader = pdfplumber.open(input_data['path_to_file'], pages=input_data.get('pages'))
-        pages = pdfReader.pages
-
-        # Extract pages from the PDF
-        extracted_pages = extract_pages(input_data['path_to_file'], page_numbers=input_data.get('pages'))
+        pdfReader = pdfplumber.open(
+            input_data['path_to_file'], 
+            pages=input_data.get('pages')
+        )
         return {
-            str(extracted_page.pageid): {
-                "raw_page": pages[extracted_page.pageid-1],
-                "extracted_page": extracted_page
-            } for extracted_page in extracted_pages
+            "pdf": {
+                page.page_number: page
+                for page in pdfReader.pages
+            }
         }
 
 
 class PDFExtractTexts(Action):
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "pdf_texts": {
+                page_id: cast(Page, page).extract_text()
+                for page_id, page in input_data["pdf"].items()
+            }
+        }
+    
+
+@OneToOne
+class PDFExtractTextsFormatted(Action):
     def process_page(
         self, 
         page: Page, 
-        extracted_page: LTPage, 
-        ex_text: bool=True, 
-        ex_table: bool=True
+        ex_tables: bool=True
     ) -> str:
         content: List[str] = []
         
@@ -49,7 +61,7 @@ class PDFExtractTexts(Action):
 
 
         # Get a sorted list of elements based on their Y-coordinate in reverse order
-        elements = [element for element in extracted_page]
+        elements = [element for element in page.layout]
         elements.sort(key=lambda a: a.y1, reverse=True)
 
 
@@ -133,27 +145,23 @@ class PDFExtractTexts(Action):
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
-            page_id: self.process_page(page_objs["raw_page"], page_objs["extracted_page"])
-            for page_id, page_objs in input_data.items()
+            page_id: self.process_page(page)
+            for page_id, page in input_data["pdf"].items()
         }
 
 
-class PDFExtractTextsTest(Action):
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        return {
-            page_id: page_objs["raw_page"].extract_text()
-            for page_id, page_objs in input_data.items()
-        }
-
-
+@OneToOne
 class PDFExtractTables(Action):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
-            page_id: cast(Page, page_objs["raw_page"]).extract_tables()
-            for page_id, page_objs in input_data.items()
+            "pdf_tables": {
+                page_id: cast(Page, page).extract_tables()
+                for page_id, page in input_data["pdf"].items()
+            }
         }
     
 
+@OneToOne
 class PDFExtractImages(Action):
     def extract_images_from_page(self, page: Page) -> Iterator[Image.Image]:
         page_height = page.height
@@ -168,12 +176,14 @@ class PDFExtractImages(Action):
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         images: Dict[str, Any] = {}
-        for page_id, page_objs in input_data.items():
-            page = cast(Page, page_objs["raw_page"])
-            images[page_id] = list(self.extract_images_from_page(page))
-        return images
+        for page_id, page in input_data["pdf"].items():
+            images[page_id] = list(self.extract_images_from_page(cast(Page, page)))
+        return {
+            "pdf_images": images
+        }
 
 
+@OneToOne
 class PDFWrite(Action):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         canvas = Canvas(

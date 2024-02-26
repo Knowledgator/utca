@@ -3,8 +3,9 @@ from typing import Dict, Any
 import soundfile as sf # type: ignore
 import numpy as np
 
-from core.executable_level_1.actions import Action
+from core.executable_level_1.actions import Action, OneToOne
 
+@OneToOne
 class AudioRead(Action):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         audio_data, samplerate = sf.read(input_data["path_to_file"]) # type: ignore 
@@ -14,6 +15,7 @@ class AudioRead(Action):
         }
 
 
+@OneToOne
 class AudioWrite(Action):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         sf.write( # type: ignore

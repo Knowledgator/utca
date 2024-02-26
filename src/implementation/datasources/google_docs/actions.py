@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from core.executable_level_1.actions import Action
+from core.executable_level_1.actions import Action, OneToOne
 from implementation.apis.google_cloud.client import (
     GoogleCloudClient
 )
@@ -30,6 +30,7 @@ class GoogleDocsAction(Action):
         self.docs_service = client.service.documents()
 
 
+@OneToOne
 class GoogleDocsCreate(GoogleDocsAction):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
@@ -48,6 +49,7 @@ class GoogleDocsCreate(GoogleDocsAction):
             raise ValueError(f'Unable to create doc: {e}')
 
 
+@OneToOne
 class GoogleDocsWrite(GoogleDocsAction):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
@@ -63,6 +65,7 @@ class GoogleDocsWrite(GoogleDocsAction):
             raise ValueError(f'Unable to update doc: {e}')
 
 
+@OneToOne
 class GoogleDocsRead(GoogleDocsAction):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
