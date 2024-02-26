@@ -8,7 +8,10 @@ from typing import (
 from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
-    from core.executable_level_1.actions import Action
+    from core.executable_level_1.actions import (
+        ActionDecorator, OneToMany, OneToOne, ManyToMany, ManyToOne, 
+        InputState, OutputState, BatchAdapter
+    )
 
 class Input(BaseModel, ABC):
     def generate_transformable(self):
@@ -56,8 +59,21 @@ class Transformable():
              return False
         
     
-    def update_state(self, action: Action) -> None:
-        self.state = action.execute(self.state)
+    def update_state(self, action: ActionDecorator[InputState, OutputState]) -> None:
+        if isinstance(self.state, Dict):
+            if isinstance(action, (ManyToOne, ManyToMany)):
+                self.state = action.execute([self.state])
+            elif isinstance(action, (OneToOne, OneToMany)):
+                self.state = action.execute(self.state)
+            else:
+                raise ValueError("Invalid Action!")
+        else:
+            if isinstance(action, (ManyToOne, ManyToMany)):
+                self.state = action.execute(self.state)
+            elif isinstance(action, OneToOne):
+                self.state = BatchAdapter(action).execute(self.state)
+            else:
+                raise ValueError("Invalid Action!")
 
         
     @property
