@@ -2,38 +2,61 @@ from typing import List, Dict, Any
 
 from PIL import Image, ImageDraw
 from transformers import ( # type: ignore
-    AutoFeatureExtractor, 
+    AutoImageProcessor, 
     AutoModelForImageClassification,
-    AutoConfig
 )
-import torch
 import numpy as np
 
-from implementation.predictors.transformers.transformers_image_classification import (
-    TransformersImageClassificationConfig,
+from core.executable_level_1.interpreter import Evaluator
+from core.executable_level_1.memory import SetMemory, GetMemory
+from core.executable_level_1.actions import (
+    ExecuteFunction, OneToOne, OneToMany, ManyToOne
+)
+from implementation.predictors.transformers.transformers_model import (
+    TransformersModel,
+    TransformersModelConfig
+)
+from implementation.tasks.image_classification.transformers_image_classification import (
     TransformersImageClassification
+)
+from implementation.tasks.image_classification.actions import (
+    ImageClassificationPreprocessor,
+    ImageClassificationPreprocessorConfig,
+    ImageClassificationMultyLabelPostprocessor,
+    ImageClassificationPostprocessorConfig
 )
 from implementation.datasources.video.actions import (
     VideoRead,
     VideoWrite
 )
-from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.actions import ExecuteFunction
-from core.executable_level_1.memory import SetMemory, GetMemory
 
 model_name = "trpakov/vit-face-expression"
 
-# Retrieve the id2label attribute from the configuration
-labels = AutoConfig.from_pretrained( # type: ignore
-    model_name
-).id2label
+model = AutoModelForImageClassification.from_pretrained(model_name) # type: ignore
+processor = AutoImageProcessor.from_pretrained(model_name) # type: ignore
+labels = model.config.id2label # type: ignore
 
-# Define model stage
-model_stage = TransformersImageClassification( # type: ignore
-    TransformersImageClassificationConfig(
-        model=AutoModelForImageClassification.from_pretrained(model_name), # type: ignore
-        feature_extractor=AutoFeatureExtractor.from_pretrained(model_name) # type: ignore
-    )
+# Define task stage
+task = TransformersImageClassification( # type: ignore
+    predictor=TransformersModel(
+        TransformersModelConfig(
+            model=model
+        )
+    ),
+    preprocess=[
+        ImageClassificationPreprocessor(
+            ImageClassificationPreprocessorConfig(
+                processor=processor # type: ignore
+            )
+        )
+    ],
+    postprocess=[
+        ImageClassificationMultyLabelPostprocessor(
+            ImageClassificationPostprocessorConfig(
+                labels=labels # type: ignore
+            )
+        )
+    ]
 )
 
 def prepare_batch_image_classification_input(state: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -47,22 +70,12 @@ def prepare_batch_image_classification_input(state: Dict[str, Any]) -> List[Dict
     ]
 
 
-def interpret_results(state: List[Dict[str, Any]]) -> Dict[str, Any]:
-    frames_labels: List[Dict[str, Any]] = []
-    for s in state:
-        probabilities = torch.nn.functional.softmax(
-            s["outputs"]["logits"], dim=-1
-        )
-
-        # Convert probabilities tensor to a Python list
-        probabilities = probabilities.detach().numpy().tolist()[0]
-
-        # Map class labels to their probabilities
-        frames_labels.append({
-            labels[i]: prob for i, prob in enumerate(probabilities)
-        })
+def group_labels(state: List[Dict[str, Any]]) -> Dict[str, Any]:
     return {
-        "labels": frames_labels
+        "labels": [
+            output["labels"]
+            for output in state
+        ]
     }
 
 
@@ -89,15 +102,16 @@ def prepare_sample(state: Dict[str, Any]) -> Dict[str, Any]:
         "fps": 0.5
     }
 
+
 if __name__ == "__main__":
     pipeline = (
         VideoRead()
-        | ExecuteFunction(prepare_batch_image_classification_input)
+        | OneToMany(ExecuteFunction)(prepare_batch_image_classification_input)
         | SetMemory("frames")
-        | model_stage
-        | ExecuteFunction(interpret_results)
+        | task
+        | ManyToOne(ExecuteFunction)(group_labels)
         | GetMemory(["frames"])
-        | ExecuteFunction(prepare_sample)
+        | OneToOne(ExecuteFunction)(prepare_sample)
         | VideoWrite()
     )
 

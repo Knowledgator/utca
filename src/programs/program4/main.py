@@ -1,44 +1,61 @@
 from typing import Dict, Any, cast
 
 from transformers import ( # type: ignore
-    AutoFeatureExtractor, 
+    AutoImageProcessor, 
     AutoModelForImageClassification,
-    AutoConfig
 )
 
-from implementation.predictors.transformers.transformers_image_classification import (
-    TransformersImageClassificationConfig,
+from implementation.predictors.transformers.transformers_model import (
+    TransformersModel,
+    TransformersModelConfig
+)
+from implementation.tasks.image_classification.transformers_image_classification import (
     TransformersImageClassification
 )
-from core.executable_level_1.actions import ExecuteFunction
+from implementation.tasks.image_classification.actions import (
+    ImageClassificationPreprocessor,
+    ImageClassificationPreprocessorConfig,
+    ImageClassificationSingleLabelPostprocessor,
+    ImageClassificationPostprocessorConfig
+)
 from implementation.datasources.image.actions import (
-    ImageRead,
-    ImagePad,
+    ImageRead, ImagePad,
 )
 from core.executable_level_1.interpreter import Evaluator
-
-def interpret_results(model_ouput: Dict[str, Any]) -> Dict[str, Any]:
-    predicted_class_idx = model_ouput["outputs"]["logits"].argmax().item()
-    return {"label": labels[predicted_class_idx]}
 
 if __name__ == "__main__":
     model_name = "facebook/deit-base-distilled-patch16-384"
 
-    labels = AutoConfig.from_pretrained(model_name).id2label # type: ignore
+    model = AutoModelForImageClassification.from_pretrained(model_name) # type: ignore
+    processor = AutoImageProcessor.from_pretrained(model_name) # type: ignore
+    labels = model.config.id2label # type: ignore
 
-    # Define model stage
-    model_stage = TransformersImageClassification( # type: ignore
-        TransformersImageClassificationConfig(
-            model=AutoModelForImageClassification.from_pretrained(model_name), # type: ignore
-            feature_extractor=AutoFeatureExtractor.from_pretrained(model_name) # type: ignore
-        )
+    # Define task stage
+    task = TransformersImageClassification( # type: ignore
+        predictor=TransformersModel(
+            TransformersModelConfig(
+                model=model
+            )
+        ),
+        preprocess=[
+            ImagePad(width=224, height=224),
+            ImageClassificationPreprocessor(
+                ImageClassificationPreprocessorConfig(
+                    processor=processor # type: ignore
+                )
+            )
+        ],
+        postprocess=[
+            ImageClassificationSingleLabelPostprocessor(
+                ImageClassificationPostprocessorConfig(
+                    labels=labels # type: ignore
+                )
+            )
+        ]
     )
 
     pipeline = (
-        ImageRead()
-        | ImagePad(width=224, height=224)
-        | model_stage
-        | ExecuteFunction(interpret_results)
+        ImageRead() | task
     )
 
     result = cast(Dict[str, Any], Evaluator(pipeline).run_program({
