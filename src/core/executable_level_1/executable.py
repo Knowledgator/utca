@@ -1,11 +1,19 @@
 from __future__ import annotations
 from typing import (
-    Any, List, Type, Dict, Union, cast, Generic
+    Any, List, Type, Dict, Union, cast, Generic, Optional
 )
 from abc import ABC,  abstractmethod
 
 from core.executable_level_1.component import Component
-from core.executable_level_1.schema import ConfigType, InputType, OutputType, Transformable, Validator
+from core.executable_level_1.schema import (
+    ConfigType, 
+    InputType, 
+    OutputType, 
+    Transformable, 
+    Validator,
+    Input,
+    Output
+)
 from core.executable_level_1.statements_types import (
     Statement
 )
@@ -16,6 +24,17 @@ from core.executable_level_1.statements_types import (
 class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
     input_class: Type[InputType]
     output_class: Type[OutputType]
+
+    def __init__(
+        self, 
+        cfg: Optional[ConfigType]=None,
+        input_class: Type[InputType]=Input,
+        output_class: Type[OutputType]=Output, 
+    ):
+        self.input_class = input_class
+        self.output_class = output_class
+        super().__init__(cfg)
+
 
     @abstractmethod
     def invoke(self, input_data: InputType) -> Dict[str, Any]:

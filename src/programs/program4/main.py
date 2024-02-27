@@ -31,7 +31,7 @@ if __name__ == "__main__":
     labels = model.config.id2label # type: ignore
 
     # Define task stage
-    task = TransformersImageClassification( # type: ignore
+    task = TransformersImageClassification(
         predictor=TransformersModel(
             TransformersModelConfig(
                 model=model

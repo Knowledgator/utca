@@ -1,7 +1,9 @@
-from typing import Type, Any, Dict, List
+from typing import Type, Any
 
-from core.executable_level_1.schema import Input, Output
 from core.predictor_level_2.predictor import Predictor
+from core.predictor_level_2.schema import (
+    PredictorInput, PredictorOutput
+)
 from core.executable_level_1.schema import Config
 
 class TransformersModelConfig(Config):    
@@ -13,12 +15,12 @@ class TransformersModelConfig(Config):
         self.__dict__[name] = value
 
 
-class TransformersModelInput(Input):
-    inputs: Any
+class TransformersModelInput(PredictorInput):
+    ...
 
 
-class TransformersModelOutput(Output):
-    outputs: Any
+class TransformersModelOutput(PredictorOutput):
+    ...
 
 
 class TransformersModel(
@@ -28,27 +30,16 @@ class TransformersModel(
         TransformersModelOutput
     ]
 ):
-    input_class: Type[TransformersModelInput] = TransformersModelInput
-    output_class: Type[TransformersModelOutput] = TransformersModelOutput
-    
-    def __init__(self, cfg: TransformersModelConfig) -> None:
+   
+    def __init__(
+        self, 
+        cfg: TransformersModelConfig,
+        input_class: Type[TransformersModelInput]=TransformersModelInput,
+        output_class: Type[TransformersModelOutput]=TransformersModelOutput
+    ) -> None:
         self.cfg = cfg
-        super().__init__(cfg)
+        super().__init__(cfg, input_class, output_class)
 
 
     def get_predictions(self, inputs: Any) -> Any:
         return self.cfg.model(**inputs) # type: ignore
-    
-
-    def invoke(
-        self, input_data: TransformersModelInput
-    ) -> Dict[str, Any]:
-        return {
-            'outputs': self.get_predictions(input_data.inputs)
-        }
-    
-
-    def invoke_batch(
-        self, input_data: List[TransformersModelInput]
-    ) -> List[Dict[str, Any]]:
-        return [self.invoke(i) for i in input_data]

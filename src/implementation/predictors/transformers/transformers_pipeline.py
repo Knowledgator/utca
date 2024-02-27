@@ -1,11 +1,16 @@
-from typing import TypeVar, Any
+from typing import TypeVar, Any, Type
 
 from transformers import ( # type: ignore
     pipeline, Pipeline # type: ignore
 )
 
-from core.executable_level_1.schema import InputType, OutputType
 from core.predictor_level_2.predictor import Predictor
+from core.predictor_level_2.schema import (
+    PredictorInputType,
+    PredictorOutputType,
+    PredictorInput,
+    PredictorOutput,
+)
 from core.executable_level_1.schema import Config
 
 class TransformersPipelineConfig(Config):    
@@ -26,13 +31,18 @@ TransformersPipelineConfigType = TypeVar(
 class TransformersPipeline(
     Predictor[
         TransformersPipelineConfigType, 
-        InputType, 
-        OutputType
+        PredictorInputType, 
+        PredictorOutputType
     ]
 ):  
-    def __init__(self, cfg: TransformersPipelineConfigType) -> None:        
+    def __init__(
+        self, 
+        cfg: TransformersPipelineConfigType,
+        input_class: Type[PredictorInputType]=PredictorInput,
+        output_class: Type[PredictorOutputType]=PredictorOutput
+    ) -> None:        
         self.pipeline = cfg.pipeline 
-        super().__init__(cfg)
+        super().__init__(cfg, input_class, output_class)
 
 
     def get_predictions(self, inputs: Any) -> Any:

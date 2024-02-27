@@ -37,7 +37,7 @@ processor = AutoImageProcessor.from_pretrained(model_name) # type: ignore
 labels = model.config.id2label # type: ignore
 
 # Define task stage
-task = TransformersImageClassification( # type: ignore
+task = TransformersImageClassification(
     predictor=TransformersModel(
         TransformersModelConfig(
             model=model

@@ -16,13 +16,17 @@ class TokenSearcherPredictor(
         TokenSearcherPredictorOutput
     ]
 ):
-    input_class: Type[TokenSearcherPredictorInput] = TokenSearcherPredictorInput
-    output_class: Type[TokenSearcherPredictorOutput] = TokenSearcherPredictorOutput
-
     def __init__(
-        self, cfg: Optional[TokenSearcherPredictorConfig]=None
+        self, 
+        cfg: Optional[TokenSearcherPredictorConfig]=None,
+        input_class: Type[TokenSearcherPredictorInput]=TokenSearcherPredictorInput,
+        output_class: Type[TokenSearcherPredictorOutput]=TokenSearcherPredictorOutput
     ) -> None:
-        super().__init__(cfg or TokenSearcherPredictorConfig())
+        super().__init__(
+            cfg or TokenSearcherPredictorConfig(),
+            input_class,
+            output_class
+        )
 
 
     def invoke(

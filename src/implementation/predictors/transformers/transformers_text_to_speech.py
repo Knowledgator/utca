@@ -1,10 +1,12 @@
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, Type
 
 from transformers import ( # type: ignore
     pipeline, Pipeline # type: ignore
 )
 
-from core.executable_level_1.schema import Input, Output
+from core.predictor_level_2.schema import (
+    PredictorInput, PredictorOutput
+)
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipelineConfig,
     TransformersPipeline
@@ -23,12 +25,12 @@ class TransformersTextToSpeechConfig(TransformersPipelineConfig):
         self.__dict__[name] = value
 
 
-class TransformersTextToSpeechInput(Input):
-    text: str
+class TransformersTextToSpeechInput(PredictorInput):
+    inputs: str
 
 
-class TransformersTextToSpeechOutput(Output):
-    text: str
+class TransformersTextToSpeechOutput(PredictorOutput):
+    inputs: str
     outputs: Dict[str, Any]
 
 
@@ -39,12 +41,14 @@ class TransformersTextToSpeechPipeline(
         TransformersTextToSpeechOutput,
     ]
 ):
-    input_class: Type[TransformersTextToSpeechInput] = TransformersTextToSpeechInput
-    output_class: Type[TransformersTextToSpeechOutput] = TransformersTextToSpeechOutput
-
-    def __init__(self, cfg: TransformersTextToSpeechConfig) -> None:
-        self.pipeline = cfg.pipeline 
-        super().__init__(cfg)
+    
+    def __init__(
+        self, 
+        cfg: TransformersTextToSpeechConfig,
+        input_class: Type[TransformersTextToSpeechInput]=TransformersTextToSpeechInput,
+        output_class: Type[TransformersTextToSpeechOutput]=TransformersTextToSpeechOutput
+    ) -> None:
+        super().__init__(cfg, input_class, output_class)
 
 
     def get_predictions(self, inputs: Any) -> Any:
@@ -52,16 +56,3 @@ class TransformersTextToSpeechPipeline(
             inputs,
             forward_params={"do_sample": True}
         )
-    
-
-    def invoke(self, input_data: TransformersTextToSpeechInput) -> Dict[str, Any]:
-        return {
-            'text': input_data.text,
-            'outputs': self.get_predictions(input_data.text)
-        }
-    
-
-    def invoke_batch(
-        self, input_data: List[TransformersTextToSpeechInput]
-    ) -> List[Dict[str, Any]]:
-        raise Exception('TODO!')

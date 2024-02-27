@@ -4,7 +4,10 @@ from transformers import ( # type: ignore
     AutoTokenizer, AutoModelForTokenClassification # type: ignore
 )
 
-from core.executable_level_1.schema import Input, Output
+from core.predictor_level_2.schema import (
+    PredictorInput,
+    PredictorOutput
+)
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipelineConfig
 )
@@ -29,10 +32,10 @@ class TokenSearcherPredictorConfig(TransformersPipelineConfig):
         )
 
 
-class TokenSearcherPredictorInput(Input):
+class TokenSearcherPredictorInput(PredictorInput):
     inputs: list[str]
 
 
-class TokenSearcherPredictorOutput(Output):
+class TokenSearcherPredictorOutput(PredictorOutput):
     inputs: list[str]
     outputs: list[list[Dict[str, Any]]]

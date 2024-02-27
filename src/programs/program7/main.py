@@ -27,7 +27,7 @@ model = ViltForQuestionAnswering.from_pretrained(model_name) # type: ignore
 processor = ViltProcessor.from_pretrained(model_name) # type: ignore
 labels = model.config.id2label # type: ignore
 
-task = TransformersVisualQandA( # type: ignore
+task = TransformersVisualQandA(
     predictor=TransformersModel(
         TransformersModelConfig(
             model=model
