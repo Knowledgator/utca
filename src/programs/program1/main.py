@@ -3,6 +3,7 @@ from typing import Dict, Any
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.eval import ExecutionSchema
 from core.executable_level_1.actions import (
+    OneToOne,
     ExecuteFunction,
     AddData,
     RenameAttribute
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     # create pipeline with described stages
     pipeline: ExecutionSchema = (
         PDFRead()
-        | ExecuteFunction(get_page) 
+        | OneToOne(ExecuteFunction)(get_page) 
         # adapts outputs to inputs 
         
         | clean_task 
