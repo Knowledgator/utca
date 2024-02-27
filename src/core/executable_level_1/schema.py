@@ -9,8 +9,9 @@ from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
     from core.executable_level_1.actions import (
-        ActionDecorator, OneToMany, OneToOne, ManyToMany, ManyToOne, 
-        InputState, OutputState, BatchAdapter
+        ActionDecorator, 
+        InputState, 
+        OutputState,
     )
 
 class Input(BaseModel, ABC):
@@ -60,13 +61,20 @@ class Transformable():
         
     
     def update_state(self, action: ActionDecorator[InputState, OutputState]) -> None:
+        from core.executable_level_1.actions import (
+            OneToMany, 
+            OneToOne, 
+            ManyToMany, 
+            ManyToOne, 
+            BatchAdapter
+        )
         if isinstance(self.state, Dict):
             if isinstance(action, (ManyToOne, ManyToMany)):
                 self.state = action.execute([self.state])
             elif isinstance(action, (OneToOne, OneToMany)):
                 self.state = action.execute(self.state)
             else:
-                raise ValueError("Invalid Action!")
+                raise ValueError("Invalid Action! Not supported Action Type!")
         else:
             if isinstance(action, (ManyToOne, ManyToMany)):
                 self.state = action.execute(self.state)

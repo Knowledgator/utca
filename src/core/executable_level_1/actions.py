@@ -19,7 +19,7 @@ class Action(Generic[InputState, OutputState], Component):
         return {"type": Statement.ACTION_STATEMENT,  Statement.ACTION_STATEMENT.value: self}
 
 
-class ActionDecorator(Generic[InputState, OutputState]):
+class ActionDecorator(Action[InputState, OutputState]):
     action: Action[InputState, OutputState]
     
     def __init__(
@@ -31,6 +31,7 @@ class ActionDecorator(Generic[InputState, OutputState]):
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         self.action = self.action_type(*args, **kwargs)
+        return self
 
 
     def execute(self, input_data: InputState) -> OutputState:

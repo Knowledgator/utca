@@ -65,8 +65,10 @@ class Task(
 
     def invoke_batch(
         self, input_data: List[InputType]
-    ) -> list[Dict[str, Any]]:
-        raise Exception("TODO!")
+    ) -> List[Dict[str, Any]]:
+        return [
+            self.invoke(i) for i in input_data
+        ]
 
 
 class NERTask(
