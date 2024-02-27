@@ -8,10 +8,7 @@ from core.executable_level_1.actions import (
 )
 from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_model import (
-    TransformersModel,
-    TransformersModelConfig,
-    TransformersModelInput,
-    TransformersModelOutput
+    TransformersModel
 )
 from implementation.tasks.image_classification.actions import (
     ImageClassificationPreprocessor,
@@ -59,10 +56,7 @@ class TransformersVisualQandA(
     Task[
         Config,
         TransformersVisualQandAInput, 
-        TransformersVisualQandAOutput,
-        TransformersModelConfig,
-        TransformersModelInput,
-        TransformersModelOutput
+        TransformersVisualQandAOutput
     ]
 ):
     input_class: Type[TransformersVisualQandAInput] = TransformersVisualQandAInput
@@ -71,7 +65,7 @@ class TransformersVisualQandA(
     def __init__(
         self,
         *,
-        cfg: Optional[Config] = None, 
+        cfg: Optional[Config]=None, 
         predictor: TransformersModel,
         preprocess: Optional[List[Action[InputState, OutputState]]]=None,
         postprocess: Optional[List[Action[InputState, OutputState]]]=None

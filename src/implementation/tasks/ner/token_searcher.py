@@ -37,10 +37,7 @@ class TokenSearcherNERTask(
     NERTask[
         NERConfig,
         TokenSearcherNERInput, 
-        TokenSearcherNEROutput,
-        TokenSearcherPredictorConfig, 
-        TokenSearcherPredictorInput, 
-        TokenSearcherPredictorOutput
+        TokenSearcherNEROutput
     ]
 ):
     input_class: Type[TokenSearcherNERInput] = TokenSearcherNERInput

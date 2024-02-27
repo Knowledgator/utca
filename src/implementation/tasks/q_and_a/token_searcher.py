@@ -38,10 +38,7 @@ class TokenSearcherQandATask(
     NERTask[
         NERConfig, 
         TokenSearcherQandAInput, 
-        TokenSearcherQandAOutput,
-        TokenSearcherPredictorConfig, 
-        TokenSearcherPredictorInput, 
-        TokenSearcherPredictorOutput
+        TokenSearcherQandAOutput
     ]
 ):
     input_class: Type[TokenSearcherQandAInput] = TokenSearcherQandAInput

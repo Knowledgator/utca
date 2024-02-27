@@ -1,22 +1,23 @@
-from typing import Generic, Dict, Any, cast, List
+from typing import Type, Dict, Any, cast, List, Union
 
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
     InputType, OutputType, ConfigType, Transformable
 )
+from core.executable_level_1.actions import (
+    InputState, OutputState
+)
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import PredictorConfigType, PredictorInputType, PredictorOutputType
+from core.predictor_level_2.schema import (
+    PredictorConfigType, PredictorInputType, PredictorOutputType
+)
 from core.task_level_3.schema import (
     InputWithThresholdType, NERConfigType, NEROutputType
 )
 
 class Task(
     Executable[ConfigType, InputType, OutputType],
-    Generic[
-        ConfigType, InputType, OutputType,
-        PredictorConfigType, PredictorInputType, PredictorOutputType
-    ]
 ):
     def __init__(
         self, 
@@ -26,21 +27,23 @@ class Task(
             PredictorInputType, 
             PredictorOutputType
         ],
-        preprocess: List[Action],
-        postprocess: List[Action]
+        preprocess: List[Action[InputState, OutputState]],
+        postprocess: List[Action[InputState, OutputState]],
+        input_class: Type[InputType],
+        output_class: Type[OutputType]
     ) -> None:
-        super().__init__(cfg)
+        super().__init__(cfg, input_class, output_class)
         self.predictor = Predictor
         self._preprocess = preprocess
         self._postprocess = postprocess
 
     
     def process(
-        self, state: Dict[str, Any], actions: List[Action]
+        self, state: InputState, actions: List[Action[InputState, OutputState]]
     ) -> Dict[str, Any]:
-        tmp = state
+        tmp: Union[InputState, OutputState] = state
         for action in actions:
-            tmp = action.execute(tmp)
+            tmp = action.execute(cast(InputState, tmp))
         return cast(Dict[str, Any], tmp)
 
 
@@ -74,7 +77,6 @@ class Task(
 class NERTask(
     Task[
         NERConfigType, InputWithThresholdType, NEROutputType,
-        PredictorConfigType, PredictorInputType, PredictorOutputType
     ]
 ):
     ...

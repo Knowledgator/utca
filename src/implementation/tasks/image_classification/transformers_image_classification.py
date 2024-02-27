@@ -8,10 +8,7 @@ from core.executable_level_1.actions import (
 )
 from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_model import (
-    TransformersModel,
-    TransformersModelConfig,
-    TransformersModelInput,
-    TransformersModelOutput
+    TransformersModel
 )
 from implementation.tasks.image_classification.actions import (
     ImageClassificationPreprocessor,
@@ -55,10 +52,7 @@ class TransformersImageClassification(
     Task[
         Config,
         TransformersImageClassificationInput, 
-        TransformersImageClassificationOutput,
-        TransformersModelConfig,
-        TransformersModelInput,
-        TransformersModelOutput
+        TransformersImageClassificationOutput
     ]
 ):
     input_class: Type[TransformersImageClassificationInput] = TransformersImageClassificationInput

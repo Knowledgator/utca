@@ -38,10 +38,7 @@ class TokenSearcherTextCleanerTask(
     NERTask[
         NERConfig,
         TokenSearcherTextCleanerInput, 
-        TokenSearcherTextCleanerOutput,
-        TokenSearcherPredictorConfig, 
-        TokenSearcherPredictorInput, 
-        TokenSearcherPredictorOutput
+        TokenSearcherTextCleanerOutput
     ]
 ):
     input_class: Type[TokenSearcherTextCleanerInput] = TokenSearcherTextCleanerInput
