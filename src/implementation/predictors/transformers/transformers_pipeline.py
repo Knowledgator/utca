@@ -46,4 +46,5 @@ class TransformersPipeline(
 
 
     def get_predictions(self, **inputs: Any) -> Any:
-        return self.pipeline(inputs.pop("inputs"), **inputs) # type: ignore
+        return self.pipeline(**inputs) # type: ignore
+        # TODO: some pipelines have issues with named parammeters
