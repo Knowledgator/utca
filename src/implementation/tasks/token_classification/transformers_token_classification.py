@@ -45,15 +45,11 @@ class TokenClassifierTask(
         input_class: Type[TokenClassifierInput]=TokenClassifierInput,
         output_class: Type[NEROutput[ClassifiedEntity]]=NEROutput[ClassifiedEntity]
     ) -> None:
-        self.cfg = cfg or NERConfig()
-        self.predictor = predictor
-        self._preprocess = preprocess or []
-        self._postprocess = postprocess or [TokenClassifierPostprocessor()]
         super().__init__(
-            self.cfg, 
-            predictor,
-            self._preprocess,
-            self._postprocess,
-            input_class, 
-            output_class,
+            cfg=cfg or NERConfig(), 
+            predictor=predictor,
+            preprocess=preprocess or [],
+            postprocess=postprocess or [TokenClassifierPostprocessor()],
+            input_class=input_class, 
+            output_class=output_class,
         )
