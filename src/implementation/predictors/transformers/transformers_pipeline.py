@@ -45,5 +45,5 @@ class TransformersPipeline(
         super().__init__(cfg, input_class, output_class)
 
 
-    def get_predictions(self, inputs: Any) -> Any:
-        return self.pipeline(inputs) # type: ignore
+    def get_predictions(self, **inputs: Any) -> Any:
+        return self.pipeline(inputs.pop("inputs"), **inputs) # type: ignore

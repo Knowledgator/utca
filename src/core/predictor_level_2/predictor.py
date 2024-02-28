@@ -16,7 +16,7 @@ class Predictor(
     ]
 ):
     @abstractmethod
-    def get_predictions(self, inputs: Any) -> Any:
+    def get_predictions(self, **inputs: Any) -> Any:
         ...
 
     
@@ -24,7 +24,7 @@ class Predictor(
         self, input_data: PredictorInputType
     ) -> Dict[str, Any]:
         return {
-            'outputs': self.get_predictions(input_data.inputs)
+            'outputs': self.get_predictions(**input_data.inputs)
         }
     
 

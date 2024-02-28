@@ -41,5 +41,5 @@ class TransformersModel(
         super().__init__(cfg, input_class, output_class)
 
 
-    def get_predictions(self, inputs: Any) -> Any:
+    def get_predictions(self, **inputs: Any) -> Any:
         return self.cfg.model(**inputs) # type: ignore

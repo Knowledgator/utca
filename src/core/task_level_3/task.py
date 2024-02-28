@@ -1,4 +1,4 @@
-from typing import Type, Dict, Any, cast, List, Union
+from typing import Type, Dict, Any, cast, List, Union, Optional
 
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
@@ -20,9 +20,10 @@ class Task(
     Executable[ConfigType, InputType, OutputType],
 ):
     def __init__(
-        self, 
-        cfg: ConfigType, 
-        Predictor: Predictor[
+        self,
+        *,
+        cfg: Optional[ConfigType]=None, 
+        predictor: Predictor[
             PredictorConfigType, 
             PredictorInputType, 
             PredictorOutputType
@@ -33,7 +34,7 @@ class Task(
         output_class: Type[OutputType]
     ) -> None:
         super().__init__(cfg, input_class, output_class)
-        self.predictor = Predictor
+        self.predictor = predictor
         self._preprocess = preprocess
         self._postprocess = postprocess
 

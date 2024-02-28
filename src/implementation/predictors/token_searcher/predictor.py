@@ -34,7 +34,7 @@ class TokenSearcherPredictor(
     ) -> Dict[str, Any]:
         return {
             'inputs': input_data.inputs,
-            'outputs': self.get_predictions(input_data.inputs)
+            'outputs': self.get_predictions(inputs=input_data.inputs)
         }
     
 

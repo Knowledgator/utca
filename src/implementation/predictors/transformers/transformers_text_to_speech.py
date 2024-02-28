@@ -51,7 +51,7 @@ class TransformersTextToSpeechPipeline(
         super().__init__(cfg, input_class, output_class)
 
 
-    def get_predictions(self, inputs: Any) -> Any:
+    def get_predictions(self, **inputs: Any) -> Any:
         return self.pipeline( # type: ignore
             inputs,
             forward_params={"do_sample": True}
