@@ -1,4 +1,4 @@
-from typing import Type, Optional, List, Dict, Any
+from typing import Type, Optional, List, Any
 
 from core.executable_level_1.schema import (
     Config, Input, Output
@@ -16,7 +16,8 @@ from implementation.tasks.textual_q_and_a.actions import (
 )
 
 class QandAInput(Input):
-    inputs: Dict[str, Any]
+    question: str
+    context: str
 
 
 class QandAOutput(Output):

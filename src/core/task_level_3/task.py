@@ -56,7 +56,7 @@ class Task(
             self.process(input_data.model_dump(), self._preprocess)
         )
         predicts = cast(Dict[str, Any], self.predictor.execute(
-            Transformable({"inputs": processed_input["inputs"]})
+            Transformable(processed_input)
         ).extract())
         return self.process(
             {

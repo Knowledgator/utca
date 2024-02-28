@@ -22,8 +22,6 @@ task = QandATask(
 
 if __name__ == "__main__":
     print(task.execute(Transformable({
-        "inputs": {
-            "question": "Hwo is a president of USA?",
-            "context": "Joseph Robinette Biden Jr. is an American politician who is the 46th and current president of the United States."
-        }
+        "question": "Hwo is a president of USA?",
+        "context": "Joseph Robinette Biden Jr. is an American politician who is the 46th and current president of the United States."
     })).extract())

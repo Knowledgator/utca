@@ -24,9 +24,7 @@ if __name__ == "__main__":
     with open("programs/program9/text.txt", "r") as f:
         text = f.read()
     print(task.execute(Transformable({
-        "inputs": {
-            "inputs": text,
-            "max_length": 200,
-            "min_length": 100
-        }
+        "inputs": text,
+        "max_length": 200,
+        "min_length": 100
     })).extract())

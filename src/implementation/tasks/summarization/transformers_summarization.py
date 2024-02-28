@@ -1,4 +1,4 @@
-from typing import Type, Optional, List, Dict, Any
+from typing import Type, Optional, List
 
 from core.executable_level_1.schema import (
     Config, Input, Output
@@ -16,7 +16,9 @@ from implementation.tasks.summarization.actions import (
 )
 
 class SummarizationInput(Input):
-    inputs: Dict[str, Any]
+    inputs: str
+    max_length: int
+    min_length: int
 
 
 class SummarizationOutput(Output):
