@@ -19,7 +19,7 @@ from implementation.predictors.token_searcher.schema import (
 from implementation.predictors.token_searcher.predictor import (
     TokenSearcherPredictor
 )
-from implementation.tasks.q_and_a.actions import (
+from implementation.tasks.textual_q_and_a.actions import (
     TokenSearcherQandAPreprocessor,
     TokenSearcherQandAPostprocessor
 )

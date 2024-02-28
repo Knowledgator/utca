@@ -45,8 +45,8 @@ class TokenSearcherQandAPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
                 for output in input_data["outputs"]
                 for ent in output 
                 if (entity := build_entity(
-                    input_data["inputs"]["inputs"][0], 
-                    ent, 
+                    input_data["inputs"]["inputs"][0],
+                    ent,
                     self.cfg.threshold
                 ))
             ]

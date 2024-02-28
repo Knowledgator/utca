@@ -19,10 +19,10 @@ from implementation.datasources.google_spreadsheet.schema import (
 from implementation.predictors.token_searcher.predictor import (
     TokenSearcherPredictor, TokenSearcherPredictorConfig
 )
-from implementation.tasks.q_and_a.token_searcher import (
+from implementation.tasks.textual_q_and_a.token_searcher import (
     TokenSearcherQandATask
 )
-from implementation.tasks.q_and_a.actions import (
+from implementation.tasks.textual_q_and_a.actions import (
     TokenSearcherQandAPostprocessor,
     TokenSearcherQandAPostprocessorConfig
 )

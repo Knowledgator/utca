@@ -1,7 +1,7 @@
 from typing import Dict, Any, cast
 
 from core.executable_level_1.schema import Transformable
-from implementation.tasks.q_and_a.token_searcher import (
+from implementation.tasks.textual_q_and_a.token_searcher import (
     TokenSearcherQandATask
 )
 
