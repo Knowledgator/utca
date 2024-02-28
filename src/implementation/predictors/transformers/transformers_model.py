@@ -43,3 +43,34 @@ class TransformersModel(
 
     def get_predictions(self, **inputs: Any) -> Any:
         return self.cfg.model(**inputs) # type: ignore
+    
+
+class TransformersGenerativeModelConfig(Config):
+    def __init__(self, model: Any, **kwargs: Any):
+        self.model = model
+        self.kwargs = kwargs
+
+
+    def __setattr__(self, name: str, value: Any) -> None: # disable pydantic
+        self.__dict__[name] = value
+
+
+class TransformersGenerativeModel(
+    Predictor[
+        TransformersGenerativeModelConfig, 
+        TransformersModelInput, 
+        TransformersModelOutput
+    ]
+):
+    def __init__(
+        self, 
+        cfg: TransformersGenerativeModelConfig,
+        input_class: Type[TransformersModelInput]=TransformersModelInput,
+        output_class: Type[TransformersModelOutput]=TransformersModelOutput
+    ) -> None:
+        self.cfg = cfg
+        super().__init__(cfg, input_class, output_class)
+
+
+    def get_predictions(self, **inputs: Any) -> Any:
+        return self.cfg.model.generate(**inputs, **self.cfg.kwargs) # type: ignore
