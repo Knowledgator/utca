@@ -51,3 +51,24 @@ class TokenSearcherQandAPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
                 ))
             ]
         }
+    
+
+class QandAPostprocessorConfig(Config):
+    threshold: float = 0.
+
+
+@OneToOne
+class QandAPostprocess(Action[Dict[str, Any], Dict[str, Any]]):
+    def __init__(
+        self, 
+        cfg: Optional[QandAPostprocessorConfig]=None
+    ) -> None:
+        self.cfg = cfg or QandAPostprocessorConfig()
+    
+    
+    def execute(
+        self, input_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        return {
+            "answer": input_data["outputs"]["answer"]
+        }
