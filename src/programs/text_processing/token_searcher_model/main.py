@@ -2,7 +2,7 @@ from typing import Dict, Any
 
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.actions import (
-    ExecuteFunction,
+    ExecuteFunction, OneToOne
 )
 from implementation.apis.google_cloud.client import GoogleCloudClient
 from implementation.datasources.google_docs.schema import (
@@ -60,8 +60,8 @@ if __name__ == "__main__":
     # create pipeline with described stages
     pipeline = (
         GoogleDocsRead(client)
-        | ExecuteFunction(get_text)
-        | ExecuteFunction(set_prompt)
+        | OneToOne(ExecuteFunction)(get_text)
+        | OneToOne(ExecuteFunction)(set_prompt)
         | model
     )
 

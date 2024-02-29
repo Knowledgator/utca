@@ -16,10 +16,10 @@ from implementation.predictors.transformers.transformers_model import (
     TransformersModel,
     TransformersModelConfig
 )
-from implementation.tasks.image_classification.transformers_image_classification import (
+from implementation.tasks.image_processing.image_classification.transformers.transformers_image_classification import (
     TransformersImageClassification
 )
-from implementation.tasks.image_classification.actions import (
+from implementation.tasks.image_processing.image_classification.transformers.actions import (
     ImageClassificationPreprocessor,
     ImageClassificationPreprocessorConfig,
     ImageClassificationMultyLabelPostprocessor,

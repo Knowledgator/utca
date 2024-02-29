@@ -1,24 +1,9 @@
 from core.executable_level_1.schema import Transformable
-from implementation.predictors.transformers.transformers_pipeline import (
-    TransformersPipeline,
-    TransformersPipelineConfig
-)
-from implementation.tasks.textual_q_and_a.transformers_q_and_a import (
+from implementation.tasks.text_processing.textual_q_and_a.transformers.transformers_q_and_a import (
     QandATask
 )
 
-model_name = "deepset/roberta-base-squad2"
-
-predictor = TransformersPipeline(
-    TransformersPipelineConfig(
-        task="question-answering", 
-        model=model_name
-    )
-)
-
-task = QandATask(
-    predictor=predictor,
-)
+task = QandATask()
 
 if __name__ == "__main__":
     print(task.execute(Transformable({

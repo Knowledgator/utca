@@ -9,29 +9,29 @@ from core.executable_level_1.actions import (
     RenameAttribute
 )
 from implementation.datasources.pdf.actions import (
-    PDFRead
+    PDFRead, PDFExtractTexts
 )
 from implementation.predictors.token_searcher.predictor import (
     TokenSearcherPredictor, TokenSearcherPredictorConfig
 )
-from implementation.tasks.clean_text.token_searcher import (
+from implementation.tasks.text_processing.clean_text.token_searcher.token_searcher import (
     TokenSearcherTextCleanerTask
 )
-from implementation.tasks.clean_text.actions import (
+from implementation.tasks.text_processing.clean_text.token_searcher.actions import (
     TokenSearcherTextCleanerPostprocessor,
     TokenSearcherTextCleanerPostprocessorConfig
 )
-from implementation.tasks.ner.token_searcher import (
+from implementation.tasks.text_processing.ner.token_searcher.token_searcher import (
     TokenSearcherNERTask
 )
-from implementation.tasks.ner.actions import (
+from implementation.tasks.text_processing.ner.token_searcher.actions import (
     TokenSearcherNERPostprocessor,
     TokenSearcherNERPostprocessorConfig
 
 )
 
 def get_page(input: Dict[str, Any]) -> Dict[str, Any]:
-    return {"text": input["texts"][0]}
+    return {"text": input["pdf_texts"][1]}
 
 
 if __name__ == "__main__":
@@ -62,6 +62,7 @@ if __name__ == "__main__":
     # create pipeline with described stages
     pipeline: ExecutionSchema = (
         PDFRead()
+        | PDFExtractTexts()
         | OneToOne(ExecuteFunction)(get_page) 
         # adapts outputs to inputs 
         
@@ -75,7 +76,7 @@ if __name__ == "__main__":
 
     # call pipeline
     res = Evaluator(pipeline).run_program({
-        "path_to_file": "programs/program1/test.pdf"
+        "path_to_file": "programs/text_processing/token_searcher_ner_pipeline/test.pdf"
     })
 
     print(res)
