@@ -1,6 +1,6 @@
 # Program5
 
-Basic text-to-speech classification.
+Basic text-to-speech.
 
 ---
 
