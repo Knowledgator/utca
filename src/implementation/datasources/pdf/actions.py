@@ -31,6 +31,7 @@ class PDFRead(Action[Dict[str, Any], Dict[str, Any]]):
         }
 
 
+@OneToOne
 class PDFExtractTexts(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
