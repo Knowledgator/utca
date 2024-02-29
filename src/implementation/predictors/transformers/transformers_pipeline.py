@@ -8,12 +8,12 @@ from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
     PredictorInputType,
     PredictorOutputType,
+    PredictorConfig,
     PredictorInput,
     PredictorOutput,
 )
-from core.executable_level_1.schema import Config
 
-class TransformersPipelineConfig(Config):    
+class TransformersPipelineConfig(PredictorConfig):    
     def __init__(self, **kwargs: Any):
         self.pipeline: Pipeline = pipeline(**kwargs) # type: ignore
 
@@ -25,7 +25,6 @@ class TransformersPipelineConfig(Config):
 TransformersPipelineConfigType = TypeVar(
     'TransformersPipelineConfigType', 
     bound=TransformersPipelineConfig, 
-    contravariant=True
 )
 
 class TransformersPipeline(
@@ -47,4 +46,22 @@ class TransformersPipeline(
 
     def get_predictions(self, **inputs: Any) -> Any:
         return self.pipeline(**inputs) # type: ignore
-        # TODO: some pipelines have issues with named parammeters
+
+
+class SummarizationInput(PredictorInput):
+    inputs: Any
+
+SummarizationInputType = TypeVar(
+    "SummarizationInputType",
+    bound=SummarizationInput
+)
+
+class TransformersSummarizationPipeline(
+    TransformersPipeline[
+        TransformersPipelineConfigType, 
+        SummarizationInputType, 
+        PredictorOutputType
+    ]
+):
+    def get_predictions(self, **inputs: Any) -> Any:
+        return self.pipeline(inputs.pop("inputs"), **inputs) # type: ignore

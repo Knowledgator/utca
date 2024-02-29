@@ -10,7 +10,7 @@ from core.executable_level_1.actions import (
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
-    PredictorConfigType, PredictorInputType, PredictorOutputType
+    PredictorConfig, PredictorInput, PredictorOutput
 )
 from core.task_level_3.schema import (
     InputWithThresholdType, NERConfigType, NEROutputType
@@ -24,9 +24,9 @@ class Task(
         *,
         cfg: Optional[ConfigType]=None, 
         predictor: Predictor[
-            PredictorConfigType, 
-            PredictorInputType, 
-            PredictorOutputType
+            PredictorConfig, 
+            PredictorInput, 
+            PredictorOutput
         ],
         preprocess: List[Action[InputState, OutputState]],
         postprocess: List[Action[InputState, OutputState]],

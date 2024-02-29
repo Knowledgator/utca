@@ -1,51 +1,15 @@
-from typing import Type, Any
+from typing import TypeVar, Any, Type
 
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
-    PredictorInput, PredictorOutput
+    PredictorConfig, 
+    PredictorInput, 
+    PredictorOutput,
+    PredictorInputType, 
+    PredictorOutputType
 )
-from core.executable_level_1.schema import Config
 
-class TransformersModelConfig(Config):    
-    def __init__(self, model: Any):
-        self.model = model
-
-
-    def __setattr__(self, name: str, value: Any) -> None: # disable pydantic
-        self.__dict__[name] = value
-
-
-class TransformersModelInput(PredictorInput):
-    ...
-
-
-class TransformersModelOutput(PredictorOutput):
-    ...
-
-
-class TransformersModel(
-    Predictor[
-        TransformersModelConfig, 
-        TransformersModelInput, 
-        TransformersModelOutput
-    ]
-):
-   
-    def __init__(
-        self, 
-        cfg: TransformersModelConfig,
-        input_class: Type[TransformersModelInput]=TransformersModelInput,
-        output_class: Type[TransformersModelOutput]=TransformersModelOutput
-    ) -> None:
-        self.cfg = cfg
-        super().__init__(cfg, input_class, output_class)
-
-
-    def get_predictions(self, **inputs: Any) -> Any:
-        return self.cfg.model(**inputs) # type: ignore
-    
-
-class TransformersGenerativeModelConfig(Config):
+class TransformersModelConfig(PredictorConfig):    
     def __init__(self, model: Any, **kwargs: Any):
         self.model = model
         self.kwargs = kwargs
@@ -55,22 +19,39 @@ class TransformersGenerativeModelConfig(Config):
         self.__dict__[name] = value
 
 
-class TransformersGenerativeModel(
+TransformersModelConfigType = TypeVar(
+    'TransformersModelConfigType', 
+    bound=TransformersModelConfig, 
+)
+
+class TransformersModel(
     Predictor[
-        TransformersGenerativeModelConfig, 
-        TransformersModelInput, 
-        TransformersModelOutput
+        TransformersModelConfigType, 
+        PredictorInputType, 
+        PredictorOutputType
     ]
 ):
+   
     def __init__(
         self, 
-        cfg: TransformersGenerativeModelConfig,
-        input_class: Type[TransformersModelInput]=TransformersModelInput,
-        output_class: Type[TransformersModelOutput]=TransformersModelOutput
+        cfg: TransformersModelConfigType,
+        input_class: Type[PredictorInputType]=PredictorInput,
+        output_class: Type[PredictorOutputType]=PredictorOutput
     ) -> None:
         self.cfg = cfg
         super().__init__(cfg, input_class, output_class)
 
 
+    def get_predictions(self, **inputs: Any) -> Any:
+        return self.cfg.model(**inputs, **self.cfg.kwargs)
+    
+
+class TransformersGenerativeModel(
+    TransformersModel[
+        TransformersModelConfigType, 
+        PredictorInputType, 
+        PredictorOutputType
+    ]
+):
     def get_predictions(self, **inputs: Any) -> Any:
         return self.cfg.model.generate(**inputs, **self.cfg.kwargs) # type: ignore
