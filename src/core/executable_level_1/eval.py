@@ -1,10 +1,11 @@
 from __future__ import annotations
 import json
 from typing import (
-    List, Any, Dict, Type,  TypeVar
+    Callable, List, Any, Dict, Optional, Type,  TypeVar, Union
 )
 
 from core.executable_level_1.component import Component
+from core.executable_level_1.schema import Transformable
 from core.executable_level_1.statements_types import Statement
 
 T = TypeVar('T', bound='Serializable')
@@ -55,25 +56,95 @@ class ExecutionSchema(Component):
     def generate_statement(self) -> Dict[str, Any]:
         return {"type": Statement.PIPELINE_STATEMENT, Statement.PIPELINE_STATEMENT.value: self.program}
 
+# indicator (condition) ? function
+class Condition():
+    validator: Callable[[Transformable], bool]
+    statement: Dict[str, Any]
+    state: List[str] | None
+    def __init__(
+        self, 
+        validator: Callable[[Transformable], bool],
+        statement: ExecutionSchema,
+        state: Optional[List[str]]
+        ) -> None:
+        self.validator = validator
+        self.constatementition: Dict[str, Any] = statement.generate_statement()
+        self.state = state
+    def get_state(self):
+        return self.state
+    def get_validator(self):
+        return self.validator
+    def get_statement(self):
+        return self.statement
+    def generate_statement(self) ->  Dict[str, Any]:
+        return {"type": Statement.CONDITION, Statement.CONDITION.value: self}
 
-# class Loop(Component):
-#     loop: Component
-#     condition: Callable[[Dict[str, Any], int], bool]
 
-#     def __init__(
-#         self, 
-#         cfg: Config,
-#         loop: Component,
-#         condition: Callable[[Dict[str, Any], int], bool]
-#     ) -> None:
-#         self.loop = loop
-#         self.condition = condition
-#         super().__init__(cfg)
+class IfStatement(Component):
+    condition: Union[Callable[..., bool], Condition]
+    # executed if true 
+    right_statement: Dict[str, Any]
+    # executed if false 
+    left_statement: Dict[str, Any] | None
+    def __init__(
+        self, 
+        condition: Union[Callable[..., bool], Condition],
+        right_statement: ExecutionSchema,
+        left_statement: ExecutionSchema | None
+        ) -> None:
+        # add conditional
+        if isinstance(condition, Condition):
+            self.condition = condition
+        else:
+            condition = condition
+        # add statements
+        self.right_statement = right_statement.generate_statement()
+        if left_statement == None:
+            self.left_statement = None
+        else:
+            self.left_statement = left_statement.generate_statement()
+
+    def get_condition(self):
+        return self.condition
+
+    def get_right_statement(self):
+        return self.right_statement 
+    
+    def get_left_statement(self):
+        return self.left_statement 
+
+    def generate_statement(self) ->  Dict[str, Any]:
+        return {"type": Statement.IF_STATEMENT, Statement.IF_STATEMENT.value: self}
 
 
-#     def generate_statement(self) -> Dict[Statement, Any]:
-#         return {Statement.LOOP_STATEMENT: self.loop.generate_statement()}
 
+class ForEach(Component):
+    pass
+
+class While(Component):
+    statement: Dict[str, Any]
+    condition:  Condition
+    max_retries: Optional[int]
+    def __init__(
+        self, 
+        condition: Condition,
+        statement: ExecutionSchema,
+        max_retries: Optional[int]
+        ) -> None:
+        # add conditional
+        self.condition = condition
+
+        # add statements
+        self.statement = statement.generate_statement()
+        self.max_retries = max_retries
+    def get_retries(self):
+        return self.max_retries
+    def get_condition(self):
+        return self.condition
+    def get_statement(self):
+        return self.statement 
+    def generate_statement(self) ->  Dict[str, Any]:
+        return {"type": Statement.WHILE_STATEMEMT, Statement.WHILE_STATEMEMT.value: self}
 
 # class Path():
 #     condition: Callable[[Dict[str, Any]], bool] = lambda _: False
@@ -119,27 +190,7 @@ class ExecutionSchema(Component):
 #         }
 
 
-# program_structure = {
-#     "start": [
-#         {"statement": lambda ctx: print("Statement 1 execution", ctx)},
-#         {"statement": lambda ctx: print("Statement 2 execution", ctx)},
-#         {"if": {
-#             "condition": lambda ctx: ctx["condition"],
-#             "true_branch": [
-#                 {"statement": lambda ctx: print("True branch statement", ctx)}
-#             ],
-#             "false_branch": [
-#                 {"statement": lambda ctx: print("False branch statement", ctx)}
-#             ]
-#         }},
-#         {"loop": {
-#             "condition": lambda ctx: ctx["loop_condition"](),
-#             "body": [
-#                 {"statement": lambda ctx: print("Loop body statement", ctx) or ctx["loop_actions"]()}
-#             ]
-#         }}
-#     ]
-# }
+
 
 
 

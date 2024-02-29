@@ -63,7 +63,8 @@ class Memory:
 
 class MemorySetInstruction(Enum):
     SET_AND_GO = "setandgo" # set and continue
-    SET_AND_FLUSH = "flush" # clean all objects
+    SET_AND_FLUSH = "setandflush" # clean all objects
+    FLUSH = "flush"
 
     # FLUSH_AND_RESTORE_INPUT = "restoreinput" # clean all objects + set initial input state
 
@@ -124,6 +125,12 @@ class MemoryManager():
         else:
             self.memory = Memory()
 
+    def generate_set_command(self, identifier: str, memory_instruction: MemorySetInstruction):
+        return SetMemory(identifier, memory_instruction)
+    
+    def generate_get_memory_command(self, identifiers: List[str], memory_instruction: MemoryGetInstruction):
+        return GetMemory(identifiers, memory_instruction)
+
     # get memory commands
 
     def resolve_get_memory(self, command: GetMemory, register: Transformable):
@@ -158,6 +165,8 @@ class MemoryManager():
             self.set_and_go(registerDict, identifiers)
         elif  instr == MemorySetInstruction.SET_AND_FLUSH: 
             registerDict = self.set_and_flush(registerDict, identifiers)
+        elif instr == MemorySetInstruction.FLUSH:
+            registerDict = self.flush()
         return Transformable(registerDict)
 
     def set_and_go(self, register: Dict[str, Any], identifier: str):
@@ -165,5 +174,8 @@ class MemoryManager():
     def set_and_flush(self, register: Dict[str, Any], identifier: str) -> Dict[str, Any]:
         self.set_and_go(register, identifier)
         return {}
+    def flush(self) -> Dict[str, Any]:
+        return {}
+    
 
         
