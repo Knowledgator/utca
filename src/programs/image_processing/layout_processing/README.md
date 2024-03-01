@@ -1,6 +1,6 @@
 # Program11
 
-Charts and Plots analusis.
+Document/layout Q&A.
 
 ---
 

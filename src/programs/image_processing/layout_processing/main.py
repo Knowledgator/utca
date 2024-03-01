@@ -1,21 +1,23 @@
-from transformers import AutoProcessor, AutoModelForQuestionAnswering
-import torch
+from core.executable_level_1.interpreter import Evaluator
+from core.executable_level_1.actions import (
+    AddData
+)
+from implementation.tasks.image_processing.documents_q_and_a.transformers.transformers_layout_lm import (
+    DocumentQandATask
+)
+from implementation.datasources.image.actions import ImageRead
 
-from PIL import Image
+task = DocumentQandATask()
 
-processor = AutoProcessor.from_pretrained("microsoft/layoutlmv3-base", apply_ocr=False)
-model = AutoModelForQuestionAnswering.from_pretrained("microsoft/layoutlmv3-base")
+if __name__ == "__main__":
+    pipeline = (
+        ImageRead()
+        | AddData({
+            "question": "What is the purchase amount?"
+        })
+        | task
+    )
 
-# dataset = load_dataset("nielsr/funsd-layoutlmv3", split="train")
-# example = dataset[0]
-image = Image.open("programs/image_processing/layout_processing/test.png")
-question = "Does Italy has highest governments responsibility?"
-# words = example["tokens"]
-# boxes = example["bboxes"]
-
-encoding = processor(image, question, return_tensors="pt")
-start_positions = torch.tensor([1])
-end_positions = torch.tensor([3])
-
-outputs = model(**encoding, start_positions=start_positions, end_positions=end_positions)
-print(outputs)
+    print(Evaluator(pipeline).run_program({
+        "path_to_file": "programs/image_processing/layout_processing/test.jpeg"
+    }))
