@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import Dict, Any, List, Optional, Union
+from typing import  Dict, Any, List, Optional, Union
 import logging
 
-from core.executable_level_1.eval import ExecutionSchema
-from core.executable_level_1.memory import GetMemory,  MemoryManager, SetMemory
+from core.executable_level_1.eval import Condition, ExecutionSchema, IfStatement, While
+from core.executable_level_1.memory import GetMemory, MemoryGetInstruction,  MemoryManager, MemorySetInstruction, SetMemory
 
 from core.executable_level_1.statements_types import Statement
 from core.executable_level_1.executable import Executable
@@ -11,6 +11,7 @@ from core.executable_level_1.schema import (
     Config, Input, Output, Transformable
 )
 from core.executable_level_1.actions import Action
+from core.executable_level_1.utils import generate_unique_state
 
 EvaluatorLogger = logging.Logger("EvaluatorLogger", logging.INFO)
 
@@ -77,6 +78,12 @@ class Evaluator:
         elif st["type"] == Statement.PIPELINE_STATEMENT:
             comp = st[Statement.PIPELINE_STATEMENT.value]
             self.eval_pipeline(comp)
+        # elif st["type"] == Statement.CONDITION:
+        #     comp = st[Statement.CONDITION.value]
+        #     self.eval_if_statement(comp)
+        elif st["type"] == Statement.IF_STATEMENT:
+            comp = st[Statement.IF_STATEMENT.value]
+            self.eval_if_statement(comp)
 
 
     def eval_action(self, action: Action) -> None:
@@ -104,12 +111,54 @@ class Evaluator:
     
     def eval_pipeline(self, pipeline: List[Dict[str, Any]]):
         self.eval_program(pipeline, None)
+    
+    def eval_condition(self, condition: Condition):
 
+        unique_state = generate_unique_state()
+        set_commend = self.memory_manager.generate_set_command(unique_state, MemorySetInstruction.SET_AND_FLUSH)
+        self.memory_manager.resolve_set_memory(set_commend, self.register)
+        work_state = condition.get_state()
+        if work_state != None:
+            get_command = self.memory_manager.generate_get_memory_command(work_state, MemoryGetInstruction.GET_AND_GO)
+            self.register = self.memory_manager.resolve_get_memory(get_command, self.register)
+        st = condition.get_statement()
+        self.eval(st)
+        validator = condition.get_validator()
+        res = validator(self.register)
+        old_state_get  = self.memory_manager.generate_get_memory_command([unique_state], MemoryGetInstruction.FLUSH_AND_GET)
+        self.register = self.memory_manager.resolve_get_memory(old_state_get, self.register)
+        return res
+    
 
+    def eval_if_statement(self, if_statement: IfStatement):
 
-   
+        condition = if_statement.get_condition()
+        bool_flag: bool
+        if isinstance(condition, Condition):
+            bool_flag = self.eval_condition(condition)
+        elif callable(condition):
+            bool_flag = condition()
+        else:
+            raise Exception()
+        
+        if bool_flag == True:
+            right_stetement = if_statement.get_right_statement()
+            self.eval(right_stetement)
+        else:
+            left_stetement = if_statement.get_left_statement()
+            if left_stetement == None:
+                return
+            self.eval(left_stetement)
 
-
+    def eval_while_statement(self, while_statement: While):
+        retries = while_statement.get_retries()
+        if retries == None:
+            while self.eval_condition(while_statement.get_condition()):
+                self.eval(while_statement.get_statement())
+        else:
+            while self.eval_condition(while_statement.get_condition()) and retries > 0:
+                self.eval(while_statement.get_statement())
+                retries -= 1
 
 # class EvaluatorCycleEvaluator:
 #     # for cyclic constructs
