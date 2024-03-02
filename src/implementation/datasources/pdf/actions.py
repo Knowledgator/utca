@@ -6,14 +6,10 @@ from reportlab.pdfgen.canvas import Canvas # type: ignore
 from reportlab.lib.units import cm # type: ignore
 from reportlab.lib.pagesizes import A4 # type: ignore
 
-from core.executable_level_1.actions import (
-    OneToOne,
-    Action
-)
+from core.executable_level_1.actions import OneToOne
 from implementation.datasources.pdf.custom_pdf import CustomPDF, Page
 
-@OneToOne
-class PDFRead(Action[Dict[str, Any], Dict[str, Any]]):
+class PDFRead(OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         pdfReader = CustomPDF.open(
             input_data['path_to_file'], 
@@ -27,8 +23,7 @@ class PDFRead(Action[Dict[str, Any], Dict[str, Any]]):
         }
 
 
-@OneToOne
-class PDFExtractTexts(Action[Dict[str, Any], Dict[str, Any]]):
+class PDFExtractTexts(OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
             "pdf_texts": {
@@ -39,7 +34,7 @@ class PDFExtractTexts(Action[Dict[str, Any], Dict[str, Any]]):
     
 
 # @OneToOne
-# class PDFExtractTextsFormatted(Action[Dict[str, Any], Dict[str, Any]]):
+# class PDFExtractTextsFormatted(OneToOne):
 #     def process_page(
 #         self, 
 #         page: Page, 
@@ -147,8 +142,7 @@ class PDFExtractTexts(Action[Dict[str, Any], Dict[str, Any]]):
 #         }
 
 
-@OneToOne
-class PDFExtractTables(Action[Dict[str, Any], Dict[str, Any]]):
+class PDFExtractTables(OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
             "pdf_tables": {
@@ -158,8 +152,7 @@ class PDFExtractTables(Action[Dict[str, Any], Dict[str, Any]]):
         }
     
 
-@OneToOne
-class PDFExtractImages(Action[Dict[str, Any], Dict[str, Any]]):
+class PDFExtractImages(OneToOne):
     def extract_images_from_page(self, page: Page) -> Iterator[Image.Image]:
         page_height = page.height
 
@@ -180,8 +173,7 @@ class PDFExtractImages(Action[Dict[str, Any], Dict[str, Any]]):
         }
 
 
-@OneToOne
-class PDFWrite(Action[Dict[str, Any], Dict[str, Any]]):
+class PDFWrite(OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         canvas = Canvas(
             input_data['path_to_file'], 

@@ -3,8 +3,7 @@ from typing import Dict, Any
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.eval import ExecutionSchema
 from core.executable_level_1.actions import (
-    OneToOne,
-    ExecuteFunction,
+    ExecuteFunctionOneToOne,
     AddData,
     RenameAttribute
 )
@@ -36,9 +35,11 @@ def get_page(input: Dict[str, Any]) -> Dict[str, Any]:
 
 if __name__ == "__main__":
     # model that will be used for clean text and NER tasks
-    model = TokenSearcherPredictor(TokenSearcherPredictorConfig(
-        device = "cpu"
-    ))
+    model = TokenSearcherPredictor(
+        TokenSearcherPredictorConfig(
+            device='cpu'
+        )
+    )
 
     # clean text stage
     clean_task = TokenSearcherTextCleanerTask(
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     pipeline: ExecutionSchema = (
         PDFRead()
         | PDFExtractTexts()
-        | OneToOne(ExecuteFunction)(get_page) 
+        | ExecuteFunctionOneToOne(get_page) 
         # adapts outputs to inputs 
         
         | clean_task 

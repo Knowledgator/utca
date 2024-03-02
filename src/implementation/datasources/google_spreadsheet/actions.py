@@ -19,8 +19,7 @@ class GoogleSpreadsheetAction(Action[InputState, OutputState]):
         self.sheet_service = client.service.spreadsheets()
 
 
-@OneToOne
-class GoogleSpreadsheetRead(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleSpreadsheetRead(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]], OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             result = cast(Dict[str, Any], (
@@ -38,8 +37,7 @@ class GoogleSpreadsheetRead(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, An
             raise ValueError(f"Unable to read specified sheet: {e}")
 
 
-@OneToMany
-class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction[Dict[str, Any], List[Dict[str, Any]]]):
+class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction[Dict[str, Any], List[Dict[str, Any]]], OneToMany):
     def execute(self, input_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         try:
             result = cast(Dict[str, Any], (
@@ -59,8 +57,7 @@ class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction[Dict[str, Any], List[Di
             raise ValueError(f"Unable to read specified sheet: {e}")
 
 
-@OneToOne
-class GoogleSpreadsheetWrite(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleSpreadsheetWrite(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]], OneToOne):
    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             input_data["spreadsheet"] = (
@@ -86,8 +83,7 @@ class GoogleSpreadsheetWrite(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, A
             raise ValueError(f"An error occurred: {e}")
 
 
-@OneToOne
-class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]], OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             input_data["spreadsheet"] = (
@@ -109,8 +105,7 @@ class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction[Dict[str, Any], Dict[s
             raise ValueError(f"An error occurred: {e}")
 
 
-@OneToOne
-class GoogleSpreadsheetAppend(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleSpreadsheetAppend(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]], OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             (
@@ -139,8 +134,7 @@ class GoogleSpreadsheetAppend(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, 
             raise ValueError(f"An error occurred: {e}")
 
 
-@OneToOne
-class GoogleSpreadsheetCreate(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleSpreadsheetCreate(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]], OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             input_data["spreadsheet_id"] = (

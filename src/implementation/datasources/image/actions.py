@@ -2,26 +2,21 @@ from typing import Dict, Any, Optional, Tuple, cast
 
 from PIL import Image, ImageOps
 
-from core.executable_level_1.actions import (
-    Action, OneToOne
-)
+from core.executable_level_1.actions import OneToOne
 
-@OneToOne
-class ImageRead(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageRead(OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         input_data['image'] = Image.open(input_data['path_to_file'])
         return input_data
 
 
-@OneToOne
-class ImageWrite(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageWrite(OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         input_data['image'].save(input_data['path_to_file'])
         return input_data
 
 
-@OneToOne
-class ImageRotate(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageRotate(OneToOne):
     def __init__(self, rotation: float) -> None:
         self.rotation = rotation
 
@@ -33,8 +28,7 @@ class ImageRotate(Action[Dict[str, Any], Dict[str, Any]]):
         return input_data
     
 
-@OneToOne
-class ImageResize(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageResize(OneToOne):
     def __init__(self, width: int, height: int) -> None:
         self.height = height
         self.width = width
@@ -47,8 +41,7 @@ class ImageResize(Action[Dict[str, Any], Dict[str, Any]]):
         return input_data
     
 
-@OneToOne
-class ImagePad(Action[Dict[str, Any], Dict[str, Any]]):
+class ImagePad(OneToOne):
     def __init__(self, width: int, height: int, color: Optional[str]=None) -> None:
         self.height = height
         self.width = width
@@ -64,8 +57,7 @@ class ImagePad(Action[Dict[str, Any], Dict[str, Any]]):
         return input_data
     
 
-@OneToOne
-class ImageCrop(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageCrop(OneToOne):
     def __init__(self, box: Tuple[int, int, int, int]) -> None:
         self.box = box
 

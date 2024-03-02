@@ -42,7 +42,7 @@ class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
 
 
     @abstractmethod
-    def invoke_batch(self, input_data: list[InputType]) -> list[Dict[str, Any]]:
+    def invoke_batch(self, input_data: List[InputType]) -> List[Dict[str, Any]]:
         ...
 
 

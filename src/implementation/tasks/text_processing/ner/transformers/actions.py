@@ -1,14 +1,13 @@
 from typing import Any, Dict, Optional
 
 from core.executable_level_1.schema import Config
-from core.executable_level_1.actions import Action, OneToOne
+from core.executable_level_1.actions import OneToOne
     
 class TokenClassifierPostprocessorConfig(Config):
     threshold: float = 0.
 
 
-@OneToOne
-class TokenClassifierPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+class TokenClassifierPostprocessor(OneToOne):
     def __init__(
         self, 
         cfg: Optional[TokenClassifierPostprocessorConfig]=None

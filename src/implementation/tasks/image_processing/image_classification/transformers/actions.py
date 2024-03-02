@@ -2,7 +2,7 @@ from typing import Any, Dict, Protocol, Mapping, runtime_checkable
 
 import torch
 
-from core.executable_level_1.actions import Action, OneToOne
+from core.executable_level_1.actions import OneToOne
 from core.executable_level_1.schema import Config
 
 @runtime_checkable
@@ -19,8 +19,7 @@ class ImageClassificationPreprocessorConfig(Config):
     processor: Processor
 
 
-@OneToOne
-class ImageClassificationPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageClassificationPreprocessor(OneToOne):
     def __init__(
         self, 
         cfg: ImageClassificationPreprocessorConfig
@@ -42,8 +41,7 @@ class ImageClassificationPostprocessorConfig(Config):
     threshold: float = 0.
 
 
-@OneToOne
-class ImageClassificationSingleLabelPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageClassificationSingleLabelPostprocessor(OneToOne):
     def __init__(
         self, 
         cfg: ImageClassificationPostprocessorConfig
@@ -60,8 +58,7 @@ class ImageClassificationSingleLabelPostprocessor(Action[Dict[str, Any], Dict[st
         }
 
 
-@OneToOne
-class ImageClassificationMultyLabelPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageClassificationMultyLabelPostprocessor(OneToOne):
     def __init__(
         self, 
         cfg: ImageClassificationPostprocessorConfig

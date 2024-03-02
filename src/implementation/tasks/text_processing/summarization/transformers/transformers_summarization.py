@@ -1,4 +1,4 @@
-from typing import Type, Optional, List
+from typing import Type, Optional, List, Union
 
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersSummarizationPipeline,
@@ -10,7 +10,7 @@ from core.executable_level_1.schema import (
     Config, Output
 )
 from core.executable_level_1.actions import (
-    Action, InputState, OutputState
+    OneToOne, OneToMany, ManyToOne, ManyToMany
 )
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
@@ -51,8 +51,8 @@ class SummarizationTask(
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Action[InputState, OutputState]]]=None,
-        postprocess: Optional[List[Action[InputState, OutputState]]]=None,
+        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
         input_class: Type[SummarizationTaskInput]=SummarizationTaskInput,
         output_class: Type[SummarizationOutput]=SummarizationOutput
     ) -> None:

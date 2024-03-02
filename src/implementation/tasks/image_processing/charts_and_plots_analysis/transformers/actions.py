@@ -1,6 +1,6 @@
 from typing import Any, Dict, Protocol, runtime_checkable
 
-from core.executable_level_1.actions import Action, OneToOne
+from core.executable_level_1.actions import OneToOne
 from core.executable_level_1.schema import Config
 
 @runtime_checkable
@@ -21,8 +21,7 @@ class ChartsAndPlotsAnalysisPreprocessorConfig(Config):
     processor: Processor
 
 
-@OneToOne
-class ChartsAndPlotsAnalysisPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+class ChartsAndPlotsAnalysisPreprocessor(OneToOne):
     def __init__(
         self, 
         cfg: ChartsAndPlotsAnalysisPreprocessorConfig
@@ -48,8 +47,7 @@ class ChartsAndPlotsAnalysisPostprocessorConfig(Config):
     processor: Processor
 
 
-@OneToOne
-class ChartsAndPlotsAnalysisPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+class ChartsAndPlotsAnalysisPostprocessor(OneToOne):
     def __init__(
         self, 
         cfg: ChartsAndPlotsAnalysisPostprocessorConfig

@@ -9,7 +9,7 @@ from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
     from core.executable_level_1.actions import (
-        ActionDecorator, 
+        Action, 
         InputState, 
         OutputState,
     )
@@ -60,28 +60,28 @@ class Transformable():
              return False
         
     
-    def update_state(self, action: ActionDecorator[InputState, OutputState]) -> None:
+    def update_state(self, action: Action[InputState, OutputState]) -> None:
         from core.executable_level_1.actions import (
             OneToMany, 
-            OneToOne, 
-            ManyToMany, 
-            ManyToOne, 
-            BatchAdapter
+            OneToOne,
+            ManyToOne
         )
         if isinstance(self.state, Dict):
-            if isinstance(action, (ManyToOne, ManyToMany)):
+            if isinstance(action, ManyToOne):
                 self.state = action.execute([self.state])
             elif isinstance(action, (OneToOne, OneToMany)):
                 self.state = action.execute(self.state)
             else:
                 raise ValueError("Invalid Action! Not supported Action Type!")
         else:
-            if isinstance(action, (ManyToOne, ManyToMany)):
+            if isinstance(action, ManyToOne):
                 self.state = action.execute(self.state)
             elif isinstance(action, OneToOne):
-                self.state = BatchAdapter(action).execute(self.state)
+                self.state = [
+                    action.execute(s) for s in self.state
+                ]
             else:
-                raise ValueError("Invalid Action!")
+                raise ValueError("Invalid Action! Not supported Action Type!")
 
         
     @property
@@ -110,4 +110,4 @@ class Config(BaseModel, ABC):
 
 
 OutputType = TypeVar('OutputType', bound=Output)
-ConfigType = TypeVar('ConfigType', bound=Config, contravariant=True)
+ConfigType = TypeVar('ConfigType', bound=Config)

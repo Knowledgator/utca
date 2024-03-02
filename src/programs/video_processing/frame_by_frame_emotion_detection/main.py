@@ -10,7 +10,7 @@ import numpy as np
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.memory import SetMemory, GetMemory
 from core.executable_level_1.actions import (
-    ExecuteFunction, OneToOne, OneToMany, ManyToOne
+    ExecuteFunctionOneToOne, ExecuteFunctionOneToMany, ExecuteFunctionManyToOne
 )
 from implementation.predictors.transformers.transformers_model import (
     TransformersModel,
@@ -106,12 +106,12 @@ def prepare_sample(state: Dict[str, Any]) -> Dict[str, Any]:
 if __name__ == "__main__":
     pipeline = (
         VideoRead()
-        | OneToMany(ExecuteFunction)(prepare_batch_image_classification_input)
+        | ExecuteFunctionOneToMany(prepare_batch_image_classification_input)
         | SetMemory("frames")
         | task
-        | ManyToOne(ExecuteFunction)(group_labels)
+        | ExecuteFunctionManyToOne(group_labels)
         | GetMemory(["frames"])
-        | OneToOne(ExecuteFunction)(prepare_sample)
+        | ExecuteFunctionOneToOne(prepare_sample)
         | VideoWrite()
     )
 

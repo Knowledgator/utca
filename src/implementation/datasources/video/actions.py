@@ -2,10 +2,9 @@ from typing import Dict, Any
 
 import cv2
 
-from core.executable_level_1.actions import Action, OneToOne
+from core.executable_level_1.actions import OneToOne
 
-@OneToOne
-class VideoRead(Action[Dict[str, Any], Dict[str, Any]]):
+class VideoRead(OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         video = cv2.VideoCapture(input_data["path_to_file"])
         # video.release() TODO: need to be called?
@@ -13,8 +12,7 @@ class VideoRead(Action[Dict[str, Any], Dict[str, Any]]):
         return input_data
 
 
-@OneToOne
-class VideoWrite(Action[Dict[str, Any], Dict[str, Any]]):
+class VideoWrite(OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         w = cv2.VideoWriter(
             input_data["path_to_file"],
@@ -28,8 +26,7 @@ class VideoWrite(Action[Dict[str, Any], Dict[str, Any]]):
         return {}
 
 
-@OneToOne
-class VideoReleaseCapture(Action[Dict[str, Any], Dict[str, Any]]):
+class VideoReleaseCapture(OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         video = input_data.pop("video_data")
         video.release()

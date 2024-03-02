@@ -1,6 +1,8 @@
-from typing import Type, Optional, List
+from typing import Type, Optional, List, Union
 
-from core.executable_level_1.actions import Action, InputState, OutputState
+from core.executable_level_1.actions import (
+    OneToOne, OneToMany, ManyToOne, ManyToMany
+)
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
@@ -41,8 +43,6 @@ class TokenSearcherQandATask(
         TokenSearcherQandAOutput
     ]
 ):
-    input_class: Type[TokenSearcherQandAInput] = TokenSearcherQandAInput
-    output_class: Type[TokenSearcherQandAOutput] = TokenSearcherQandAOutput
     
     def __init__(
         self,
@@ -52,10 +52,14 @@ class TokenSearcherQandATask(
             TokenSearcherPredictorInput, 
             TokenSearcherPredictorOutput
         ]]=None,
-        preprocess: Optional[List[Action[InputState, OutputState]]]=None,
-        postprocess: Optional[List[Action[InputState, OutputState]]]=None
+        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        input_class: Type[TokenSearcherQandAInput]=TokenSearcherQandAInput,
+        output_class: Type[TokenSearcherQandAOutput]=TokenSearcherQandAOutput
     ) -> None:
         self.cfg = cfg or NERConfig()
         self.predictor = predictor or TokenSearcherPredictor()
         self._preprocess = preprocess or [TokenSearcherQandAPreprocessor()]
         self._postprocess = postprocess or [TokenSearcherQandAPostprocessor()]
+        self.input_class = input_class
+        self.output_class = output_class

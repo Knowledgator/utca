@@ -1,4 +1,4 @@
-from abc import abstractmethod, ABCMeta
+from abc import abstractmethod
 from typing import (
     Callable, Any, Dict, List, Generic, TypeVar
 )
@@ -122,35 +122,40 @@ class MergeData(OneToOne):
         return state
 
 
-class DynamicTypeMeta(ABCMeta):
-    def __call__(cls, *args: Any, **kwargs: Any):
-        if 'type_' in kwargs:
-            desired_type = kwargs.pop('type_')
-            cls = type(desired_type.__name__, (desired_type,), dict(cls.__dict__))
-        instance = cls.__new__(cls, *args, **kwargs)
-        cls.__init__(instance, *args, **kwargs)
-        return instance
-
-
-class ExecuteFunction(Action[InputState, OutputState], metaclass=DynamicTypeMeta):
+class ExecuteFunction(Action[InputState, OutputState]):
     def __init__(
-        self, 
-        func: Callable[[InputState], OutputState],
-        type_: Action[InputState, OutputState]
+        self, func: Callable[[InputState], OutputState]
     ) -> None:
         self.func = func
 
 
     def execute(self, input_data: InputState) -> OutputState:
         return self.func(input_data)
-
-
-class BatchAdapter(ManyToMany):
-    def __init__(self, action: OneToOne):
-        self.action = action
-
     
-    def execute(self, input_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        return [
-            self.action.execute(i) for i in input_data
-        ]
+
+class ExecuteFunctionOneToOne(
+    OneToOne, 
+    ExecuteFunction[Dict[str, Any], Dict[str, Any]]
+):
+    ...
+
+
+class ExecuteFunctionOneToMany(
+    OneToMany, 
+    ExecuteFunction[Dict[str, Any], List[Dict[str, Any]]]
+):
+    ...
+
+
+class ExecuteFunctionManyToMany(
+    ManyToMany, 
+    ExecuteFunction[List[Dict[str, Any]], List[Dict[str, Any]]]
+):
+    ...
+
+
+class ExecuteFunctionManyToOne(
+    ManyToOne, 
+    ExecuteFunction[List[Dict[str, Any]], Dict[str, Any]]
+):
+    ...

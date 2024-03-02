@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, TypeVar
 
 from transformers import ( # type: ignore
     AutoTokenizer, AutoModelForTokenClassification # type: ignore
@@ -39,3 +39,8 @@ class TokenSearcherPredictorInput(PredictorInput):
 class TokenSearcherPredictorOutput(PredictorOutput):
     inputs: list[str]
     outputs: list[list[Dict[str, Any]]]
+
+
+TokenSearcherPredictorConfigType = TypeVar("TokenSearcherPredictorConfigType", bound=TokenSearcherPredictorConfig)
+TokenSearcherPredictorInputType = TypeVar("TokenSearcherPredictorInputType", bound=TokenSearcherPredictorInput)
+TokenSearcherPredictorOutputType = TypeVar("TokenSearcherPredictorOutputType", bound=TokenSearcherPredictorOutput)

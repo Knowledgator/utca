@@ -32,8 +32,7 @@ class GoogleDocsAction(Action[InputState, OutputState]):
         self.docs_service = client.service.documents()
 
 
-@OneToOne
-class GoogleDocsCreate(GoogleDocsAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleDocsCreate(GoogleDocsAction[Dict[str, Any], Dict[str, Any]], OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             doc_id: str = ( # type: ignore
@@ -51,8 +50,7 @@ class GoogleDocsCreate(GoogleDocsAction[Dict[str, Any], Dict[str, Any]]):
             raise ValueError(f'Unable to create doc: {e}')
 
 
-@OneToOne
-class GoogleDocsWrite(GoogleDocsAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleDocsWrite(GoogleDocsAction[Dict[str, Any], Dict[str, Any]], OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             input_data["document"] = (
@@ -67,8 +65,7 @@ class GoogleDocsWrite(GoogleDocsAction[Dict[str, Any], Dict[str, Any]]):
             raise ValueError(f'Unable to update doc: {e}')
 
 
-@OneToOne
-class GoogleDocsRead(GoogleDocsAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleDocsRead(GoogleDocsAction[Dict[str, Any], Dict[str, Any]], OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             return (

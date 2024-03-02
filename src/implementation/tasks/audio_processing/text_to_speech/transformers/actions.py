@@ -1,11 +1,8 @@
 from typing import Any, Dict
 
-from core.executable_level_1.actions import Action, OneToOne
+from core.executable_level_1.actions import OneToOne
 
-@OneToOne
-class TextToSpeechPostprocess(
-    Action[Dict[str, Any], Dict[str, Any]]
-):
+class TextToSpeechPostprocess(OneToOne):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
             "audio_data": input_data["outputs"]["audio"],

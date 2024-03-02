@@ -1,12 +1,8 @@
 from typing import Any, Dict
 
-from core.executable_level_1.actions import Action, OneToOne
+from core.executable_level_1.actions import OneToOne
     
-
-@OneToOne
-class SummarizationPostprocess(
-    Action[Dict[str, Any], Dict[str, Any]]
-):    
+class SummarizationPostprocess(OneToOne):    
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:

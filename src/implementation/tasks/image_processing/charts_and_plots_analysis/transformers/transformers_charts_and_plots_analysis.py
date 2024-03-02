@@ -1,4 +1,4 @@
-from typing import Type, Optional, Any, List
+from typing import Type, Optional, Any, List, Union
 
 from PIL import Image
 from transformers import ( # type: ignore
@@ -7,7 +7,7 @@ from transformers import ( # type: ignore
 
 from core.executable_level_1.schema import Config, Input, Output
 from core.executable_level_1.actions import (
-    Action, InputState, OutputState
+    OneToOne, OneToMany, ManyToOne, ManyToMany
 )
 from core.predictor_level_2.predictor import (
     Predictor, 
@@ -62,8 +62,8 @@ class ChartsAndPlotsAnalysis(
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Action[InputState, OutputState]]]=None,
-        postprocess: Optional[List[Action[InputState, OutputState]]]=None,
+        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
         input_class: Type[ChartsAndPlotsAnalysisInput]=ChartsAndPlotsAnalysisInput,
         output_class: Type[ChartsAndPlotsAnalysisOutput]=ChartsAndPlotsAnalysisOutput
     ) -> None:

@@ -24,13 +24,13 @@ class TransformersPipelineConfig(PredictorConfig):
 
 TransformersPipelineConfigType = TypeVar(
     'TransformersPipelineConfigType', 
-    bound=TransformersPipelineConfig, 
+    bound=TransformersPipelineConfig
 )
 
 class TransformersPipeline(
     Predictor[
         TransformersPipelineConfigType, 
-        PredictorInputType, 
+        PredictorInputType,
         PredictorOutputType
     ]
 ):  

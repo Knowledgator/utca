@@ -10,7 +10,9 @@ from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
     Config, Input, Output, Transformable
 )
-from core.executable_level_1.actions import Action
+from core.executable_level_1.actions import (
+    Action, InputState, OutputState
+)
 from core.executable_level_1.utils import generate_unique_state
 
 EvaluatorLogger = logging.Logger("EvaluatorLogger", logging.INFO)
@@ -86,7 +88,7 @@ class Evaluator:
             self.eval_if_statement(comp)
 
 
-    def eval_action(self, action: Action) -> None:
+    def eval_action(self, action: Action[InputState, OutputState]) -> None:
         """Evaluates an action statement."""
         # Update the register state based on the action
         self.register.update_state(action)

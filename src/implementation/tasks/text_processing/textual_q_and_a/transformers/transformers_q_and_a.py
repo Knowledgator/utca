@@ -1,21 +1,20 @@
-from typing import Type, Optional, List, Any
-
-from implementation.predictors.transformers.transformers_pipeline import (
-    TransformersPipeline,
-    TransformersPipelineConfig
-)
+from typing import Type, Optional, List, Any, Union
 
 from core.executable_level_1.schema import (
     Config, Output
 )
 from core.executable_level_1.actions import (
-    Action, InputState, OutputState
+    OneToOne, OneToMany, ManyToOne, ManyToMany
 )
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
     PredictorConfig, PredictorInput, PredictorOutput
 )
 from core.task_level_3.task import Task
+from implementation.predictors.transformers.transformers_pipeline import (
+    TransformersPipeline,
+    TransformersPipelineConfig
+)
 from implementation.tasks.text_processing.textual_q_and_a.transformers.actions import (
     QandAPostprocess
 )
@@ -47,8 +46,8 @@ class QandATask(
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Action[InputState, OutputState]]]=None,
-        postprocess: Optional[List[Action[InputState, OutputState]]]=None,
+        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
         input_class: Type[QandAInput]=QandAInput,
         output_class: Type[QandAOutput]=QandAOutput
     ) -> None:

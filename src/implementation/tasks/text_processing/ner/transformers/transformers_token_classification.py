@@ -1,9 +1,12 @@
-from typing import Type, Optional, List
+from typing import Type, Optional, List, Union
 
 from core.executable_level_1.actions import (
-    Action, InputState, OutputState
+    OneToOne, OneToMany, ManyToOne, ManyToMany
 )
 from core.predictor_level_2.predictor import Predictor
+from core.predictor_level_2.schema import (
+    PredictorConfig, PredictorInput, PredictorOutput
+)
 from core.predictor_level_2.schema import (
     PredictorConfig,
     PredictorInput,
@@ -50,8 +53,8 @@ class TokenClassifierTask(
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Action[InputState, OutputState]]]=None,
-        postprocess: Optional[List[Action[InputState, OutputState]]]=None,
+        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
         input_class: Type[TokenClassifierInput]=TokenClassifierInput,
         output_class: Type[NEROutput[ClassifiedEntity]]=NEROutput[ClassifiedEntity]
     ) -> None:

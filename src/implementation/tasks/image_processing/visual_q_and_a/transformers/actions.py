@@ -1,6 +1,6 @@
 from typing import Any, Dict, Protocol, Mapping, runtime_checkable
 
-from core.executable_level_1.actions import Action, OneToOne
+from core.executable_level_1.actions import OneToOne
 from core.executable_level_1.schema import Config
 
 @runtime_checkable
@@ -17,8 +17,7 @@ class VisualQandAPreprocessorConfig(Config):
     processor: Processor
 
 
-@OneToOne
-class VisualQandAPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+class VisualQandAPreprocessor(OneToOne):
     def __init__(
         self, 
         cfg: VisualQandAPreprocessorConfig
@@ -42,8 +41,7 @@ class VisualQandAPostprocessorConfig(Config):
     threshold: float = 0.
 
 
-@OneToOne
-class VisualQandAPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+class VisualQandAPostprocessor(OneToOne):
     def __init__(
         self, 
         cfg: VisualQandAPostprocessorConfig

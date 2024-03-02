@@ -7,7 +7,9 @@ from core.executable_level_1.schema import (
 from core.executable_level_1.actions import (
     InputState, OutputState
 )
-from core.executable_level_1.actions import Action
+from core.executable_level_1.actions import (
+    OneToOne, OneToMany, ManyToOne, ManyToMany, Action
+)
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
     PredictorConfig, PredictorInput, PredictorOutput
@@ -28,8 +30,8 @@ class Task(
             PredictorInput, 
             PredictorOutput
         ],
-        preprocess: List[Action[InputState, OutputState]],
-        postprocess: List[Action[InputState, OutputState]],
+        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]],
+        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]],
         input_class: Type[InputType],
         output_class: Type[OutputType]
     ) -> None:
@@ -53,7 +55,7 @@ class Task(
     ) -> Dict[str, Any]:
         processed_input = cast(
             Dict[str, Any],
-            self.process(input_data.model_dump(), self._preprocess)
+            self.process(input_data.model_dump(), self._preprocess) # type: ignore
         )
         predicts = cast(Dict[str, Any], self.predictor.execute(
             Transformable(processed_input)
@@ -63,7 +65,7 @@ class Task(
                 "inputs": processed_input,
                 "outputs": predicts["outputs"]
             }, 
-            self._postprocess
+            self._postprocess # type: ignore
         )
     
 
