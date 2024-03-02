@@ -1,6 +1,6 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 from typing import (
-    Callable, Any, Dict, List, Generic, TypeVar, Type
+    Callable, Any, Dict, List, Generic, TypeVar
 )
 
 from core.executable_level_1.component import Component
@@ -19,43 +19,23 @@ class Action(Generic[InputState, OutputState], Component):
         return {"type": Statement.ACTION_STATEMENT,  Statement.ACTION_STATEMENT.value: self}
 
 
-class ActionDecorator(Action[InputState, OutputState]):
-    action: Action[InputState, OutputState]
-    
-    def __init__(
-        self, 
-        action: Type[Action[InputState, OutputState]]
-    ) -> None:
-        self.action_type = action
-
-
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        self.action = self.action_type(*args, **kwargs)
-        return self
-
-
-    def execute(self, input_data: InputState) -> OutputState:
-        return self.action.execute(input_data)
-
-
-class ManyToMany(ActionDecorator[List[Dict[str, Any]], List[Dict[str, Any]]]):
+class ManyToMany(Action[List[Dict[str, Any]], List[Dict[str, Any]]]):
     ...
 
 
-class OneToOne(ActionDecorator[Dict[str, Any], Dict[str, Any]]):
+class OneToOne(Action[Dict[str, Any], Dict[str, Any]]):
     ...
 
 
-class ManyToOne(ActionDecorator[List[Dict[str, Any]], Dict[str, Any]]):
+class ManyToOne(Action[List[Dict[str, Any]], Dict[str, Any]]):
     ...
 
 
-class OneToMany(ActionDecorator[Dict[str, Any], List[Dict[str, Any]]]):
+class OneToMany(Action[Dict[str, Any], List[Dict[str, Any]]]):
     ...
 
 
-@OneToOne
-class AddData(Action[Dict[str, Any], Dict[str, Any]]):
+class AddData(OneToOne):
     data: Dict[str, Any]
 
     def __init__(self, data: Dict[str, Any]) -> None:
@@ -67,8 +47,7 @@ class AddData(Action[Dict[str, Any], Dict[str, Any]]):
         return input_data
 
 
-@OneToOne
-class RenameAttribute(Action[Dict[str, Any], Dict[str, Any]]):
+class RenameAttribute(OneToOne):
     old_name: str
     new_name: str
 
@@ -82,8 +61,7 @@ class RenameAttribute(Action[Dict[str, Any], Dict[str, Any]]):
         return input_data
 
 
-@OneToOne
-class ChangeValue(Action[Dict[str, Any], Dict[str, Any]]):
+class ChangeValue(OneToOne):
     key: str
     value: Any
 
@@ -97,8 +75,7 @@ class ChangeValue(Action[Dict[str, Any], Dict[str, Any]]):
         return input_data
 
 
-@OneToOne
-class RenameAttributeQuery(Action[Dict[str, Any], Dict[str, Any]]):
+class RenameAttributeQuery(OneToOne):
     TRANSFORMATION_DELIMITER = ";"
     TRANSFORMATION_POINTER = "<-"
     
@@ -129,8 +106,7 @@ class RenameAttributeQuery(Action[Dict[str, Any], Dict[str, Any]]):
         return input_data
 
 
-@OneToOne
-class MergeData(Action[Dict[str, Any], Dict[str, Any]]):
+class MergeData(OneToOne):
     data: Dict[str, Any]
     new_priority: bool
 
@@ -146,20 +122,30 @@ class MergeData(Action[Dict[str, Any], Dict[str, Any]]):
         return state
 
 
-class ExecuteFunction(Action[InputState, OutputState]):
+class DynamicTypeMeta(ABCMeta):
+    def __call__(cls, *args: Any, **kwargs: Any):
+        if 'type_' in kwargs:
+            desired_type = kwargs.pop('type_')
+            cls = type(desired_type.__name__, (desired_type,), dict(cls.__dict__))
+        instance = cls.__new__(cls, *args, **kwargs)
+        cls.__init__(instance, *args, **kwargs)
+        return instance
+
+
+class ExecuteFunction(Action[InputState, OutputState], metaclass=DynamicTypeMeta):
     def __init__(
         self, 
-        func: Callable[[InputState], OutputState]
+        func: Callable[[InputState], OutputState],
+        type_: Action[InputState, OutputState]
     ) -> None:
         self.func = func
 
 
     def execute(self, input_data: InputState) -> OutputState:
         return self.func(input_data)
-    
 
-@ManyToMany
-class BatchAdapter(Action[List[Dict[str, Any]], List[Dict[str, Any]]]):
+
+class BatchAdapter(ManyToMany):
     def __init__(self, action: OneToOne):
         self.action = action
 
