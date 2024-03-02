@@ -1,6 +1,7 @@
 # 1. extract tables boxes. 
 # 2. exclude/include and format text
 from typing import List, Any, Dict, Tuple, Optional
+from operator import itemgetter
 
 from pdfminer.pdfpage import PDFPage
 from pdfplumber.page import Page
@@ -45,13 +46,13 @@ def process_tables_chars(
         table_arr: List[List[Optional[str]]] = []
         for row in table.rows:
             arr: List[Optional[str]] = []
-            row_chars, unprocessed_chars = extract_chars(row.bbox, unprocessed_chars)
+            unprocessed_chars, row_chars = extract_chars(row.bbox, unprocessed_chars)
 
             for cell in row.cells:
                 if cell is None:
                     cell_text = None
                 else:
-                    cell_chars, row_chars = extract_chars(cell, row_chars)
+                    row_chars, cell_chars = extract_chars(cell, row_chars)
 
                     if len(cell_chars):
                         kwargs["x_shift"] = cell[0]
@@ -66,6 +67,19 @@ def process_tables_chars(
             table_arr.append(arr)
         extracted_tables.append(table_arr)
     return extracted_tables, unprocessed_chars
+
+
+def get_markdown_table(table: List[List[Optional[str]]]) -> str:
+    table_md = ""
+    for row in table:
+        table_md += "| "
+        for cell in row:
+            if cell:
+                table_md += cell.replace("\n", "<br/>") + " |"
+            else:
+                table_md += "|"
+        table_md += "\n"
+    return table_md
 
 
 class CustomPage(Page):
@@ -93,21 +107,43 @@ class CustomPage(Page):
             defaults.update({"layout_height": self.height})
         full_kwargs: Dict[str, Any] = {**defaults, **kwargs}
         return chars_to_textmap(
-            self.chars, **full_kwargs
+            chars, **full_kwargs
         )
 
 
     def extract_text(self, **kwargs: Any) -> str:
-        if not kwargs.get("tables"):
-            tset = TableSettings.resolve(kwargs["table_settings"])
-            tables = self.find_tables(tset)
+        tset = TableSettings.resolve(kwargs.get("table_settings", {}))
+        tables = self.find_tables(tset)
+
+        print(len(self.chars))
+        if tables:
             processed_tables, unprocessed_chars = process_tables_chars(
                 tables, self.chars
             )
         else:
-            unprocessed_chars = self.chars
-        # text_extraction
-        return self.get_textmap(unprocessed_chars, **kwargs).as_string
+            processed_tables, unprocessed_chars = [], self.chars
+
+        text_map = self.get_textmap(unprocessed_chars, **kwargs)
+        
+        if not kwargs.get("tables") or not tables:
+            return text_map.as_string
+        
+        current_table = 0
+        text = ""
+        for idx, t in enumerate(text_map.tuples):
+            if current_table >= len(tables):
+                text += "".join(map(itemgetter(0), text_map.tuples[idx:]))
+                break
+
+            char, meta = t[0], t[1]
+            if not meta or meta["top"] < tables[current_table].bbox[1] :
+                text += char
+            else:
+                if meta["x0"] >= tables[current_table].bbox[0]:
+                    text += get_markdown_table(processed_tables[current_table])
+                    current_table += 1
+                text += char
+        return text
 
 
 class CustomPDF(PDF):
