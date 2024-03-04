@@ -44,6 +44,8 @@ class TokenClassifierTask(
         NEROutput[ClassifiedEntity],
     ]
 ):
+    default_model = "dbmdz/bert-large-cased-finetuned-conll03-english"
+    
     def __init__(
         self,
         *,
@@ -58,13 +60,12 @@ class TokenClassifierTask(
         input_class: Type[TokenClassifierInput]=TokenClassifierInput,
         output_class: Type[NEROutput[ClassifiedEntity]]=NEROutput[ClassifiedEntity]
     ) -> None:
-        model_name = "dbmdz/bert-large-cased-finetuned-conll03-english"
 
         if not predictor:
             predictor = TransformersPipeline(
                 TransformersPipelineConfig(
                     task="token-classification", 
-                    model=model_name
+                    model=self.default_model
                 ),
                 input_class=ModelInput
             )
