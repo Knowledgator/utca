@@ -75,6 +75,17 @@ class ChangeValue(OneToOne):
         return input_data
 
 
+class UnpackValue(OneToOne):
+    def __init__(self, key: str) -> None:
+        self.key = key
+
+
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        value = input_data.pop(self.key)
+        input_data.update(value)
+        return input_data
+
+
 class RenameAttributeQuery(OneToOne):
     TRANSFORMATION_DELIMITER = ";"
     TRANSFORMATION_POINTER = "<-"
