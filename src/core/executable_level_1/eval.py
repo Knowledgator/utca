@@ -59,17 +59,20 @@ class ExecutionSchema(Component):
 # indicator (condition) ? function
 class Condition():
     validator: Callable[[Transformable], bool]
-    statement: Dict[str, Any]
+    statement: ExecutionSchema
     state: List[str] | None
     def __init__(
         self, 
         validator: Callable[[Transformable], bool],
         statement: ExecutionSchema,
         state: Optional[List[str]]
-        ) -> None:
+    ) -> None:
         self.validator = validator
+        self.statement = statement
         self.constatementition: Dict[str, Any] = statement.generate_statement()
         self.state = state
+
+    
     def get_state(self):
         return self.state
     def get_validator(self):
@@ -81,7 +84,7 @@ class Condition():
 
 
 class IfStatement(Component):
-    condition: Union[Callable[..., bool], Condition]
+    condition: Union[Callable[[Transformable], bool], Condition]
     # executed if true 
     right_statement: Dict[str, Any]
     # executed if false 
@@ -132,6 +135,24 @@ class ForEach(Component):
         return {
             "type": Statement.FOR_EACH_STATEMENT, 
             Statement.FOR_EACH_STATEMENT.value: self
+        }
+    
+
+class Filter(Component):
+    condition: Union[Callable[..., bool], Condition]
+
+    def __init__(self, condition: Union[Callable[..., bool], Condition]) -> None:
+        self.condition = condition
+
+
+    def get_condition(self) -> Union[Callable[..., bool], Condition]:
+        return self.condition
+    
+    
+    def generate_statement(self) ->  Dict[str, Any]:
+        return {
+            "type": Statement.FILTER_STATEMENT, 
+            Statement.FILTER_STATEMENT.value: self
         }
 
 

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import  Dict, Any, List, Optional, Union, cast
+from typing import  Dict, Any, List, Optional, Union, cast, Callable
 import logging
 
 from core.executable_level_1.eval import (
@@ -7,13 +7,14 @@ from core.executable_level_1.eval import (
     ExecutionSchema, 
     IfStatement, 
     While,
+    Filter,
     ForEach,
 )
 from core.executable_level_1.memory import (
     GetMemory, 
     MemoryGetInstruction,  
     MemoryManager, 
-    MemorySetInstruction, 
+    # MemorySetInstruction, 
     SetMemory
 )
 from core.executable_level_1.statements_types import Statement
@@ -24,7 +25,7 @@ from core.executable_level_1.schema import (
 from core.executable_level_1.actions import (
     Action, InputState, OutputState
 )
-from core.executable_level_1.utils import generate_unique_state
+# from core.executable_level_1.utils import generate_unique_state
 
 EvaluatorLogger = logging.Logger("EvaluatorLogger", logging.INFO)
 
@@ -124,35 +125,50 @@ class Evaluator:
     
     def eval_pipeline(self, pipeline: List[Dict[str, Any]]):
         self.eval_program(pipeline, None)
-    
-    def eval_condition(self, condition: Condition):
 
-        unique_state = generate_unique_state()
-        set_commend = self.memory_manager.generate_set_command(unique_state, MemorySetInstruction.SET_AND_FLUSH)
-        self.memory_manager.resolve_set_memory(set_commend, self.register)
-        work_state = condition.get_state()
-        if work_state != None:
-            get_command = self.memory_manager.generate_get_memory_command(work_state, MemoryGetInstruction.GET_AND_GO)
-            self.register = self.memory_manager.resolve_get_memory(get_command, self.register)
-        st = condition.get_statement()
-        self.eval(st)
-        validator = condition.get_validator()
-        res = validator(self.register)
-        old_state_get  = self.memory_manager.generate_get_memory_command([unique_state], MemoryGetInstruction.FLUSH_AND_GET)
-        self.register = self.memory_manager.resolve_get_memory(old_state_get, self.register)
-        return res
+
+    # def eval_condition(self, condition: Condition):
+    #     unique_state = generate_unique_state()
+    #     set_commend = self.memory_manager.generate_set_command(unique_state, MemorySetInstruction.SET_AND_FLUSH)
+    #     self.memory_manager.resolve_set_memory(set_commend, self.register)
+    #     work_state = condition.get_state()
+    #     if work_state != None:
+    #         get_command = self.memory_manager.generate_get_memory_command(work_state, MemoryGetInstruction.GET_AND_GO)
+    #         self.register = self.memory_manager.resolve_get_memory(get_command, self.register)
+    #     st = condition.get_statement()
+    #     self.eval(st)
+    #     validator = condition.get_validator()
+    #     res = validator(self.register)
+    #     old_state_get  = self.memory_manager.generate_get_memory_command([unique_state], MemoryGetInstruction.FLUSH_AND_GET)
+    #     self.register = self.memory_manager.resolve_get_memory(old_state_get, self.register)
+    #     return res
+        
+    def eval_condition(
+        self, 
+        condition: Union[Callable[[Transformable], bool], Condition],
+        state: Transformable
+    ) -> bool:
+        if isinstance(condition, Condition):
+            work_state = condition.get_state()
+            if work_state != None:
+                get_command = self.memory_manager.generate_get_memory_command(work_state, MemoryGetInstruction.GET_AND_GO)
+                state = self.memory_manager.resolve_get_memory(get_command, state)
+            state = Transformable(
+                Evaluator(condition.get_statement()).run_program(
+                    state.extract()
+            ))
+            return condition.validator(state)
+        elif callable(condition):
+            return condition(state)
+        else:
+            raise Exception()
     
 
     def eval_if_statement(self, if_statement: IfStatement):
-
-        condition = if_statement.get_condition()
-        bool_flag: bool
-        if isinstance(condition, Condition):
-            bool_flag = self.eval_condition(condition)
-        elif callable(condition):
-            bool_flag = condition()
-        else:
-            raise Exception()
+        bool_flag = self.eval_condition(
+            condition=if_statement.get_condition(),
+            state=self.register
+        )
         
         if bool_flag == True:
             right_stetement = if_statement.get_right_statement()
@@ -163,15 +179,34 @@ class Evaluator:
                 return
             self.eval(left_stetement)
 
+
     def eval_while_statement(self, while_statement: While):
         retries = while_statement.get_retries()
         if retries == None:
-            while self.eval_condition(while_statement.get_condition()):
+            while self.eval_condition(
+                while_statement.get_condition(), 
+                self.register
+            ):
                 self.eval(while_statement.get_statement())
         else:
-            while self.eval_condition(while_statement.get_condition()) and retries > 0:
+            while (
+                self.eval_condition(
+                    while_statement.get_condition(),
+                    self.register
+                ) and retries > 0
+            ):
                 self.eval(while_statement.get_statement())
                 retries -= 1
+
+
+    def eval_filter_statement(self, filter_statement: Filter) -> None:
+        self.register = Transformable([
+            s for s in self.register 
+            if self.eval_condition(
+                filter_statement.get_condition(),
+                Transformable(s)
+            )
+        ])
 
     
     def eval_for_each(self, for_each_statement: ForEach) -> None:
