@@ -43,7 +43,10 @@ class TransformersModel(
 
 
     def get_predictions(self, **inputs: Any) -> Any:
-        return self.cfg.model(**inputs, **self.cfg.kwargs)
+        if not "encodings" in inputs:
+            return self.cfg.model(**inputs, **self.cfg.kwargs)
+        else:
+            return self.cfg.model(**inputs["encodings"], **self.cfg.kwargs)
     
 
 class TransformersGenerativeModel(
