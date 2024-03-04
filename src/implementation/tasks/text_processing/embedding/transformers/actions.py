@@ -1,6 +1,7 @@
 from typing import Any, Dict, Protocol, runtime_checkable
 
 import torch
+import numpy as np
 
 from core.executable_level_1.actions import OneToOne
 from core.executable_level_1.schema import Config
@@ -28,7 +29,7 @@ class EmbeddingPreprocessor(OneToOne):
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         input_data["encodings"] = self.cfg.tokenizer(
-            input_data["sentences"], 
+            input_data["texts"], 
             padding=True, 
             truncation=True, 
             return_tensors='pt'
@@ -40,11 +41,21 @@ class EmbeddingPostprocessor(OneToOne):
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        sentence_embeddings = input_data["outputs"]["last_hidden_state"][:, 0]
+        texts_embeddings = input_data["outputs"]["last_hidden_state"][:, 0]
         # normalize embeddings
-        sentence_embeddings = torch.nn.functional.normalize(
-            sentence_embeddings, p=2, dim=1
+        texts_embeddings = torch.nn.functional.normalize(
+            texts_embeddings, p=2, dim=1
         )
-        return {
-            "embeddings": sentence_embeddings
-        }
+        input_data["embeddings"] = texts_embeddings
+        return input_data
+
+
+class ConvertEmbeddingsToNumpyArrays(OneToOne):
+    def execute(
+        self, input_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        input_data["embeddings"] = np.array([
+            e.detach().numpy() for e in input_data["embeddings"]
+        ])
+        return input_data
+    

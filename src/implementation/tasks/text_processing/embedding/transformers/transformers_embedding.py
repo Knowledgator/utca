@@ -1,7 +1,6 @@
 from typing import Dict, Type, Optional, List, Union, Any
 
 from transformers import AutoModel, AutoTokenizer # type: ignore
-import torch
 
 from core.executable_level_1.actions import (
     OneToOne, OneToMany, ManyToOne, ManyToMany
@@ -28,18 +27,16 @@ from implementation.predictors.transformers.transformers_model import (
 from implementation.tasks.text_processing.embedding.transformers.actions import (
     EmbeddingPreprocessor,
     EmbeddingPreprocessorConfig,
-    EmbeddingPostprocessor
+    EmbeddingPostprocessor,
+    ConvertEmbeddingsToNumpyArrays,
 )
 
 class TextEmbeddingInput(Input):
-    sentences: List[str]
+    texts: List[str]
 
 
 class TextEmbeddingOutput(Output):
-    class Config:
-        arbitrary_types_allowed = True
-
-    embeddings: List[torch.Tensor]
+    embeddings: Any
 
 
 class ModelInput(PredictorInput):
@@ -92,7 +89,10 @@ class TextEmbeddingTask(
                     )
                 )
             ],
-            postprocess=postprocess or [EmbeddingPostprocessor()],
+            postprocess=postprocess or [
+                EmbeddingPostprocessor(),
+                ConvertEmbeddingsToNumpyArrays()    
+            ],
             input_class=input_class, 
             output_class=output_class,
         )
