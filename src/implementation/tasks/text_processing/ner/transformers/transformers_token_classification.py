@@ -60,7 +60,6 @@ class TokenClassifierTask(
         input_class: Type[TokenClassifierInput]=TokenClassifierInput,
         output_class: Type[NEROutput[ClassifiedEntity]]=NEROutput[ClassifiedEntity]
     ) -> None:
-
         if not predictor:
             predictor = TransformersPipeline(
                 TransformersPipelineConfig(
