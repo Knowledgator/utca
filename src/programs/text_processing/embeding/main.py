@@ -9,7 +9,7 @@ from implementation.tasks.text_processing.embedding.transformers.transformers_em
     TextEmbeddingTask
 )
 from implementation.datasources.index.actions import (
-    BuildIndex, SearchIndex, GetTextsByIndexes,
+    BuildIndex, AddDataset, SearchIndex, GetTextsByIndexes,
 )
 
 # Sentences for dataset
@@ -21,16 +21,15 @@ sentences = [
     "Blizzard conditions continued to slam Northern California over the weekend with damaging winds and heavy snow dumping on mountain ridges down to the valleys.",
 ]
 
+
 if __name__ == "__main__":
     task = TextEmbeddingTask()
     
     pipeline = (
         task
         | RenameAttribute("embeddings", "dataset")
-        | AddData({
-            "dataset_dimensions": 1024
-        })
-        | BuildIndex()
+        | BuildIndex(dataset_dimensions=1024)
+        | AddDataset()
         | SetMemory("index")
         | AddData({
             "texts": ["Bad weather"]
@@ -39,7 +38,6 @@ if __name__ == "__main__":
         | RenameAttribute("embeddings", "query")
         | GetMemory(["index"])
         | UnpackValue("index")
-        | AddData({"k": 1})
         | SearchIndex()
         | AddData({
             "texts": sentences
