@@ -33,6 +33,7 @@ class Validator(Generic[InputType]):
 # Task №1 - can validate is it right based on input and output class !!!
 class Transformable():
     state: Union[Dict[str, Any], List[Dict[str, Any]]]
+    pos: int = 0
 
     def __init__(self, input: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
         self.state = input
@@ -87,6 +88,27 @@ class Transformable():
     @property
     def is_batch(self):
         return isinstance(self.state, List)
+    
+
+    def __next__(self) -> Dict[str, Any]:
+        # not thread safe!!!
+        if isinstance(self.state, Dict):
+            if self.pos == 0:
+                self.pos += 1
+                return self.state
+            raise StopIteration
+        
+        if self.pos < len(self.state):
+            self.pos += 1
+            return self.state[self.pos]
+
+        raise StopIteration
+    
+
+    def __iter__(self) -> Transformable:
+        # not thread safe!!!
+        self.pos = 0
+        return self
 
 # input | model(transform) + Data(dict) + Alter("query") | model | db
 

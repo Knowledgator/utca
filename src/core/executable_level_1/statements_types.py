@@ -18,6 +18,8 @@ class Statement(Enum):
     CONDITION = "condition"
     IF_STATEMENT = "if_statement"
     WHILE_STATEMEMT = "while_statement"
+    FOR_EACH_STATEMENT = "for_each_statement"
+    FILTER_STATEMENT = "filter_statement"
     # SWITCH_STATEMENT = "switch_statement"
     # LOOP_STATEMENT = "loop_statement"
     # PARALLEL_STATEMENT = "parallel_statement"

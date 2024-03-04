@@ -1,10 +1,21 @@
 from __future__ import annotations
-from typing import  Dict, Any, List, Optional, Union
+from typing import  Dict, Any, List, Optional, Union, cast
 import logging
 
-from core.executable_level_1.eval import Condition, ExecutionSchema, IfStatement, While
-from core.executable_level_1.memory import GetMemory, MemoryGetInstruction,  MemoryManager, MemorySetInstruction, SetMemory
-
+from core.executable_level_1.eval import (
+    Condition, 
+    ExecutionSchema, 
+    IfStatement, 
+    While,
+    ForEach,
+)
+from core.executable_level_1.memory import (
+    GetMemory, 
+    MemoryGetInstruction,  
+    MemoryManager, 
+    MemorySetInstruction, 
+    SetMemory
+)
 from core.executable_level_1.statements_types import Statement
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
@@ -161,6 +172,15 @@ class Evaluator:
             while self.eval_condition(while_statement.get_condition()) and retries > 0:
                 self.eval(while_statement.get_statement())
                 retries -= 1
+
+    
+    def eval_for_each(self, for_each_statement: ForEach) -> None:
+        self.regitser = Transformable([
+            cast(
+                Dict[str, Any],
+                Evaluator(for_each_statement.get_statement()).run_program(t)
+            ) for t in self.register
+        ])
 
 # class EvaluatorCycleEvaluator:
 #     # for cyclic constructs

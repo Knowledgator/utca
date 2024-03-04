@@ -117,9 +117,24 @@ class IfStatement(Component):
         return {"type": Statement.IF_STATEMENT, Statement.IF_STATEMENT.value: self}
 
 
-
 class ForEach(Component):
-    pass
+    statement: ExecutionSchema
+
+    def __init__(self, statement: ExecutionSchema) -> None:
+        self.statement = statement
+
+
+    def get_statement(self) -> ExecutionSchema:
+        return self.statement
+    
+    
+    def generate_statement(self) ->  Dict[str, Any]:
+        return {
+            "type": Statement.FOR_EACH_STATEMENT, 
+            Statement.FOR_EACH_STATEMENT.value: self
+        }
+
+
 
 class While(Component):
     statement: Dict[str, Any]
