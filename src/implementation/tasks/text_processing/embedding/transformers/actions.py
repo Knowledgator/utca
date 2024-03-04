@@ -40,7 +40,6 @@ class EmbeddingPostprocessor(OneToOne):
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        print(input_data)
         sentence_embeddings = input_data["outputs"]["last_hidden_state"][:, 0]
         # normalize embeddings
         sentence_embeddings = torch.nn.functional.normalize(
