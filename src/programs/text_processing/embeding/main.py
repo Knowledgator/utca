@@ -20,7 +20,7 @@ if __name__ == "__main__":
     )
 
     res = cast(Dict[str, Any], search.execute(Transformable({
-        "query": "Bad weather",
+        "query": ["Bad weather"],
         "results_count": 1
     })).extract())
     print(f'About bad weather: {res["search_results"]["texts"][0]}')

@@ -99,9 +99,9 @@ class Transformable():
             raise StopIteration
         
         if self.pos < len(self.state):
+            state = self.state[self.pos]
             self.pos += 1
-            return self.state[self.pos]
-
+            return state
         raise StopIteration
     
 

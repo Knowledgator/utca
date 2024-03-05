@@ -15,7 +15,7 @@ from implementation.datasources.index.actions import (
 )
 
 class SemanticSearchSchemaInput(Input):
-    query: str
+    query: List[str]
     results_count: int
 
 
@@ -44,9 +44,7 @@ class SemanticSearchSchema(
             encoder = self.default_encoder()
         self.encoder = encoder
 
-        self.index = BuildIndex(
-            encoder.predictor.config.hidden_size # type: ignore
-        ).execute({})["index"]
+        self.index = self.build_index()
 
         self.dataset = []
         if dataset:
@@ -72,9 +70,19 @@ class SemanticSearchSchema(
         return self
 
 
+    def build_index(self) -> Any:
+        return BuildIndex(
+            self.encoder.predictor.config.hidden_size # type: ignore
+        ).execute({})["index"]
+
+
+    def drop_index(self) -> Any:
+        self.index = self.build_index()
+
+
     def invoke(self, input_data: SemanticSearchSchemaInput) -> Dict[str, Any]:
         search_results = SearchIndex(input_data.results_count).execute({
-            "query": self.get_embeddings([input_data.query]),
+            "query": self.get_embeddings(input_data.query),
             "index": self.index
         })
         search_results = GetTextsByIndexes().execute(

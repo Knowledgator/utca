@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import  Dict, Any, List, Optional, Union, cast, Callable
 import logging
+import copy
 
 from core.executable_level_1.eval import (
     Condition, 
@@ -98,6 +99,9 @@ class Evaluator:
         elif st["type"] == Statement.IF_STATEMENT:
             comp = st[Statement.IF_STATEMENT.value]
             self.eval_if_statement(comp)
+        elif st["type"] == Statement.FILTER_STATEMENT:
+            comp = st[Statement.FILTER_STATEMENT.value]
+            self.eval_filter_statement(comp)
 
 
     def eval_action(self, action: Action[InputState, OutputState]) -> None:
@@ -201,10 +205,10 @@ class Evaluator:
 
     def eval_filter_statement(self, filter_statement: Filter) -> None:
         self.register = Transformable([
-            s for s in self.register 
+            s for s in self.register
             if self.eval_condition(
                 filter_statement.get_condition(),
-                Transformable(s)
+                Transformable(copy.deepcopy(s))
             )
         ])
 
