@@ -49,6 +49,11 @@ class TransformersModel(
             return self.cfg.model(**inputs["encodings"], **self.cfg.kwargs)
     
 
+    @property
+    def config(self) -> Any:
+        return self.cfg.model.config
+
+
 class TransformersGenerativeModel(
     TransformersModel[
         TransformersModelConfigType, 

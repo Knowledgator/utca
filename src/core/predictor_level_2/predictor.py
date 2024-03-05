@@ -32,3 +32,8 @@ class Predictor(
         self, input_data: List[PredictorInputType]
     ) -> List[Dict[str, Any]]:
         return [self.invoke(i) for i in input_data]
+    
+
+    @property
+    def config(self) -> Dict[str, Any]:
+        return {}

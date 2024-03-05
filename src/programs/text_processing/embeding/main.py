@@ -1,16 +1,8 @@
 from typing import Dict, Any, cast
 
-from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.actions import (
-    AddData, RenameAttribute, UnpackValue
-)
-from core.executable_level_1.memory import SetMemory, GetMemory
-from implementation.tasks.text_processing.embedding.transformers.transformers_embedding import (
-    TextEmbeddingTask
-)
-from implementation.datasources.index.actions import (
-    BuildIndex, AddDataset, SearchIndex, GetTextsByIndexes,
-)
+# from core.executable_level_1.interpreter import Evaluator
+from core.executable_level_1.schema import Transformable
+from implementation.schemas.semantic_search_schema import SemanticSearchSchema
 
 # Sentences for dataset
 sentences = [
@@ -23,29 +15,12 @@ sentences = [
 
 
 if __name__ == "__main__":
-    task = TextEmbeddingTask()
-    
-    pipeline = (
-        task
-        | RenameAttribute("embeddings", "dataset")
-        | BuildIndex(dataset_dimensions=1024)
-        | AddDataset()
-        | SetMemory("index")
-        | AddData({
-            "texts": ["Bad weather"]
-        })
-        | task
-        | RenameAttribute("embeddings", "query")
-        | GetMemory(["index"])
-        | UnpackValue("index")
-        | SearchIndex()
-        | AddData({
-            "texts": sentences
-        })
-        | GetTextsByIndexes()
+    search = SemanticSearchSchema(
+        dataset=sentences
     )
 
-    res = cast(Dict[str, Any], Evaluator(pipeline).run_program({
-        "texts": sentences
-    }))
+    res = cast(Dict[str, Any], search.execute(Transformable({
+        "query": "Bad weather",
+        "results_count": 1
+    })).extract())
     print(f'About bad weather: {res["search_results"]["texts"][0]}')
