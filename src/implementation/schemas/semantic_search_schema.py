@@ -14,7 +14,24 @@ from implementation.datasources.index.actions import (
     BuildIndex, AddDataset, SearchIndex, GetTextsByIndexes,
 )
 
-class SemanticSearchSchema(Executable[Config, Input, Output]):
+class SemanticSearchSchemaInput(Input):
+    query: str
+    results_count: int
+
+
+class SemanticSearchSchemaOutput(Output):
+    search_results: Dict[str, Any]
+
+
+class SemanticSearchSchema(
+    Executable[
+        Config, 
+        SemanticSearchSchemaInput, 
+        SemanticSearchSchemaOutput
+    ]
+):
+    input_class = SemanticSearchSchemaInput
+    output_class = SemanticSearchSchemaOutput
     default_encoder = TextEmbeddingTask
     dataset: List[str]
 
@@ -55,19 +72,9 @@ class SemanticSearchSchema(Executable[Config, Input, Output]):
         return self
 
 
-    def invoke(self, input_data: Input) -> Dict[str, Any]:
-        return {}
-    
-    
-    def invoke_batch(self, input_data: List[Input]) -> List[Dict[str, Any]]:
-        return []
-
-
-    def execute(self, input_data: Transformable) -> Transformable:
-        state = cast(Dict[str, Any], input_data.extract())
-        query = state["query"]
-        search_results = SearchIndex(state["results_count"]).execute({
-            "query": self.get_embeddings([query]),
+    def invoke(self, input_data: SemanticSearchSchemaInput) -> Dict[str, Any]:
+        search_results = SearchIndex(input_data.results_count).execute({
+            "query": self.get_embeddings([input_data.query]),
             "index": self.index
         })
         search_results = GetTextsByIndexes().execute(
@@ -76,14 +83,10 @@ class SemanticSearchSchema(Executable[Config, Input, Output]):
                 "texts": self.dataset
             }
         )
-        return Transformable(search_results)
+        return search_results
     
-
-    def execute_batch(self, input_data: Transformable) -> Transformable:
-        # temporary
-        return Transformable([
-            cast(
-                Dict[str, Any],
-                self.execute(Transformable(i)).extract()
-            ) for i in input_data
-        ])
+    
+    def invoke_batch(self, input_data: List[SemanticSearchSchemaInput]) -> List[Dict[str, Any]]:
+        return [
+            self.invoke(i) for i in input_data 
+        ]
