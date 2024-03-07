@@ -36,99 +36,138 @@ class EvaluatorConfigs():
     pass
 
 
-
 class Evaluator:
     program: List[Dict[str, Any]]  # Corrected typo in 'retrieve'
     memory_manager: MemoryManager
     register: Transformable
     
-    def __init__(self, schema: ExecutionSchema, cfg: EvaluatorConfigs = EvaluatorConfigs()) -> None:
+    def __init__(
+        self, 
+        schema: ExecutionSchema, 
+        cfg: EvaluatorConfigs = EvaluatorConfigs()
+    ) -> None:
         self.program = schema.retrieve_program()  # Corrected typo in 'retrieve'
         self.memory_manager = MemoryManager(None)
-        self.register: Transformable = Transformable({})  # Initialized but must be set properly
 
-    
-    def set_initial_input(self, program_input: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
+
+    def prepare_input(
+        self, 
+        program_input: Optional[
+            Union[Dict[str, Any], List[Dict[str, Any]]]
+        ]
+    ) -> Transformable:
         """Sets the initial input for the program."""
-        self.register = Transformable(program_input)  # Assuming this method correctly instantiates a Transformable
-    
-    
-    def run_program(self, program_input: Union[Dict[str, Any], List[Dict[str, Any]]]):
-        return self.eval_program(self.program, program_input)
+        if program_input is not None:
+            return Transformable(program_input)  # Assuming this method correctly instantiates a Transformable
+        return Transformable({})
+
+
+    def run_program(
+        self, 
+        program_input: Optional[
+            Union[Dict[str, Any], List[Dict[str, Any]]]
+        ]
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:    
+        return self.eval_program(
+            self.program,
+            self.prepare_input(program_input)
+        ).extract()
     
     
     def eval_program(
         self, 
         program: List[Dict[str, Any]], 
-        program_input: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+        program_input: Transformable
+    ) -> Transformable:
         """Evaluates the program based on the input provided."""
-        if program_input is not None:
-            self.set_initial_input(program_input)
-        # Execution loop
         for i, st in enumerate(program):
             try:
-                self.eval(st)
+                self.eval(st, program_input)
                 EvaluatorLogger.info(f"Step {i} executed successfully.")
             except Exception as e:
                 EvaluatorLogger.error(f"Error at step {i}: {e}")
                 EvaluatorLogger.exception(e)
-        return self.register.extract()  # Assuming this method extracts the final result
+        return self.register
 
 
-    def eval(self, st: Dict[str, Any]) -> None:
+    def eval(
+        self, st: Dict[str, Any], input_data: Transformable
+    ) -> Transformable:
         """Evaluates a single statement."""
         if st["type"] == Statement.EXECUTE_STATEMENT:
             comp = st[Statement.EXECUTE_STATEMENT.value]
-            self.eval_execute(comp)  # Assuming comp is an executable; this needs to match the method definition
+            return self.eval_execute(comp, input_data)  # Assuming comp is an executable; this needs to match the method definition
         elif st["type"] == Statement.ACTION_STATEMENT:
             comp = st[Statement.ACTION_STATEMENT.value]
-            self.eval_action(comp)  # Assuming comp is an action; this needs to match the method definition
+            return self.eval_action(comp, input_data)  # Assuming comp is an action; this needs to match the method definition
         elif st["type"] == Statement.SET_MEMORY_STATEMENT:
             comp = st[Statement.SET_MEMORY_STATEMENT.value]
-            self.eval_set_memory(comp)
+            return self.eval_set_memory(comp, input_data)
         elif st["type"] == Statement.GET_MEMORY_STATEMENT:
             comp = st[Statement.GET_MEMORY_STATEMENT.value]
-            self.eval_get_memory(comp)
+            return self.eval_get_memory(comp, input_data)
         elif st["type"] == Statement.PIPELINE_STATEMENT:
             comp = st[Statement.PIPELINE_STATEMENT.value]
-            self.eval_pipeline(comp)
+            return self.eval_pipeline(comp, input_data)
         # elif st["type"] == Statement.CONDITION:
         #     comp = st[Statement.CONDITION.value]
         #     self.eval_if_statement(comp)
         elif st["type"] == Statement.IF_STATEMENT:
             comp = st[Statement.IF_STATEMENT.value]
-            self.eval_if_statement(comp)
+            return self.eval_if_statement(comp, input_data)
         elif st["type"] == Statement.FILTER_STATEMENT:
             comp = st[Statement.FILTER_STATEMENT.value]
-            self.eval_filter_statement(comp)
+            return self.eval_filter_statement(comp, input_data)
+        raise ValueError(f"Unexpected statement type!: {st['type']}")
 
 
-    def eval_action(self, action: Action[InputState, OutputState]) -> None:
+    def eval_action(
+        self, 
+        action: Action[InputState, OutputState],
+        input_data: Transformable
+    ) -> Transformable:
         """Evaluates an action statement."""
         # Update the register state based on the action
-        self.register.update_state(action)
+        input_data.update_state(action)
+        return input_data
 
 
-    def eval_execute(self, executable: Executable[Config, Input, Output]) -> None:
+    def eval_execute(
+        self, 
+        executable: Executable[Config, Input, Output],
+        input_data: Transformable
+    ) -> Transformable:
         """Evaluates an execute statement."""
         # Execute the executable and update the register accordingly
-        if self.register.is_batch:
-            self.register = executable.execute_batch(self.register)
-        else:
-            self.register = executable.execute(self.register)
+        if input_data.is_batch:
+            return executable.execute_batch(input_data)
+        return executable.execute(input_data)
     
     
-    def eval_set_memory(self, set_memory_command: SetMemory):
-        self.register = self.memory_manager.resolve_set_memory(set_memory_command, self.register)
+    def eval_set_memory(
+        self, 
+        set_memory_command: SetMemory,
+        input_data: Transformable
+    ) -> Transformable:
+        return self.memory_manager.resolve_set_memory(set_memory_command, input_data)
+    
+    def eval_get_memory(
+        self, 
+        get_memory_command: GetMemory,
+        input_data: Transformable
+    ) -> Transformable:
+        return self.memory_manager.resolve_get_memory(
+            get_memory_command, 
+            input_data
+        )
     
     
-    def eval_get_memory(self, get_memory_command: GetMemory):
-        self.register = self.memory_manager.resolve_get_memory(get_memory_command, self.register)
-    
-    
-    def eval_pipeline(self, pipeline: List[Dict[str, Any]]):
-        self.eval_program(pipeline, None)
+    def eval_pipeline(
+        self, 
+        pipeline: List[Dict[str, Any]],
+        input_data: Transformable
+    ) -> Transformable:
+        return self.eval_program(pipeline, input_data)
 
 
     # def eval_condition(self, condition: Condition):
@@ -150,71 +189,95 @@ class Evaluator:
     def eval_condition(
         self, 
         condition: Union[Callable[[Transformable], bool], Condition],
-        state: Transformable
+        input_data: Transformable
     ) -> bool:
         if isinstance(condition, Condition):
             work_state = condition.get_state()
             if work_state != None:
-                get_command = self.memory_manager.generate_get_memory_command(work_state, MemoryGetInstruction.GET_AND_GO)
-                state = self.memory_manager.resolve_get_memory(get_command, state)
-            state = Transformable(
-                Evaluator(condition.get_statement()).run_program(
-                    state.extract()
-            ))
-            return condition.validator(state)
+                get_command = self.memory_manager.generate_get_memory_command(
+                    work_state, MemoryGetInstruction.GET_AND_GO
+                )
+                input_data = self.memory_manager.resolve_get_memory(
+                    get_command, input_data
+                )
+            ev = Evaluator(condition.get_statement())
+            input_data = ev.eval_program(
+                ev.program,
+                copy.deepcopy(input_data)
+            )
+            return condition.validator(input_data)
         elif callable(condition):
-            return condition(state)
+            return condition(copy.deepcopy(input_data))
         else:
             raise Exception()
     
 
-    def eval_if_statement(self, if_statement: IfStatement):
+    def eval_if_statement(
+        self, 
+        if_statement: IfStatement,
+        input_data: Transformable
+    ) -> Transformable:
         bool_flag = self.eval_condition(
             condition=if_statement.get_condition(),
-            state=self.register
+            input_data=input_data
         )
         
         if bool_flag == True:
             right_stetement = if_statement.get_right_statement()
-            self.eval(right_stetement)
+            return self.eval(
+                right_stetement, input_data
+            )
         else:
             left_stetement = if_statement.get_left_statement()
             if left_stetement == None:
-                return
-            self.eval(left_stetement)
+                return input_data
+            return self.eval(
+                left_stetement, input_data
+            )
 
 
-    def eval_while_statement(self, while_statement: While):
+    def eval_while_statement(
+        self, while_statement: While, input_data: Transformable
+    ) -> Transformable:
         retries = while_statement.get_retries()
         if retries == None:
             while self.eval_condition(
                 while_statement.get_condition(), 
-                self.register
+                input_data
             ):
-                self.eval(while_statement.get_statement())
+                input_data = self.eval(
+                    while_statement.get_statement(),
+                    input_data
+                )
         else:
             while (
                 self.eval_condition(
                     while_statement.get_condition(),
-                    self.register
+                    input_data
                 ) and retries > 0
             ):
-                self.eval(while_statement.get_statement())
+                input_data = self.eval(
+                    while_statement.get_statement(),
+                    input_data
+                )
                 retries -= 1
+        return input_data
 
 
-    def eval_filter_statement(self, filter_statement: Filter) -> None:
-        self.register = Transformable([
+    def eval_filter_statement(
+        self, filter_statement: Filter, input_data: Transformable
+    ) -> Transformable:
+        return Transformable([
             s for s in self.register
             if self.eval_condition(
                 filter_statement.get_condition(),
-                Transformable(copy.deepcopy(s))
+                Transformable(s)
             )
         ])
 
     
-    def eval_for_each(self, for_each_statement: ForEach) -> None:
-        self.regitser = Transformable([
+    def eval_for_each(self, for_each_statement: ForEach) -> Transformable:
+        return Transformable([
             cast(
                 Dict[str, Any],
                 Evaluator(for_each_statement.get_statement()).run_program(t)
