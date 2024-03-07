@@ -72,7 +72,7 @@ class TransformersVisualQandA(
             model = ViltForQuestionAnswering.from_pretrained(self.default_model) # type: ignore
             predictor = TransformersModel(
                 TransformersModelConfig(
-                    model=model
+                    model=model # type: ignore
                 ),
                 input_class=ModelInput
             )
@@ -99,7 +99,7 @@ class TransformersVisualQandA(
 
         super().__init__(
             cfg=cfg,
-            predictor=predictor,
+            predictor=predictor, # type: ignore
             preprocess=preprocess,
             postprocess=postprocess,
             input_class=input_class, 

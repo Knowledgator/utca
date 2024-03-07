@@ -1,4 +1,6 @@
-from typing import TypeVar, Any, Type
+from typing import TypeVar, Any, Type, Dict, Optional
+
+from transformers import PreTrainedModel # type: ignore
 
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
@@ -9,14 +11,15 @@ from core.predictor_level_2.schema import (
     PredictorOutputType
 )
 
-class TransformersModelConfig(PredictorConfig):    
-    def __init__(self, model: Any, **kwargs: Any):
-        self.model = model
-        self.kwargs = kwargs
+class TransformersModelConfig(PredictorConfig):
+    class Config:
+        arbitrary_types_allowed = True
 
+    model: PreTrainedModel
+    kwargs: Optional[Dict[str, Any]]=None
 
-    def __setattr__(self, name: str, value: Any) -> None: # disable pydantic
-        self.__dict__[name] = value
+    def get_kwargs(self) -> Dict[str, Any]:
+        return self.kwargs or {}
 
 
 TransformersModelConfigType = TypeVar(
@@ -44,14 +47,14 @@ class TransformersModel(
 
     def get_predictions(self, **inputs: Any) -> Any:
         if not "encodings" in inputs:
-            return self.cfg.model(**inputs, **self.cfg.kwargs)
+            return self.cfg.model(**inputs, **self.cfg.get_kwargs())
         else:
-            return self.cfg.model(**inputs["encodings"], **self.cfg.kwargs)
+            return self.cfg.model(**inputs.pop("encodings"), **inputs, **self.cfg.get_kwargs())
     
 
     @property
     def config(self) -> Any:
-        return self.cfg.model.config
+        return self.cfg.model.config # type: ignore
 
 
 class TransformersGenerativeModel(
@@ -62,4 +65,7 @@ class TransformersGenerativeModel(
     ]
 ):
     def get_predictions(self, **inputs: Any) -> Any:
-        return self.cfg.model.generate(**inputs, **self.cfg.kwargs) # type: ignore
+        if not "encodings" in inputs:
+            return self.cfg.model.generate(**inputs, **self.cfg.get_kwargs()) # type: ignore
+        else:
+            return self.cfg.model.generate(**inputs.pop("encodings"), **inputs, **self.cfg.get_kwargs()) # type: ignore

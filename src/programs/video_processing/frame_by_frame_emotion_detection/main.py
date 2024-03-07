@@ -40,7 +40,7 @@ labels = model.config.id2label # type: ignore
 task = TransformersImageClassification(
     predictor=TransformersModel(
         TransformersModelConfig(
-            model=model
+            model=model # type: ignore
         )
     ),
     preprocess=[

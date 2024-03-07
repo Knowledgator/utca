@@ -1,4 +1,4 @@
-from typing import Dict, Type, Optional, List, Union, Any
+from typing import Type, Optional, List, Union, Any
 
 from transformers import AutoModel, AutoTokenizer # type: ignore
 
@@ -72,7 +72,7 @@ class TextEmbeddingTask(
             model = AutoModel.from_pretrained(self.default_model) # type: ignore
             predictor = TransformersModel(
                 TransformersModelConfig(
-                    model=model
+                    model=model # type: ignore
                 ),
                 input_class=ModelInput
             )
@@ -96,7 +96,3 @@ class TextEmbeddingTask(
             input_class=input_class, 
             output_class=output_class,
         )
-
-    
-    def invoke(self, input_data: TextEmbeddingInput) -> Dict[str, Any]:
-        return super().invoke(input_data)

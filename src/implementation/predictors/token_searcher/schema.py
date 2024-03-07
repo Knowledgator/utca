@@ -13,23 +13,13 @@ from implementation.predictors.transformers.transformers_pipeline import (
 )
 
 class TokenSearcherPredictorConfig(TransformersPipelineConfig):
-    name: str
-    
-    def __init__(
-        self,
-        *,
-        name: str='knowledgator/UTC-DeBERTa-small', 
-        **kwargs: Any
-    ):
-        self.name = name
-        super().__init__(
-            task='ner', # type: ignore
-            model=AutoModelForTokenClassification.from_pretrained(name), # type: ignore
-            tokenizer=AutoTokenizer.from_pretrained(name), # type: ignore
-            aggregation_strategy='first', # type: ignore
-            batch_size=12, # type: ignore
-            **kwargs
-        )
+    task='ner'
+    model='knowledgator/UTC-DeBERTa-small'
+    tokenizer='knowledgator/UTC-DeBERTa-small'
+    kwargs={
+        "aggregation_strategy": "first",
+        "batch_size": 12
+    }
 
 
 class TokenSearcherPredictorInput(PredictorInput):

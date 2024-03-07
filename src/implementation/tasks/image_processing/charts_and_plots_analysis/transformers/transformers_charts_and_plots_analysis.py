@@ -71,8 +71,10 @@ class ChartsAndPlotsAnalysis(
             model = Pix2StructForConditionalGeneration.from_pretrained(self.default_model) # type: ignore
             predictor=TransformersGenerativeModel(
                 TransformersModelConfig(
-                    model=model,
-                    max_new_tokens=512
+                    model=model, # type: ignore
+                    kwargs={
+                        "max_new_tokens": 512
+                    }
                 ),
                 input_class=ModelInput
             )
@@ -100,7 +102,7 @@ class ChartsAndPlotsAnalysis(
 
         super().__init__(
             cfg=cfg,
-            predictor=predictor,
+            predictor=predictor, # type: ignore
             preprocess=preprocess,
             postprocess=postprocess,
             input_class=input_class, 

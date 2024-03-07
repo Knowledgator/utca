@@ -70,7 +70,7 @@ class TransformersImageClassification(
             model = AutoModelForImageClassification.from_pretrained(self.default_model) # type: ignore
             predictor=TransformersModel(
                 TransformersModelConfig(
-                    model=model
+                    model=model # type: ignore
                 ),
                 input_class=ImageModelInput
             )
