@@ -35,5 +35,6 @@ class Predictor(
     
 
     @property
-    def config(self) -> Dict[str, Any]:
-        return {}
+    @abstractmethod
+    def config(self) -> Any:
+        ...
