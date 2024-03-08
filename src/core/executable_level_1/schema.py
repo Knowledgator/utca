@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC
 from typing import (
-    TypeVar, Any, Dict, Generic, Type, Optional, List, Union,
+    TypeVar, Any, Dict, Generic, Type, List, Union,
     TYPE_CHECKING
 )
 
@@ -124,9 +124,6 @@ class Output(BaseModel, ABC):
 
 
 class Config(BaseModel, ABC):
-    max_workers: int = 1
-    timeout: Optional[float] = None 
-
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.__str__()})"
 
