@@ -59,5 +59,5 @@ class ChartsAndPlotsAnalysisPostprocessor(OneToOne):
         self, input_data: Dict[str, Any], 
     ) -> Dict[str, Any]:
         return {
-            "outputs": self.cfg.processor.decode(input_data["outputs"][0], skip_special_tokens=True)
+            "outputs": self.cfg.processor.decode(input_data["outputs"][0], skip_special_tokens=True).replace("<0x0A>", "<br/>")
         }

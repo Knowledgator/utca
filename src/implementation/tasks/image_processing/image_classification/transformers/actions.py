@@ -76,6 +76,8 @@ class ImageClassificationMultyLabelPostprocessor(OneToOne):
 
         return {
             "labels": {
-                self.cfg.labels[i]: prob for i, prob in enumerate(probabilities)
+                self.cfg.labels[i]: prob 
+                for i, prob in enumerate(probabilities)
+                if prob >= self.cfg.threshold
             }
         }
