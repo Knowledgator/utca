@@ -1,9 +1,10 @@
-from typing import Dict, Any, TypeVar
+from typing import Any, Dict, List, TypeVar, Union, Optional
 
 from transformers import ( # type: ignore
-    AutoTokenizer, AutoModelForTokenClassification # type: ignore
+    PreTrainedModel,
+    TFPreTrainedModel,
+    PreTrainedTokenizer,
 )
-
 from core.predictor_level_2.schema import (
     PredictorInput,
     PredictorOutput
@@ -13,22 +14,29 @@ from implementation.predictors.transformers.transformers_pipeline import (
 )
 
 class TokenSearcherPredictorConfig(TransformersPipelineConfig):
-    task='ner'
-    model='knowledgator/UTC-DeBERTa-small'
-    tokenizer='knowledgator/UTC-DeBERTa-small'
-    kwargs={
+    task: Optional[str]="ner"
+    model: Optional[Union[
+        str,
+        PreTrainedModel,
+        TFPreTrainedModel
+    ]]="knowledgator/UTC-DeBERTa-small"
+    tokenizer: Optional[Union[
+        str,
+        PreTrainedTokenizer
+    ]]="knowledgator/UTC-DeBERTa-small"
+    kwargs: Optional[Dict[str, Any]]={
         "aggregation_strategy": "first",
         "batch_size": 12
     }
 
 
 class TokenSearcherPredictorInput(PredictorInput):
-    inputs: list[str]
+    inputs: List[str]
 
 
 class TokenSearcherPredictorOutput(PredictorOutput):
-    inputs: list[str]
-    outputs: list[list[Dict[str, Any]]]
+    inputs: List[str]
+    outputs: List[List[Dict[str, Any]]]
 
 
 TokenSearcherPredictorConfigType = TypeVar("TokenSearcherPredictorConfigType", bound=TokenSearcherPredictorConfig)
