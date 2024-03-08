@@ -84,6 +84,32 @@ class UnpackValue(OneToOne):
         value = input_data.pop(self.key)
         input_data.update(value)
         return input_data
+    
+
+class SetOneToKey(OneToOne):
+    def __init__(self, key: str) -> None:
+        self.key = key
+
+
+    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            self.key: input_data
+        }
+    
+
+class SetMultipleToKey(ManyToOne):
+    def __init__(self, key: str) -> None:
+        self.key = key
+
+
+    def execute(self, input_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        return {
+            self.key: input_data
+        }
+
+
+class DropStateToSingle(OneToOne, ManyToOne):
+    ...
 
 
 class RenameAttributeQuery(OneToOne):
