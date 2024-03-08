@@ -115,7 +115,6 @@ class CustomPage(Page):
         tset = TableSettings.resolve(kwargs.get("table_settings", {}))
         tables = self.find_tables(tset)
 
-        print(len(self.chars))
         if tables:
             processed_tables, unprocessed_chars = process_tables_chars(
                 tables, self.chars
