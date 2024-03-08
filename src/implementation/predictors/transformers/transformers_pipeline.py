@@ -28,6 +28,7 @@ from core.predictor_level_2.schema import (
 class TransformersPipelineConfig(PredictorConfig):
     class Config:
         arbitrary_types_allowed = True
+        protected_namespaces = ()
 
     task: Optional[str]=None
     model: Optional[Union[
@@ -43,10 +44,7 @@ class TransformersPipelineConfig(PredictorConfig):
         str,
         PreTrainedTokenizer
     ]]=None
-    feature_extractor: Optional[Union[ # type: ignore
-        str, 
-        PreTrainedFeatureExtractor
-    ]]=None
+    feature_extractor: Optional[Any]=None
     image_processor: Optional[Union[
         str, 
         BaseImageProcessor
