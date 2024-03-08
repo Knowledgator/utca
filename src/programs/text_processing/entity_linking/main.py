@@ -1,9 +1,13 @@
-from typing import Dict, Any, cast
+from typing import Any, Dict, List
 
-# from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.schema import Transformable
+from core.executable_level_1.interpreter import Evaluator
+from core.executable_level_1.eval import ForEach, ExecutionSchema
+from core.executable_level_1.actions import ExecuteFunctionOneToMany
 from implementation.tasks.text_processing.entity_linking.transformers.transformers_entity_linking import (
     EntityLinkingTask
+)
+from implementation.tasks.text_processing.text_classification.comprehend_it.comprehend_it import (
+    ComprehendIt
 )
 
 # Sentences for dataset
@@ -15,14 +19,26 @@ sentences = [
     "Blizzard conditions continued to slam Northern California over the weekend with damaging winds and heavy snow dumping on mountain ridges down to the valleys.",
 ]
 
+def prepare_to_rescore(input_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    return [
+        {
+            "text": sentence,
+            "labels": [l[0] for l in labels]
+        } for sentence, labels in zip(sentences, input_data["classification_output"])
+    ]
 
 if __name__ == "__main__":
-    task = EntityLinkingTask(
-        labels=["positive", "negative", "neutral"]
+    pipeline = (
+        EntityLinkingTask(
+            labels=["positive", "negative", "neutral"]
+        )
+        | ExecuteFunctionOneToMany(prepare_to_rescore)
+        | ForEach(ExecutionSchema(ComprehendIt()))
     )
-    res = cast(Dict[str, Any], task.execute(Transformable({
+
+    res = Evaluator(pipeline).run_program({
         "num_beams": 2,
         "texts": sentences,
         "num_return_sequences": 2
-    })).extract())
+    })
     print(res)
