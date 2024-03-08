@@ -24,9 +24,7 @@ from implementation.tasks.text_processing.summarization.transformers.actions imp
 )
 
 class SummarizationTaskInput(SummarizationInput):
-    inputs: List[str]
-    max_length: int
-    min_length: int
+    inputs: str
 
 
 class SummarizationOutput(Output):
@@ -36,7 +34,7 @@ class SummarizationOutput(Output):
 class SummarizationTask(
     Task[
         Config,
-        SummarizationInput, 
+        SummarizationTaskInput, 
         SummarizationOutput,
     ]
 ):
@@ -60,7 +58,10 @@ class SummarizationTask(
             predictor = TransformersSummarizationPipeline(
                 TransformersPipelineConfig(
                     task="summarization", 
-                    model=self.default_model
+                    model=self.default_model,
+                    kwargs={
+                        "truncation": True
+                    }
                 ),
                 input_class=SummarizationTaskInput
             )
