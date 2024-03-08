@@ -39,7 +39,6 @@ class EvaluatorConfigs():
 class Evaluator:
     program: List[Dict[str, Any]]  # Corrected typo in 'retrieve'
     memory_manager: MemoryManager
-    register: Transformable
     
     def __init__(
         self, 
@@ -82,12 +81,12 @@ class Evaluator:
         """Evaluates the program based on the input provided."""
         for i, st in enumerate(program):
             try:
-                self.eval(st, program_input)
+                program_input = self.eval(st, program_input)
                 EvaluatorLogger.info(f"Step {i} executed successfully.")
             except Exception as e:
                 EvaluatorLogger.error(f"Error at step {i}: {e}")
                 EvaluatorLogger.exception(e)
-        return self.register
+        return program_input
 
 
     def eval(
@@ -118,6 +117,9 @@ class Evaluator:
         elif st["type"] == Statement.FILTER_STATEMENT:
             comp = st[Statement.FILTER_STATEMENT.value]
             return self.eval_filter_statement(comp, input_data)
+        elif st["type"] == Statement.FOR_EACH_STATEMENT:
+            comp = st[Statement.FOR_EACH_STATEMENT.value]
+            return self.eval_for_each(comp, input_data)
         raise ValueError(f"Unexpected statement type!: {st['type']}")
 
 
@@ -151,6 +153,7 @@ class Evaluator:
     ) -> Transformable:
         return self.memory_manager.resolve_set_memory(set_memory_command, input_data)
     
+
     def eval_get_memory(
         self, 
         get_memory_command: GetMemory,
@@ -268,7 +271,7 @@ class Evaluator:
         self, filter_statement: Filter, input_data: Transformable
     ) -> Transformable:
         return Transformable([
-            s for s in self.register
+            s for s in input_data
             if self.eval_condition(
                 filter_statement.get_condition(),
                 Transformable(s)
@@ -276,12 +279,14 @@ class Evaluator:
         ])
 
     
-    def eval_for_each(self, for_each_statement: ForEach) -> Transformable:
+    def eval_for_each(
+        self, for_each_statement: ForEach, input_data: Transformable
+    ) -> Transformable:
         return Transformable([
             cast(
                 Dict[str, Any],
                 Evaluator(for_each_statement.get_statement()).run_program(t)
-            ) for t in self.register
+            ) for t in input_data
         ])
 
 # class EvaluatorCycleEvaluator:
