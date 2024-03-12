@@ -51,6 +51,7 @@ class SQLAction:
         self.session.execute(
             self.statement, **input_data.get("kwargs", {})
         )
+        self.session.commit()
         return input_data
 
 
@@ -77,6 +78,7 @@ class SQLActionWithReturns(SQLAction):
                 self.statement, **input_data.get("kwargs", {})
             )
         )
+        self.session.commit()
         return input_data
 
 
