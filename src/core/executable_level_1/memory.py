@@ -1,6 +1,6 @@
 
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union, cast
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.schema import Transformable
@@ -100,23 +100,50 @@ class SetMemory(Component):
 class MemoryGetInstruction(Enum):
     GET_AND_GO = "getandgo" # get and merge
     FLUSH_AND_GET = "flushandget" # clean all objects and get
+    
+
+class MemoryMergeInstruction(Enum):
+    SET_MEMORY_TO_EVERYONE = "setmemorytoeveryone"
+    COMBINE_IF_POSSIBLE = "combineifpossible"
+    MERGE = "merge"
 
 
 class GetMemory(Component):
     identifiers: List[str]
     memory_instruction: MemoryGetInstruction
-    def __init__(self, identifiers: List[str],
-                 memory_instruction: MemoryGetInstruction = MemoryGetInstruction.GET_AND_GO):
+    memory_merge: MemoryMergeInstruction
+
+    def __init__(
+        self, 
+        identifiers: List[str],
+        memory_instruction: MemoryGetInstruction=MemoryGetInstruction.GET_AND_GO,
+        memory_merge: MemoryMergeInstruction=MemoryMergeInstruction.MERGE
+    ):
         super().__init__()
         self.identifiers = identifiers
         self.memory_instruction = memory_instruction
-    def get_identifiers(self):
-        return self.identifiers
-    def get_memory_instruction(self):
-        return self.memory_instruction
-    def generate_statement(self) -> Dict[str, Any]:
-        return {"type": Statement.GET_MEMORY_STATEMENT, Statement.GET_MEMORY_STATEMENT.value: self}
+        self.memory_merge = memory_merge
+
     
+    def get_identifiers(self) -> List[str]:
+        return self.identifiers
+    
+    
+    def get_memory_instruction(self) -> MemoryGetInstruction:
+        return self.memory_instruction
+    
+
+    def get_memory_merge(self) -> MemoryMergeInstruction:
+        return self.memory_merge
+    
+    
+    def generate_statement(self) -> Dict[str, Any]:
+        return {
+            "type": Statement.GET_MEMORY_STATEMENT, 
+            Statement.GET_MEMORY_STATEMENT.value: self
+        }
+    
+
 class MemoryManager():
     memory: Memory
     def __init__(self, path: Optional[str]) -> None:
@@ -135,22 +162,87 @@ class MemoryManager():
 
     def resolve_get_memory(self, command: GetMemory, register: Transformable):
         ## TODO: refactor redundant transformable and dict transversion
-        registerDict = register.extract()
+        register_data = register.extract()
         instr = command.get_memory_instruction()
+        merge = command.get_memory_merge()
         identifiers = command.get_identifiers()
         if instr == MemoryGetInstruction.GET_AND_GO:
-            registerDict = self.get_and_go(registerDict, identifiers)
+            register_data = self.get_and_go(register_data, identifiers, merge)
         elif  instr == MemoryGetInstruction.FLUSH_AND_GET: 
-            registerDict = self.flush_and_get(identifiers)
-        return Transformable(registerDict)
+            register_data = self.flush_and_get(identifiers)
+        return Transformable(register_data)
 
         
-    def get_and_go(self, register: Dict[str, Any], identifiers: List[str]):
-        for identifier in identifiers:
-            register[identifier] = (self.memory.retrieve_store(identifier))
+    def get_and_go(
+        self, 
+        register: Union[Dict[str, Any], List[Dict[str, Any]]], 
+        identifiers: List[str],
+        merge: MemoryMergeInstruction
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+        if merge == MemoryMergeInstruction.MERGE:
+            register = {
+                "register": register
+            }
+            for identifier in identifiers:
+                register[identifier] = self.memory.retrieve_store(identifier)
+            return register
+
+        elif merge == MemoryMergeInstruction.SET_MEMORY_TO_EVERYONE:
+            if isinstance(register, Dict):
+                for identifier in identifiers:
+                    register[identifier] = self.memory.retrieve_store(identifier)
+            else:
+                for r in register:
+                    for identifier in identifiers:
+                        r[identifier] = self.memory.retrieve_store(identifier)
+            return register
+        
+        else:
+            if isinstance(register, Dict):
+                for identifier in identifiers:
+                    memory_data = self.memory.retrieve_store(identifier)            
+                    if isinstance(memory_data, Dict):
+                        register = {
+                            **cast(Dict[str, Any], register),
+                            **memory_data
+                        }
+                    else:
+                        register = [
+                            {
+                                **cast(Dict[str, Any], register),
+                                **m
+                            } for m in memory_data
+                        ]
+            else:
+                for identifier in identifiers:
+                    memory_data = self.memory.retrieve_store(identifier)            
+                    if isinstance(memory_data, Dict):
+                        register = [
+                            {
+                                **r,
+                                **memory_data
+                            } for r in register
+                        ]
+                    else:
+                        if len(memory_data) == len(register):
+                            register = [
+                                {
+                                    **r,
+                                    **m
+                                } for r, m in zip(register, memory_data)
+                            ]
+                        else:
+                            register = [
+                                {
+                                    **r,
+                                    identifier: memory_data
+                                } for r in register
+                            ]
         return register
+    
+
     def flush_and_get(self, identifiers: List[str]):
-        return self.get_and_go({}, identifiers)
+        return self.get_and_go({}, identifiers, MemoryMergeInstruction.MERGE)
 
 
      # set memory commands
@@ -169,13 +261,23 @@ class MemoryManager():
             registerDict = self.flush()
         return Transformable(registerDict)
 
-    def set_and_go(self, register: Dict[str, Any], identifier: str):
+    
+    def set_and_go(
+        self, 
+        register: Union[Dict[str, Any], List[Dict[str, Any]]], 
+        identifier: str
+    ):
         self.memory.add_store(identifier, register)
-    def set_and_flush(self, register: Dict[str, Any], identifier: str) -> Dict[str, Any]:
+    
+    
+    def set_and_flush(
+        self, 
+        register: Union[Dict[str, Any], List[Dict[str, Any]]], 
+        identifier: str
+    ) -> Dict[str, Any]:
         self.set_and_go(register, identifier)
         return {}
+    
+    
     def flush(self) -> Dict[str, Any]:
         return {}
-    
-
-        
