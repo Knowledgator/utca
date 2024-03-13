@@ -7,21 +7,19 @@ from implementation.predictors.token_searcher.schema import (
     TokenSearcherPredictorConfig, 
     TokenSearcherPredictorInput, 
     TokenSearcherPredictorOutput,
-    TokenSearcherPredictorConfigType, 
     TokenSearcherPredictorInputType, 
     TokenSearcherPredictorOutputType
 )   
 
 class TokenSearcherPredictor(
     TransformersPipeline[
-        TokenSearcherPredictorConfigType,
         TokenSearcherPredictorInputType, 
         TokenSearcherPredictorOutputType
     ]
 ):
     def __init__(
         self, 
-        cfg: TokenSearcherPredictorConfigType=TokenSearcherPredictorConfig(),
+        cfg: TokenSearcherPredictorConfig=TokenSearcherPredictorConfig(),
         input_class: Type[TokenSearcherPredictorInputType]=TokenSearcherPredictorInput,
         output_class: Type[TokenSearcherPredictorOutputType]=TokenSearcherPredictorOutput
     ) -> None:

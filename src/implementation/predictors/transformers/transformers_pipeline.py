@@ -80,7 +80,6 @@ TransformersPipelineConfigType = TypeVar(
 
 class TransformersPipeline(
     Predictor[
-        TransformersPipelineConfigType, 
         PredictorInputType,
         PredictorOutputType
     ]
@@ -89,14 +88,14 @@ class TransformersPipeline(
 
     def __init__(
         self,
-        cfg: TransformersPipelineConfigType,
+        cfg: TransformersPipelineConfig,
         input_class: Type[PredictorInputType]=PredictorInput,
         output_class: Type[PredictorOutputType]=PredictorOutput,
     ) -> None:
         self.pipeline: Pipeline = pipeline(
             **cfg.pipeline_config
         )
-        super().__init__(cfg, input_class, output_class)
+        super().__init__(input_class, output_class)
 
 
     def get_predictions(self, **inputs: Any) -> Any:
@@ -118,7 +117,6 @@ SummarizationInputType = TypeVar(
 
 class TransformersSummarizationPipeline(
     TransformersPipeline[
-        TransformersPipelineConfigType,
         SummarizationInputType, 
         PredictorOutputType
     ]

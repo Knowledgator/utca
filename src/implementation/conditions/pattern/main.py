@@ -1,4 +1,4 @@
-from typing import Dict, Union, Any, cast
+from typing import Union
 import re
 
 from core.executable_level_1.schema import Transformable
@@ -17,14 +17,8 @@ class RePattern:
 
 
     def search(self, input_data: Transformable) -> bool:
-        return bool(self.pattern.search(cast(
-            Dict[str, Any],
-            input_data.extract()
-        )[self.key]))
+        return bool(self.pattern.search(getattr(input_data, self.key)))
     
 
     def match(self, input_data: Transformable) -> bool:
-        return bool(self.pattern.match(cast(
-            Dict[str, Any],
-            input_data.extract()
-        )[self.key]))
+        return bool(self.pattern.match(getattr(input_data, self.key)))

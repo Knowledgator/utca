@@ -7,21 +7,19 @@ from implementation.predictors.comprehend_it.schema import (
     ComprehendItPredictorConfig,
     ComprehendItPredictorInput, 
     ComprehendItPredictorOutput,
-    ComprehendItPredictorConfigType, 
     ComprehendItPredictorInputType, 
     ComprehendItPredictorOutputType
 )   
 
 class ComprehendItPredictor(
     TransformersPipeline[
-        ComprehendItPredictorConfigType,
         ComprehendItPredictorInputType, 
         ComprehendItPredictorOutputType
     ]
 ):
     def __init__(
         self, 
-        cfg: ComprehendItPredictorConfigType=ComprehendItPredictorConfig(),
+        cfg: ComprehendItPredictorConfig=ComprehendItPredictorConfig(),
         input_class: Type[ComprehendItPredictorInputType]=ComprehendItPredictorInput,
         output_class: Type[ComprehendItPredictorOutputType]=ComprehendItPredictorOutput
     ) -> None:

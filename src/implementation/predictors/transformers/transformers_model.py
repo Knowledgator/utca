@@ -29,7 +29,6 @@ TransformersModelConfigType = TypeVar(
 
 class TransformersModel(
     Predictor[
-        TransformersModelConfigType, 
         PredictorInputType, 
         PredictorOutputType
     ]
@@ -37,12 +36,12 @@ class TransformersModel(
    
     def __init__(
         self, 
-        cfg: TransformersModelConfigType,
+        cfg: TransformersModelConfig,
         input_class: Type[PredictorInputType]=PredictorInput,
         output_class: Type[PredictorOutputType]=PredictorOutput
     ) -> None:
         self.cfg = cfg
-        super().__init__(cfg, input_class, output_class)
+        super().__init__(input_class, output_class)
 
 
     def get_predictions(self, **inputs: Any) -> Any:
@@ -59,7 +58,6 @@ class TransformersModel(
 
 class TransformersGenerativeModel(
     TransformersModel[
-        TransformersModelConfigType, 
         PredictorInputType, 
         PredictorOutputType
     ]
