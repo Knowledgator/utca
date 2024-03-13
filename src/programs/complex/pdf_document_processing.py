@@ -10,7 +10,7 @@ from core.executable_level_1.memory import (
 from core.executable_level_1.actions import (
     AddData,
     UnpackValue,
-    ExecuteFunctionOneToMany,
+    ExecuteFunction,
 )
 from implementation.datasources.pdf.actions import (
     PDFRead, PDFExtractTexts, PDFExtractImages, PDFFindTables
@@ -65,7 +65,7 @@ def crop_tables_from_pages(
 if __name__ == "__main__":
     text_summarization = (
         PDFExtractTexts()
-        | ExecuteFunctionOneToMany(prepare_text_summarization_input)
+        | ExecuteFunction(prepare_text_summarization_input)
         | SummarizationTask()
     )
 
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
     image_processing = (
         PDFExtractImages()
-        | ExecuteFunctionOneToMany(prepare_image_classification_input)
+        | ExecuteFunction(prepare_image_classification_input)
         | ForEach(
             process_visual_data
         )
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     table_processing = (
         PDFFindTables()
-        | ExecuteFunctionOneToMany(crop_tables_from_pages)
+        | ExecuteFunction(crop_tables_from_pages)
         | ForEach(
             process_visual_data
         )

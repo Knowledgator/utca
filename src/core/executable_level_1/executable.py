@@ -1,16 +1,14 @@
 from __future__ import annotations
 from typing import (
-    Any, List, Type, Dict, Union, cast, Generic, Optional
+    Any, List, Dict, Callable, Type, Generic, Optional, TypeVar, cast
 )
 from abc import ABC,  abstractmethod
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.schema import (
-    ConfigType, 
     InputType, 
     OutputType, 
     Transformable, 
-    Validator,
     Input,
     Output
 )
@@ -18,22 +16,26 @@ from core.executable_level_1.statements_types import (
     Statement
 )
 
-# + and | code
-# protocol with transformable
+ValidationClass = TypeVar("ValidationClass", Input, Output)
 
-class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
+class Executable(
+    Generic[InputType, OutputType], 
+    Component, 
+    ABC
+):
+    default_key: str
     input_class: Type[InputType]
     output_class: Type[OutputType]
 
     def __init__(
         self, 
-        cfg: Optional[ConfigType]=None,
         input_class: Type[InputType]=Input,
         output_class: Type[OutputType]=Output, 
+        default_key: str="output"
     ):
         self.input_class = input_class
         self.output_class = output_class
-        super().__init__(cfg)
+        self.default_key = default_key
 
 
     @abstractmethod
@@ -41,69 +43,84 @@ class Executable(Generic[ConfigType, InputType, OutputType], Component, ABC):
         ...
 
 
-    @abstractmethod
-    def invoke_batch(self, input_data: List[InputType]) -> List[Dict[str, Any]]:
-        ...
-
-
-    def validate_input(
-        self, input_data: Transformable
-    ) -> Union[InputType, List[InputType]]:
-        if not input_data.is_batch:
-            return self.input_class(**cast(
-                Dict[str, Any], input_data.extract()
-            ))
-        
-        data = input_data.extract()
-        return [
-            self.input_class(
-                **cast(Dict[str, Any], i)
-            ) for i in data
-        ]
-
-
-    def validate_output(self, output_data: Dict[str, Any]) -> OutputType:
-        return self.output_class(**output_data)
-
-
-    def prepare_output(
+    def validate(
         self, 
-        output_data: Dict[str, Any], 
-    ) -> Transformable:
-        output = self.validate_output(output_data)
-        return output.get_transform()
+        data: Dict[str, Any],
+        validation_class: Type[ValidationClass]
+    ) -> ValidationClass:
+        return validation_class(**data)
 
 
     def execute(
         self, 
-        input_data: Transformable, 
-    ) -> Transformable:
+        input_data: Dict[str, Any], 
+    ) -> Dict[str, Any]:
         try:
-            validated_input = cast(InputType, self.validate_input(input_data))
+            validated_input = self.validate(
+                input_data,
+                self.input_class
+            )
             result: Dict[str, Any] = self.invoke(validated_input)
-            return self.prepare_output(result)
+            self.validate(
+                result, self.output_class
+            )
+            return input_data
         except Exception as e:
             raise ValueError(f"Validation error: {e}")
 
 
     def execute_batch(
-        self, input_data: Transformable 
-    ) -> Transformable:
+        self, 
+        input_data: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
         try:
-            validated_input = cast(List[InputType], self.validate_input(input_data))
-            result: list[Dict[str, Any]] = self.invoke_batch(validated_input)
-            return Transformable(result)
+            result: List[Dict[str, Any]] = []
+            
+            for i in input_data:
+                validated_input = self.validate(i, self.input_class)
+                tmp = self.invoke(validated_input)
+                self.validate(tmp, self.output_class)
+                result.append(tmp)
+            return input_data
         except Exception as e:
             raise ValueError(f"Validation error: {e}")
-
-
-    def getValidator(self) -> Validator[InputType]:
-        return Validator(self.input_class)
     
+
+    def __call__(
+        self, 
+        register: Transformable,
+        get_key: Optional[str]=None,
+        set_key: Optional[str]=None
+    ) -> Transformable:
+        input_data = getattr(register, get_key or "__dict__")
+        if isinstance(input_data, Dict):
+            result = self.execute(cast(Dict[str, Any], input_data))
+        else:
+            result = self.execute_batch(
+                cast(List[Dict[str, Any]], input_data)
+            )
+        setattr(
+            register, 
+            set_key or self.default_key, 
+            result
+        )
+        return register
+
+
+    def use(
+        self,
+        get_key: Optional[str]=None,
+        set_key: Optional[str]=None
+    ) -> Callable[[Transformable], Transformable]:
+        def executor(register: Transformable):
+            return self.__call__(register, get_key, set_key)
+        return executor
+
 
     def generate_statement(
         self
     ) -> Dict[str, Any]:
-        return {"type": Statement.EXECUTE_STATEMENT,  Statement.EXECUTE_STATEMENT.value: self}
-
-
+        return {
+            "type": Statement.EXECUTE_STATEMENT,  
+            Statement.EXECUTE_STATEMENT.value: self
+        }

@@ -1,8 +1,8 @@
 from typing import Any, Dict
 
-from core.executable_level_1.actions import OneToOne
+from core.executable_level_1.actions import Action
     
-class DocumentQandAPostprocess(OneToOne):    
+class DocumentQandAPostprocess(Action[Dict[str, Any], Dict[str, Any]]):    
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:

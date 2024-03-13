@@ -1,11 +1,11 @@
 from __future__ import annotations
-from typing import List, Optional, cast, Dict, Any
+from typing import List, Optional, Dict, Any
 
 import numpy.typing as npt
 
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
-    Config, Input, Output, Transformable
+    Input, Output, Transformable
 )
 from implementation.tasks.text_processing.embedding.transformers.transformers_embedding import (
     TextEmbeddingTask
@@ -25,7 +25,6 @@ class SemanticSearchSchemaOutput(Output):
 
 class SemanticSearchSchema(
     Executable[
-        Config, 
         SemanticSearchSchemaInput, 
         SemanticSearchSchemaOutput
     ]
@@ -52,12 +51,12 @@ class SemanticSearchSchema(
     
 
     def get_embeddings(self, texts: List[str]) -> npt.NDArray[Any]:
-        return cast(
-            Dict[str, Any],
-            self.encoder.execute(Transformable({
+        return getattr(
+            self.encoder(Transformable({
                 "texts": texts
-            })).extract()
-        )["embeddings"]
+            })), 
+            "embeddings"
+        )
 
 
     def add(self, dataset: List[str]) -> SemanticSearchSchema:

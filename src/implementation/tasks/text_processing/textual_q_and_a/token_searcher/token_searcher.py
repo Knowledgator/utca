@@ -1,7 +1,7 @@
-from typing import Type, Optional, List, Union
+from typing import Type, Optional, List
 
 from core.executable_level_1.actions import (
-    OneToOne, OneToMany, ManyToOne, ManyToMany
+    Action, ActionInput, ActionOutput
 )
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
@@ -14,7 +14,6 @@ from core.task_level_3.objects.objects import (
     Entity
 )
 from implementation.predictors.token_searcher.schema import (
-    TokenSearcherPredictorConfig, 
     TokenSearcherPredictorInput, 
     TokenSearcherPredictorOutput
 )
@@ -38,7 +37,6 @@ class TokenSearcherQandAOutput(NEROutput[Entity]):
 
 class TokenSearcherQandATask(
     NERTask[
-        NERConfig, 
         TokenSearcherQandAInput, 
         TokenSearcherQandAOutput
     ]
@@ -48,12 +46,11 @@ class TokenSearcherQandATask(
         self,
         cfg: Optional[NERConfig]=None, 
         predictor: Optional[Predictor[
-            TokenSearcherPredictorConfig, 
             TokenSearcherPredictorInput, 
             TokenSearcherPredictorOutput
         ]]=None,
-        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
-        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         input_class: Type[TokenSearcherQandAInput]=TokenSearcherQandAInput,
         output_class: Type[TokenSearcherQandAOutput]=TokenSearcherQandAOutput
     ) -> None:

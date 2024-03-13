@@ -1,14 +1,13 @@
-from typing import Type, Optional, List, Union
+from typing import Type, Optional, List
 
 from core.executable_level_1.actions import (
-    OneToOne, OneToMany, ManyToOne, ManyToMany
+    Action, ActionInput, ActionOutput
 )
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
-    PredictorConfig, PredictorInput, PredictorOutput
+    PredictorInput, PredictorOutput
 )
 from core.predictor_level_2.schema import (
-    PredictorConfig,
     PredictorInput,
     PredictorOutput
 )
@@ -39,7 +38,6 @@ class ModelInput(PredictorInput):
 
 class TokenClassifierTask(
     NERTask[
-        NERConfig,
         TokenClassifierInput, 
         NEROutput[ClassifiedEntity],
     ]
@@ -51,12 +49,11 @@ class TokenClassifierTask(
         *,
         cfg: Optional[NERConfig]=None, 
         predictor: Optional[Predictor[
-            PredictorConfig, 
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
-        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         input_class: Type[TokenClassifierInput]=TokenClassifierInput,
         output_class: Type[NEROutput[ClassifiedEntity]]=NEROutput[ClassifiedEntity]
     ) -> None:
@@ -70,10 +67,9 @@ class TokenClassifierTask(
             )
 
         super().__init__(
-            cfg=cfg or NERConfig(), 
             predictor=predictor,
             preprocess=preprocess or [],
-            postprocess=postprocess or [TokenClassifierPostprocessor()],
+            postprocess=postprocess or [TokenClassifierPostprocessor()], # type: ignore
             input_class=input_class, 
             output_class=output_class,
         )

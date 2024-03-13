@@ -3,7 +3,7 @@ from typing import Any, Dict, Protocol, runtime_checkable
 import torch
 import numpy as np
 
-from core.executable_level_1.actions import OneToOne
+from core.executable_level_1.actions import Action
 from core.executable_level_1.schema import Config
 
 @runtime_checkable
@@ -20,7 +20,7 @@ class EmbeddingPreprocessorConfig(Config):
     tokenizer: Tokenizer
 
 
-class EmbeddingPreprocessor(OneToOne):
+class EmbeddingPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(self, cfg: EmbeddingPreprocessorConfig) -> None:
         self.cfg = cfg
 
@@ -37,7 +37,7 @@ class EmbeddingPreprocessor(OneToOne):
         return input_data
     
 
-class EmbeddingPostprocessor(OneToOne):
+class EmbeddingPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -50,7 +50,7 @@ class EmbeddingPostprocessor(OneToOne):
         return input_data
 
 
-class ConvertEmbeddingsToNumpyArrays(OneToOne):
+class ConvertEmbeddingsToNumpyArrays(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:

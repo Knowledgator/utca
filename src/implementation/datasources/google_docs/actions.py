@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
 from core.executable_level_1.actions import (
-    Action, OneToOne, InputState, OutputState
+    Action, ActionInput, ActionOutput
 )
 from implementation.apis.google_cloud.client import (
     GoogleCloudClient
@@ -27,12 +27,12 @@ from implementation.apis.google_cloud.client import (
 #     }
 # ]
 
-class GoogleDocsAction(Action[InputState, OutputState]):
+class GoogleDocsAction(Action[ActionInput, ActionOutput]):
     def __init__(self, client: GoogleCloudClient) -> None:
         self.docs_service = client.service.documents()
 
 
-class GoogleDocsCreate(GoogleDocsAction[Dict[str, Any], Dict[str, Any]], OneToOne):
+class GoogleDocsCreate(GoogleDocsAction[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             doc_id: str = ( # type: ignore
@@ -50,7 +50,7 @@ class GoogleDocsCreate(GoogleDocsAction[Dict[str, Any], Dict[str, Any]], OneToOn
             raise ValueError(f'Unable to create doc: {e}')
 
 
-class GoogleDocsWrite(GoogleDocsAction[Dict[str, Any], Dict[str, Any]], OneToOne):
+class GoogleDocsWrite(GoogleDocsAction[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             input_data["document"] = (
@@ -65,7 +65,7 @@ class GoogleDocsWrite(GoogleDocsAction[Dict[str, Any], Dict[str, Any]], OneToOne
             raise ValueError(f'Unable to update doc: {e}')
 
 
-class GoogleDocsRead(GoogleDocsAction[Dict[str, Any], Dict[str, Any]], OneToOne):
+class GoogleDocsRead(GoogleDocsAction[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
             return (

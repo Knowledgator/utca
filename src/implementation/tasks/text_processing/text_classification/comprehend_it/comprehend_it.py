@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union, Type
+from typing import Any, Dict, List, Optional, Type
 
 from core.executable_level_1.schema import (
     Input, 
@@ -6,11 +6,10 @@ from core.executable_level_1.schema import (
     Config 
 )
 from core.executable_level_1.actions import (
-    OneToOne, OneToMany, ManyToOne, ManyToMany
+    Action, ActionInput, ActionOutput
 )
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
-    PredictorConfig,
     PredictorInput,
     PredictorOutput
 )
@@ -30,7 +29,6 @@ class ComprehendItOutput(Output):
 
 class ComprehendIt(
     Task[
-        Config,
         ComprehendItInput,
         ComprehendItOutput
     ]
@@ -40,12 +38,11 @@ class ComprehendIt(
         *,
         cfg: Optional[Config]=None, 
         predictor: Optional[Predictor[
-            PredictorConfig, 
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
-        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         input_class: Type[ComprehendItInput]=ComprehendItInput,
         output_class: Type[ComprehendItOutput]=ComprehendItOutput
     ) -> None:
@@ -53,7 +50,6 @@ class ComprehendIt(
             predictor = ComprehendItPredictor()
 
         super().__init__(
-            cfg=cfg, 
             predictor=predictor,
             preprocess=preprocess or [],
             postprocess=postprocess or [],

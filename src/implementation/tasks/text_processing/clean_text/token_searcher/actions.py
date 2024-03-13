@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from core.executable_level_1.actions import OneToOne
+from core.executable_level_1.actions import Action
 from core.executable_level_1.schema import Config
 from core.task_level_3.utils import (
     build_entity
@@ -9,7 +9,7 @@ from core.task_level_3.objects.objects import (
     Entity
 )
 
-class TokenSeatcherTextCleanerPreprocessor(OneToOne):
+class TokenSeatcherTextCleanerPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     prompt: str = """
 Clean the following text extracted from the web matching not relevant parts:
 
@@ -28,7 +28,7 @@ class TokenSearcherTextCleanerPostprocessorConfig(Config):
     threshold: float = 0.
 
 
-class TokenSearcherTextCleanerPostprocessor(OneToOne):
+class TokenSearcherTextCleanerPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
         cfg: Optional[TokenSearcherTextCleanerPostprocessorConfig] = None

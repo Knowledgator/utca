@@ -1,4 +1,4 @@
-from typing import Type, Optional, Any, List, Union
+from typing import Type, Optional, Any, List
 
 from PIL import Image
 from transformers import ( # type: ignore
@@ -9,11 +9,11 @@ from transformers import ( # type: ignore
 
 from core.executable_level_1.schema import Config, Input, Output
 from core.executable_level_1.actions import (
-    OneToOne, OneToMany, ManyToOne, ManyToMany
+    Action, ActionInput, ActionOutput
 )
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
-    PredictorConfig, PredictorInput, PredictorOutput
+    PredictorInput, PredictorOutput
 )
 from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_model import (
@@ -45,7 +45,6 @@ class ImageModelInput(PredictorInput):
 
 class TransformersImageClassification(
     Task[
-        Config,
         TransformersImageClassificationInput, 
         TransformersImageClassificationOutput
     ]
@@ -57,12 +56,11 @@ class TransformersImageClassification(
         *,
         cfg: Optional[Config] = None, 
         predictor: Optional[Predictor[
-            PredictorConfig, 
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
-        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         input_class: Type[TransformersImageClassificationInput]=TransformersImageClassificationInput,
         output_class: Type[TransformersImageClassificationOutput]=TransformersImageClassificationOutput
     ) -> None:
@@ -97,7 +95,6 @@ class TransformersImageClassification(
             ]
 
         super().__init__(
-            cfg=cfg,
             predictor=predictor,
             preprocess=preprocess,
             postprocess=postprocess,

@@ -1,12 +1,12 @@
 from typing import Any, Dict, Optional
 
 from core.executable_level_1.schema import Config
-from core.executable_level_1.actions import OneToOne
+from core.executable_level_1.actions import Action
 from core.task_level_3.utils import (
     build_entity
 )
 
-class TokenSearcherQandAPreprocessor(OneToOne):
+class TokenSearcherQandAPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     prompt: str = """{question}
 Text:
  """
@@ -24,7 +24,7 @@ class TokenSearcherQandAPostprocessorConfig(Config):
     threshold: float = 0.
 
 
-class TokenSearcherQandAPostprocessor(OneToOne):
+class TokenSearcherQandAPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
         cfg: Optional[TokenSearcherQandAPostprocessorConfig]=None

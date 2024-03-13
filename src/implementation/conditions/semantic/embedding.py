@@ -1,9 +1,9 @@
-from typing import Dict, Any, List, Optional, cast
+from typing import Dict, Any, List, Optional
 
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.eval import Condition, ExecutionSchema
 from core.executable_level_1.actions import (
-    ExecuteFunctionOneToOne,
+    ExecuteFunction,
     AddData
 )
 from implementation.schemas.semantic_search_schema import (
@@ -40,7 +40,7 @@ class SemanticCondition(Condition):
             return input_data
 
         return (
-            ExecuteFunctionOneToOne(build_dataset)
+            ExecuteFunction(build_dataset)
             | AddData({
                 "query": targets,
                 "results_count": 1
@@ -55,10 +55,7 @@ class SemanticCondition(Condition):
             return any(
                 res_distance[0] <= distance
                 for res_distance in
-                cast(
-                    Dict[str, Any],
-                    input_data.extract()
-                )["search_results"]["distances"]
+                input_data.extract()["search_results"]["distances"]
             )
         return validator
     

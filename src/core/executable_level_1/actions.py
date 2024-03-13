@@ -1,125 +1,123 @@
 from abc import abstractmethod
+from dataclasses import dataclass
 from typing import (
-    Callable, Any, Dict, List, Generic, TypeVar
+    Callable, Any, Dict, List, Optional, TypeVar, Generic
 )
 
+from core.executable_level_1.schema import Transformable
 from core.executable_level_1.component import Component
 from core.executable_level_1.statements_types import Statement
 
-InputState = TypeVar("InputState", Dict[str, Any], List[Dict[str, Any]])
-OutputState = TypeVar("OutputState", Dict[str, Any], List[Dict[str, Any]])
 
-class Action(Generic[InputState, OutputState], Component):    
-    @abstractmethod
-    def execute(self, input_data: InputState) -> OutputState:
-        pass
+ActionInput = TypeVar(
+    "ActionInput", Dict[str, Any], List[Dict[str, Any]]
+)
+ActionOutput = TypeVar(
+    "ActionOutput", Dict[str, Any], List[Dict[str, Any]]
+)
+
+class Action(Generic[ActionInput, ActionOutput], Component):
+    default_key: str = "output"
+
+    def __call__(
+        self, 
+        register: Transformable,
+        get_key: Optional[str]=None,
+        set_key: Optional[str]=None
+    ) -> Transformable:
+        result = self.execute(
+            getattr(register, get_key or "__dict__")
+        )
+        if not isinstance(result, Dict) and not set_key:
+            return Transformable({
+                self.default_key: result
+            })
+        setattr(
+            register,
+            set_key or "__dict__",
+            result
+        )
+        return register
+
+
+    def use(
+        self,
+        get_key: Optional[str]=None,
+        set_key: Optional[str]=None
+    ) -> Callable[[Transformable], Transformable]:
+        def executor(register: Transformable):
+            return self.__call__(register, get_key, set_key)
+        return executor
 
 
     def generate_statement(self) -> Dict[str, Any]:
         return {"type": Statement.ACTION_STATEMENT,  Statement.ACTION_STATEMENT.value: self}
 
 
-class ManyToMany(Action[List[Dict[str, Any]], List[Dict[str, Any]]]):
-    ...
+    @abstractmethod
+    def execute(
+        self, 
+        input_data: ActionInput
+    ) -> ActionOutput:
+        ...
 
 
-class OneToOne(Action[Dict[str, Any], Dict[str, Any]]):
-    ...
-
-
-class ManyToOne(Action[List[Dict[str, Any]], Dict[str, Any]]):
-    ...
-
-
-class OneToMany(Action[Dict[str, Any], List[Dict[str, Any]]]):
-    ...
-
-
-class AddData(OneToOne):
+@dataclass(slots=True)
+class AddData(Action[Dict[str, Any], Dict[str, Any]]):
     data: Dict[str, Any]
 
-    def __init__(self, data: Dict[str, Any]) -> None:
-        self.data = data
-
-
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        input_data.update(self.data)
-        return input_data
+        return {
+            **input_data,
+            **self.data
+        }
 
 
-class RenameAttribute(OneToOne):
+@dataclass(slots=True)
+class RenameAttribute(Action[Dict[str, Any], Dict[str, Any]]):
     old_name: str
     new_name: str
-
-    def __init__(self, old_name: str, new_name: str) -> None:
-        self.old_name = old_name
-        self.new_name = new_name
-
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         input_data[self.new_name] = input_data.pop(self.old_name)
         return input_data
 
 
-class ChangeValue(OneToOne):
+@dataclass(slots=True)
+class ChangeValue(Action[Dict[str, Any], Dict[str, Any]]):
     key: str
     value: Any
-
-    def __init__(self, key: str, value: Any) -> None:
-        self.key = key
-        self.value = value
-
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         input_data[self.key] = self.value
         return input_data
 
 
-class UnpackValue(OneToOne):
-    def __init__(self, key: str) -> None:
-        self.key = key
-
+@dataclass(slots=True)
+class UnpackValue(Action[Dict[str, Any], Dict[str, Any]]):
+    key: str
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        value = input_data.pop(self.key)
-        input_data.update(value)
-        return input_data
+        input_data.update(input_data.pop(self.key))
+        return input_data 
     
 
-class SetOneToKey(OneToOne):
-    def __init__(self, key: str) -> None:
-        self.key = key
-
+@dataclass(slots=True)
+class NestToKey(Action[Dict[str, Any], Dict[str, Any]]):
+    key: str
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
             self.key: input_data
         }
-    
-
-class SetMultipleToKey(ManyToOne):
-    def __init__(self, key: str) -> None:
-        self.key = key
 
 
-    def execute(self, input_data: List[Dict[str, Any]]) -> Dict[str, Any]:
-        return {
-            self.key: input_data
-        }
-
-
-class DropStateToSingle(OneToOne, ManyToOne):
-    ...
-
-
-class RenameAttributeQuery(OneToOne):
+@dataclass(slots=True)
+class RenameAttributeQuery(Action[Dict[str, Any], Dict[str, Any]]):
     TRANSFORMATION_DELIMITER = ";"
     TRANSFORMATION_POINTER = "<-"
     
     query: str
-
-    def __init__(self, query: str) -> None:
-        self.query = query
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Return the new name."""
@@ -143,56 +141,21 @@ class RenameAttributeQuery(OneToOne):
         return input_data
 
 
-class MergeData(OneToOne):
+@dataclass(slots=True)
+class MergeData(Action[Dict[str, Any], Dict[str, Any]]):
     data: Dict[str, Any]
     new_priority: bool
 
-    def __init__(self, data: Dict[str, Any], new_priority: bool = True) -> None:
-        self.data = data
-        self.new_priority = new_priority
-
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         if self.new_priority:
-            state = {**input_data, **self.data}
+            return {**input_data, **self.data}
         else:
-            state = {**self.data, **input_data}
-        return state
+            return {**self.data, **input_data}
 
 
-class ExecuteFunction(Action[InputState, OutputState]):
-    def __init__(
-        self, func: Callable[[InputState], OutputState]
-    ) -> None:
-        self.func = func
+@dataclass(slots=True)
+class ExecuteFunction(Action[ActionInput, ActionOutput]):
+    f: Callable[[ActionInput], ActionOutput]
 
-
-    def execute(self, input_data: InputState) -> OutputState:
-        return self.func(input_data)
-    
-
-class ExecuteFunctionOneToOne(
-    OneToOne, 
-    ExecuteFunction[Dict[str, Any], Dict[str, Any]]
-):
-    ...
-
-
-class ExecuteFunctionOneToMany(
-    OneToMany, 
-    ExecuteFunction[Dict[str, Any], List[Dict[str, Any]]]
-):
-    ...
-
-
-class ExecuteFunctionManyToMany(
-    ManyToMany, 
-    ExecuteFunction[List[Dict[str, Any]], List[Dict[str, Any]]]
-):
-    ...
-
-
-class ExecuteFunctionManyToOne(
-    ManyToOne, 
-    ExecuteFunction[List[Dict[str, Any]], Dict[str, Any]]
-):
-    ...
+    def execute(self, input_data: ActionInput) -> ActionOutput:
+        return self.f(input_data)

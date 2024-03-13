@@ -21,10 +21,10 @@ from core.executable_level_1.memory import (
 from core.executable_level_1.statements_types import Statement
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
-    Config, Input, Output, Transformable
+    Input, Output, Transformable
 )
 from core.executable_level_1.actions import (
-    Action, InputState, OutputState
+    Action, ActionInput, ActionOutput
 )
 # from core.executable_level_1.utils import generate_unique_state
 
@@ -51,9 +51,7 @@ class Evaluator:
 
     def prepare_input(
         self, 
-        program_input: Optional[
-            Union[Dict[str, Any], List[Dict[str, Any]]]
-        ]
+        program_input: Optional[Dict[str, Any]]=None
     ) -> Transformable:
         """Sets the initial input for the program."""
         if program_input is not None:
@@ -63,9 +61,7 @@ class Evaluator:
 
     def run_program(
         self, 
-        program_input: Optional[
-            Union[Dict[str, Any], List[Dict[str, Any]]]
-        ]
+        program_input: Optional[Dict[str, Any]]=None
     ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:    
         return self.eval_program(
             self.program,
@@ -125,25 +121,25 @@ class Evaluator:
 
     def eval_action(
         self, 
-        action: Action[InputState, OutputState],
+        action: Union[Action[ActionInput, ActionOutput], Callable[[Transformable], Transformable]],
         input_data: Transformable
     ) -> Transformable:
         """Evaluates an action statement."""
         # Update the register state based on the action
-        input_data.update_state(action)
-        return input_data
+        return action(input_data)
 
 
     def eval_execute(
         self, 
-        executable: Executable[Config, Input, Output],
+        executable: Union[
+            Executable[Input, Output], 
+            Callable[[Transformable], Transformable]
+        ],
         input_data: Transformable
     ) -> Transformable:
         """Evaluates an execute statement."""
         # Execute the executable and update the register accordingly
-        if input_data.is_batch:
-            return executable.execute_batch(input_data)
-        return executable.execute(input_data)
+        return executable(input_data)
     
     
     def eval_set_memory(

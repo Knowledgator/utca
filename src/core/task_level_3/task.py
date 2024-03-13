@@ -1,70 +1,67 @@
-from typing import Type, Dict, Any, cast, List, Union, Optional
+from typing import Type, Dict, Any, List, Union, Optional, Callable
 
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
-    InputType, OutputType, ConfigType, Transformable
+    InputType, OutputType, Transformable
 )
 from core.executable_level_1.actions import (
-    InputState, OutputState
-)
-from core.executable_level_1.actions import (
-    OneToOne, OneToMany, ManyToOne, ManyToMany, Action
+    Action, ActionInput, ActionOutput
 )
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
-    PredictorConfig, PredictorInput, PredictorOutput
+    PredictorInput, PredictorOutput
 )
 from core.task_level_3.schema import (
-    InputWithThresholdType, NERConfigType, NEROutputType
+    InputWithThresholdType, NEROutputType
 )
 
 class Task(
-    Executable[ConfigType, InputType, OutputType],
+    Executable[InputType, OutputType],
 ):
     def __init__(
         self,
         *,
-        cfg: Optional[ConfigType]=None, 
         predictor: Predictor[
-            PredictorConfig, 
             PredictorInput, 
             PredictorOutput
         ],
-        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]],
-        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]],
+        preprocess: Optional[List[Action[ActionInput, ActionOutput]]],
+        postprocess: Optional[List[Action[ActionInput, ActionOutput]]],
         input_class: Type[InputType],
         output_class: Type[OutputType]
     ) -> None:
-        super().__init__(cfg, input_class, output_class)
+        super().__init__(input_class, output_class)
         self.predictor = predictor
         self._preprocess = preprocess
         self._postprocess = postprocess
 
     
     def process(
-        self, state: InputState, actions: List[Action[InputState, OutputState]]
-    ) -> Dict[str, Any]:
-        tmp: Union[InputState, OutputState] = state
+        self, 
+        state: Transformable, 
+        actions: List[Union[
+            Action[ActionInput, ActionOutput],
+            Callable[[Transformable], Transformable]
+        ]]
+    ) -> Transformable:
         for action in actions:
-            tmp = action.execute(cast(InputState, tmp))
-        return cast(Dict[str, Any], tmp)
+            state = action(state)
+        return state
 
 
     def invoke(
         self, input_data: InputType
     ) -> Dict[str, Any]:
-        processed_input = cast(
-            Dict[str, Any],
-            self.process(input_data.model_dump(), self._preprocess) # type: ignore
+        processed_input = self.process(
+            input_data.generate_transformable(), 
+            self._preprocess # type: ignore
         )
-        predicts = cast(Dict[str, Any], self.predictor.execute(
-            Transformable(processed_input)
-        ).extract())
+        predicts = self.predictor(processed_input)
         return self.process(
-            {
-                "inputs": processed_input,
-                "outputs": predicts["outputs"]
-            }, 
+            Transformable({
+                "inputs": processed_input.extract(),
+                "outputs": getattr(predicts, "outputs")
+            }),
             self._postprocess # type: ignore
         )
     
@@ -79,7 +76,7 @@ class Task(
 
 class NERTask(
     Task[
-        NERConfigType, InputWithThresholdType, NEROutputType,
+        InputWithThresholdType, NEROutputType,
     ]
 ):
     ...

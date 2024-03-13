@@ -1,14 +1,14 @@
-from typing import Type, Optional, List, Any, Union
+from typing import Type, Optional, List, Any
 
 from core.executable_level_1.schema import (
     Config, Output
 )
 from core.executable_level_1.actions import (
-    OneToOne, OneToMany, ManyToOne, ManyToMany
+    Action, ActionInput, ActionOutput
 )
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
-    PredictorConfig, PredictorInput, PredictorOutput
+    PredictorInput, PredictorOutput
 )
 from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_pipeline import (
@@ -30,7 +30,6 @@ class TransformersTextToSpeechOutput(Output):
 
 class TransformersTextToSpeech(
     Task[
-        Config,
         TransformersTextToSpeechInput, 
         TransformersTextToSpeechOutput,
     ]
@@ -41,17 +40,15 @@ class TransformersTextToSpeech(
         self, 
         cfg: Optional[Config]=None,
         predictor: Optional[Predictor[
-            PredictorConfig, 
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
-        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         input_class: Type[TransformersTextToSpeechInput]=TransformersTextToSpeechInput,
         output_class: Type[TransformersTextToSpeechOutput]=TransformersTextToSpeechOutput
     ) -> None:
         super().__init__(
-            cfg=cfg,
             predictor=(predictor or TransformersPipeline(
                 cfg=TransformersPipelineConfig(
                     task="text-to-speech",
@@ -63,7 +60,7 @@ class TransformersTextToSpeech(
                 input_class=TransformersTextToSpeechInput,
             )),
             preprocess=preprocess or [],
-            postprocess=postprocess or [TextToSpeechPostprocess()],
+            postprocess=postprocess or [TextToSpeechPostprocess()], # type: ignore
             input_class=input_class, 
             output_class=output_class
         )

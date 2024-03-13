@@ -1,4 +1,4 @@
-from typing import Type, Optional, List, Union
+from typing import Type, Optional, List
 
 from PIL import Image
 
@@ -6,11 +6,10 @@ from core.executable_level_1.schema import (
     Config, Output
 )
 from core.executable_level_1.actions import (
-    OneToOne, OneToMany, ManyToOne, ManyToMany
+    Action, ActionInput, ActionOutput
 )
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
-    PredictorConfig,
     PredictorInput,
     PredictorOutput
 )
@@ -37,7 +36,6 @@ class DocumentQandAOutput(Output):
 
 class DocumentQandATask(
     Task[
-        Config,
         DocumentQandAInput, 
         DocumentQandAOutput,
     ]
@@ -49,12 +47,11 @@ class DocumentQandATask(
         *,
         cfg: Optional[Config]=None, 
         predictor: Optional[Predictor[
-            PredictorConfig, 
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
-        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         input_class: Type[DocumentQandAInput]=DocumentQandAInput,
         output_class: Type[DocumentQandAOutput]=DocumentQandAOutput
     ) -> None:
@@ -68,10 +65,9 @@ class DocumentQandATask(
             )
 
         super().__init__(
-            cfg=cfg, 
             predictor=predictor,
             preprocess=preprocess or [],
-            postprocess=postprocess or [DocumentQandAPostprocess()],
+            postprocess=postprocess or [DocumentQandAPostprocess()], # type: ignore
             input_class=input_class, 
             output_class=output_class,
         )

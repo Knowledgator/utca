@@ -1,5 +1,5 @@
 from typing import (
-    Any, Dict, List, Callable, Tuple, Type, Optional, Union, cast
+    Any, Dict, List, Callable, Type, Optional, Union, cast
 ) 
 
 from transformers import ( # type: ignore
@@ -17,14 +17,10 @@ pyximport.install() # type: ignore
 
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.actions import (
-    OneToOne, OneToMany, ManyToOne, ManyToMany
+    Action, ActionInput, ActionOutput
 )
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
-    PredictorConfig, PredictorInput, PredictorOutput
-)
-from core.predictor_level_2.schema import (
-    PredictorConfig,
     PredictorInput,
     PredictorOutput
 )
@@ -39,6 +35,10 @@ from implementation.predictors.transformers.transformers_model import (
     TransformersModelConfig
 )
 from implementation.datasources.trie.labels_trie import LabelsTrie # type: ignore
+from implementation.tasks.text_processing.entity_linking.transformers.actions import (
+    EntityLinkingPreprocessing,
+    EntityLinkingPostprocess
+)
 
 class EntityLinkingInput(Input):
     texts: List[str]
@@ -62,60 +62,8 @@ class ModelInput(PredictorInput):
     ]
 
 
-class EntityLinkingPreprocessing(OneToOne):
-    prompt: str = "Classifity the following text:\n {}\nLabel:"
-
-    def execute(
-        self, input_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        input_data["texts"] = [
-            self.prompt.format(text)
-            for text in input_data["texts"]
-        ]
-        return input_data
-    
-
-class EntityLinkingPostprocess(OneToOne):
-    def __init__(
-        self, 
-        tokenizer: Union[PreTrainedTokenizer, PreTrainedTokenizerFast],
-        encoder_decoder: bool,
-    ) -> None:
-        self.tokenizer = tokenizer
-        self.encoder_decoder = encoder_decoder
-
-
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        decodes = self.tokenizer.batch_decode( # type: ignore
-            input_data["outputs"]["sequences"], # type: ignore
-            skip_special_tokens=True
-        )
-
-        num_beams = input_data["inputs"]["num_beams"]
-        if num_beams <= 1:
-            scores = input_data["outputs"]["sequences_scores"] # type: ignore
-        else:
-            scores = torch.ones(len(decodes))
-        
-        outputs2scores: List[List[Tuple[str, float]]] = []
-        for text_id in range(len(input_data["inputs"]["texts"])):
-            input_ = input_data["inputs"]["texts"][text_id]
-            input_len = len(input_)
-            batch: List[Tuple[str, float]] = []
-            for beam_id in range(num_beams):
-                score = scores[text_id*num_beams+beam_id]
-                p = torch.exp(score).item() # type: ignore
-                label = cast(str, decodes[text_id*num_beams+beam_id])
-                if not self.encoder_decoder:
-                    label = label[input_len:].strip()
-                batch.append((label, p))
-            outputs2scores.append(batch)
-        return {"classification_output": outputs2scores}
-
-
 class EntityLinkingTask(
     Task[
-        Config,
         EntityLinkingInput, 
         EntityLinkingOutput,
     ]
@@ -209,12 +157,11 @@ class EntityLinkingTask(
             str, PreTrainedTokenizer, PreTrainedTokenizerFast
         ]]=None,
         predictor: Optional[Predictor[
-            PredictorConfig, 
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
-        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         input_class: Type[EntityLinkingInput]=EntityLinkingInput,
         output_class: Type[EntityLinkingOutput]=EntityLinkingOutput
     ) -> None:
@@ -250,13 +197,12 @@ class EntityLinkingTask(
         self.initialize_labels_trie(labels)
 
         super().__init__(
-            cfg=cfg, 
             predictor=predictor,
-            preprocess=preprocess or [
-                EntityLinkingPreprocessing()
+            preprocess=preprocess or [ # type: ignore
+                EntityLinkingPreprocessing() 
             ],
-            postprocess=postprocess or [
-                EntityLinkingPostprocess(
+            postprocess=postprocess or [ # type: ignore
+                EntityLinkingPostprocess( 
                     tokenizer=self.tokenizer,
                     encoder_decoder=self.encoder_decoder
                 )  
@@ -267,28 +213,26 @@ class EntityLinkingTask(
 
 
     def invoke(self, input_data: EntityLinkingInput) -> Dict[str, Any]:
-        processed_input = cast(
-            Dict[str, Any],
-            self.process(input_data.model_dump(), self._preprocess) # type: ignore
-        )
+        processed_input = self.process(
+            input_data.generate_transformable(), 
+            self._preprocess # type: ignore
+        ) 
         tokenized_prompt = self.tokenizer( # type: ignore
-            processed_input["texts"], 
+            getattr(processed_input, "texts"), 
             return_tensors="pt",
             padding=True,
             truncation=True
         )
         prompt_len = tokenized_prompt["input_ids"].shape[-1] # type: ignore
-        processed_input["prefix_allowed_tokens_fn"] = (
+        processed_input.prefix_allowed_tokens_fn = ( # type: ignore
             lambda _, sent: self._get_candidates(sent, prompt_len) # type: ignore
         )
-        processed_input["encodings"] = tokenized_prompt
-        predicts = cast(Dict[str, Any], self.predictor.execute(
-            Transformable(processed_input)
-        ).extract())
+        processed_input.encodings = tokenized_prompt # type: ignore
+        predicts = self.predictor(processed_input)
         return self.process(
-            {
-                "inputs": processed_input,
-                "outputs": predicts["outputs"]
-            }, 
+            Transformable({
+                "inputs": processed_input.extract(),
+                "outputs": getattr(predicts, "outputs")
+            }), 
             self._postprocess # type: ignore
         )        

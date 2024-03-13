@@ -1,17 +1,17 @@
-from typing import Type, Optional, Any, List, Union
+from typing import Type, Optional, Any, List
 
 from PIL import Image
 from transformers import ( # type: ignore
     ViltProcessor, ViltForQuestionAnswering, AutoConfig
 )
 
-from core.executable_level_1.schema import Config, Input, Output
+from core.executable_level_1.schema import Input, Output
 from core.executable_level_1.actions import (
-    OneToOne, OneToMany, ManyToOne, ManyToMany
+    Action, ActionInput, ActionOutput
 )
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
-    PredictorConfig, PredictorInput, PredictorOutput
+    PredictorInput, PredictorOutput
 )
 from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_model import (
@@ -47,7 +47,6 @@ class ModelInput(PredictorInput):
 
 class TransformersVisualQandA(
     Task[
-        Config,
         TransformersVisualQandAInput, 
         TransformersVisualQandAOutput
     ]
@@ -57,14 +56,12 @@ class TransformersVisualQandA(
     def __init__(
         self,
         *,
-        cfg: Optional[Config]=None, 
         predictor: Optional[Predictor[
-            PredictorConfig, 
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
-        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         input_class: Type[TransformersVisualQandAInput]=TransformersVisualQandAInput,
         output_class: Type[TransformersVisualQandAOutput]=TransformersVisualQandAOutput
     ) -> None:
@@ -79,7 +76,7 @@ class TransformersVisualQandA(
 
         if not preprocess:
             processor = ViltProcessor.from_pretrained(self.default_model) # type: ignore
-            preprocess=[
+            preprocess=[ # type: ignore
                 VisualQandAPreprocessor(
                     VisualQandAPreprocessorConfig(
                         processor=processor # type: ignore
@@ -89,7 +86,7 @@ class TransformersVisualQandA(
         
         if not postprocess:
             labels = AutoConfig.from_pretrained(self.default_model).id2label # type: ignore
-            postprocess=[
+            postprocess=[ # type: ignore
                 VisualQandAPostprocessor(
                     VisualQandAPostprocessorConfig(
                         labels=labels # type: ignore
@@ -98,7 +95,6 @@ class TransformersVisualQandA(
             ]
 
         super().__init__(
-            cfg=cfg,
             predictor=predictor, # type: ignore
             preprocess=preprocess,
             postprocess=postprocess,

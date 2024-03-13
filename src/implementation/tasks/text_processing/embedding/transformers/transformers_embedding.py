@@ -1,16 +1,15 @@
-from typing import Type, Optional, List, Union, Any
+from typing import Type, Optional, List, Any
 
 from transformers import AutoModel, AutoTokenizer # type: ignore
 
 from core.executable_level_1.actions import (
-    OneToOne, OneToMany, ManyToOne, ManyToMany
+    Action, ActionInput, ActionOutput
 )
 from core.predictor_level_2.predictor import Predictor
 from core.predictor_level_2.schema import (
-    PredictorConfig, PredictorInput, PredictorOutput
+    PredictorInput, PredictorOutput
 )
 from core.predictor_level_2.schema import (
-    PredictorConfig,
     PredictorInput,
     PredictorOutput
 )
@@ -45,7 +44,6 @@ class ModelInput(PredictorInput):
 
 class TextEmbeddingTask(
     Task[
-        Config,
         TextEmbeddingInput, 
         TextEmbeddingOutput,
     ]
@@ -57,12 +55,11 @@ class TextEmbeddingTask(
         *,
         cfg: Optional[Config]=None, 
         predictor: Optional[Predictor[
-            PredictorConfig, 
             PredictorInput, 
             PredictorOutput
         ]]=None,
-        preprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
-        postprocess: Optional[List[Union[OneToOne, OneToMany, ManyToOne, ManyToMany]]]=None,
+        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         input_class: Type[TextEmbeddingInput]=TextEmbeddingInput,
         output_class: Type[TextEmbeddingOutput]=TextEmbeddingOutput
     ) -> None:
@@ -78,18 +75,17 @@ class TextEmbeddingTask(
             )
 
         super().__init__(
-            cfg=cfg, 
             predictor=predictor,
             preprocess=preprocess or [
                 EmbeddingPreprocessor(
                     EmbeddingPreprocessorConfig(
-                        tokenizer=AutoTokenizer.from_pretrained( # type: ignore
+                        tokenizer=AutoTokenizer.from_pretrained( # type: ignore 
                             self.default_model
                         )
                     )
                 )
             ],
-            postprocess=postprocess or [
+            postprocess=postprocess or [ # type: ignore
                 EmbeddingPostprocessor(),
                 ConvertEmbeddingsToNumpyArrays()    
             ],
