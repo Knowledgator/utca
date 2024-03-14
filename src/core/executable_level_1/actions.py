@@ -5,7 +5,7 @@ from typing import (
 )
 
 from core.executable_level_1.schema import Transformable
-from core.executable_level_1.component import Component
+from core.executable_level_1.component import Component, Executor
 from core.executable_level_1.statements_types import Statement
 
 
@@ -44,10 +44,12 @@ class Action(Generic[ActionInput, ActionOutput], Component):
         self,
         get_key: Optional[str]=None,
         set_key: Optional[str]=None
-    ) -> Callable[[Transformable], Transformable]:
-        def executor(register: Transformable):
-            return self.__call__(register, get_key, set_key)
-        return executor
+    ) -> Executor:
+        return Executor(
+            component=self, 
+            get_key=get_key, 
+            set_key=set_key
+        )
 
 
     def generate_statement(self) -> Dict[str, Any]:

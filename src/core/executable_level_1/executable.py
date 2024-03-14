@@ -1,10 +1,10 @@
 from __future__ import annotations
 from typing import (
-    Any, List, Dict, Callable, Type, Generic, Optional, TypeVar, cast
+    Any, List, Dict, Type, Generic, Optional, TypeVar, cast
 )
 from abc import ABC,  abstractmethod
 
-from core.executable_level_1.component import Component
+from core.executable_level_1.component import Component, Executor
 from core.executable_level_1.schema import (
     InputType, 
     OutputType, 
@@ -64,7 +64,7 @@ class Executable(
             self.validate(
                 result, self.output_class
             )
-            return input_data
+            return result
         except Exception as e:
             raise ValueError(f"Validation error: {e}")
 
@@ -81,7 +81,7 @@ class Executable(
                 tmp = self.invoke(validated_input)
                 self.validate(tmp, self.output_class)
                 result.append(tmp)
-            return input_data
+            return result
         except Exception as e:
             raise ValueError(f"Validation error: {e}")
     
@@ -95,13 +95,15 @@ class Executable(
         input_data = getattr(register, get_key or "__dict__")
         if isinstance(input_data, Dict):
             result = self.execute(cast(Dict[str, Any], input_data))
+            set_key = set_key or "__dict__"
         else:
             result = self.execute_batch(
                 cast(List[Dict[str, Any]], input_data)
             )
+            set_key = set_key or self.default_key
         setattr(
             register, 
-            set_key or self.default_key, 
+            set_key,
             result
         )
         return register
@@ -111,10 +113,12 @@ class Executable(
         self,
         get_key: Optional[str]=None,
         set_key: Optional[str]=None
-    ) -> Callable[[Transformable], Transformable]:
-        def executor(register: Transformable):
-            return self.__call__(register, get_key, set_key)
-        return executor
+    ) -> Executor:
+        return Executor(
+            component=self, 
+            get_key=get_key, 
+            set_key=set_key
+        )
 
 
     def generate_statement(
