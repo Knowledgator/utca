@@ -62,4 +62,4 @@ class SemanticCondition(Condition):
 
     def get_statement(self) -> ExecutionSchema:
         self.semantic_schema.drop_index()
-        return self.statement
+        return super().get_statement()
