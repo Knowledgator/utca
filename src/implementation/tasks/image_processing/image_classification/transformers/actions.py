@@ -30,10 +30,12 @@ class ImageClassificationPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        return self.cfg.processor(
-            images=input_data["image"], 
-            return_tensors="pt"
-        )
+        return {
+            "pixel_values": self.cfg.processor(
+                images=input_data["image"], 
+                return_tensors="pt"
+            )["pixel_values"]
+        }
 
 
 class ImageClassificationPostprocessorConfig(Config):
