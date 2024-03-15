@@ -1,13 +1,12 @@
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import (
-    Callable, Any, Dict, List, Optional, TypeVar, Generic
+    Callable, Any, Dict, List, Optional, TypeVar, Generic, cast
 )
 
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.component import Component, Executor
 from core.executable_level_1.statements_types import Statement
-
 
 ActionInput = TypeVar(
     "ActionInput", Dict[str, Any], List[Dict[str, Any]]
@@ -28,6 +27,7 @@ class Action(Generic[ActionInput, ActionOutput], Component):
         result = self.execute(
             getattr(register, get_key or "__dict__")
         )
+
         if not isinstance(result, Dict) and not set_key:
             return Transformable({
                 self.default_key: result
@@ -52,8 +52,9 @@ class Action(Generic[ActionInput, ActionOutput], Component):
         )
 
 
-    def generate_statement(self) -> Dict[str, Any]:
-        return {"type": Statement.ACTION_STATEMENT,  Statement.ACTION_STATEMENT.value: self}
+    @property
+    def statement(self) -> Statement:
+        return Statement.ACTION_STATEMENT
 
 
     @abstractmethod
@@ -62,6 +63,19 @@ class Action(Generic[ActionInput, ActionOutput], Component):
         input_data: ActionInput
     ) -> ActionOutput:
         ...
+
+
+class Logger(Action[ActionInput, ActionOutput]):
+    def __init__(self, message: str="") -> None:
+        self.message = message
+
+    def execute(self, input_data: ActionInput) -> ActionOutput:
+        import logging
+        from core.executable_level_1.interpreter import EvaluatorLogger
+        EvaluatorLogger.level = logging.DEBUG
+        EvaluatorLogger.error(self.message)
+        EvaluatorLogger.error(input_data)
+        return cast(ActionOutput, input_data)
 
 
 @dataclass(slots=True)
