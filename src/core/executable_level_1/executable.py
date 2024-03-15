@@ -121,10 +121,8 @@ class Executable(
         )
 
 
-    def generate_statement(
+    @property
+    def statement(
         self
-    ) -> Dict[str, Any]:
-        return {
-            "type": Statement.EXECUTE_STATEMENT,  
-            Statement.EXECUTE_STATEMENT.value: self
-        }
+    ) -> Statement:
+        return Statement.EXECUTE_STATEMENT

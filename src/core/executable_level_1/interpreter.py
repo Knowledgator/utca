@@ -1,8 +1,11 @@
 from __future__ import annotations
-from typing import  Dict, Any, List, Optional, Union, cast, Callable
+from typing import (
+    Dict, Any, List, Optional, Union, cast, Callable
+)
 import logging
 import copy
 
+from core.executable_level_1.component import Component
 from core.executable_level_1.eval import (
     Condition, 
     ExecutionSchema, 
@@ -37,7 +40,7 @@ class EvaluatorConfigs():
 
 
 class Evaluator:
-    program: List[Dict[str, Any]]  # Corrected typo in 'retrieve'
+    program: List[Component]
     memory_manager: MemoryManager
     
     def __init__(
@@ -71,7 +74,7 @@ class Evaluator:
     
     def eval_program(
         self, 
-        program: List[Dict[str, Any]], 
+        program: List[Component], 
         program_input: Transformable
     ) -> Transformable:
         """Evaluates the program based on the input provided."""
@@ -86,37 +89,51 @@ class Evaluator:
 
 
     def eval(
-        self, st: Dict[str, Any], input_data: Transformable
+        self, st: Component, input_data: Transformable
     ) -> Transformable:
         """Evaluates a single statement."""
-        if st["type"] == Statement.EXECUTE_STATEMENT:
-            comp = st[Statement.EXECUTE_STATEMENT.value]
-            return self.eval_execute(comp, input_data)  # Assuming comp is an executable; this needs to match the method definition
-        elif st["type"] == Statement.ACTION_STATEMENT:
-            comp = st[Statement.ACTION_STATEMENT.value]
-            return self.eval_action(comp, input_data)  # Assuming comp is an action; this needs to match the method definition
-        elif st["type"] == Statement.SET_MEMORY_STATEMENT:
-            comp = st[Statement.SET_MEMORY_STATEMENT.value]
-            return self.eval_set_memory(comp, input_data)
-        elif st["type"] == Statement.GET_MEMORY_STATEMENT:
-            comp = st[Statement.GET_MEMORY_STATEMENT.value]
-            return self.eval_get_memory(comp, input_data)
-        elif st["type"] == Statement.PIPELINE_STATEMENT:
-            comp = st[Statement.PIPELINE_STATEMENT.value]
-            return self.eval_pipeline(comp, input_data)
-        # elif st["type"] == Statement.CONDITION:
-        #     comp = st[Statement.CONDITION.value]
-        #     self.eval_if_statement(comp)
-        elif st["type"] == Statement.IF_STATEMENT:
-            comp = st[Statement.IF_STATEMENT.value]
-            return self.eval_if_statement(comp, input_data)
-        elif st["type"] == Statement.FILTER_STATEMENT:
-            comp = st[Statement.FILTER_STATEMENT.value]
-            return self.eval_filter_statement(comp, input_data)
-        elif st["type"] == Statement.FOR_EACH_STATEMENT:
-            comp = st[Statement.FOR_EACH_STATEMENT.value]
-            return self.eval_for_each(comp, input_data)
-        raise ValueError(f"Unexpected statement type!: {st['type']}")
+        if st.statement == Statement.EXECUTE_STATEMENT:
+            return self.eval_execute(
+                cast(Executable[Input, Output], st), 
+                input_data
+            )
+        elif st.statement == Statement.ACTION_STATEMENT:
+            return self.eval_action(
+                cast(Action[ActionInput, ActionOutput], st),
+                input_data
+            )
+        elif st.statement == Statement.SET_MEMORY_STATEMENT:
+            return self.eval_set_memory(
+                cast(SetMemory, st), 
+                input_data
+            )
+        elif st.statement == Statement.GET_MEMORY_STATEMENT:
+            return self.eval_get_memory(
+                cast(GetMemory, st), 
+                input_data
+            )
+        elif st.statement == Statement.PIPELINE_STATEMENT:
+            st = cast(ExecutionSchema, st)
+            return self.eval_pipeline(
+                st.retrieve_program(), 
+                input_data
+            )
+        elif st.statement == Statement.IF_STATEMENT:
+            return self.eval_if_statement(
+                cast(IfStatement, st), 
+                input_data
+            )
+        elif st.statement == Statement.FILTER_STATEMENT:
+            return self.eval_filter_statement(
+                cast(Filter, st), 
+                input_data
+            )
+        elif st.statement == Statement.FOR_EACH_STATEMENT:
+            return self.eval_for_each(
+                cast(ForEach, st), 
+                input_data
+            )
+        raise ValueError(f"Unexpected statement type!: {st.statement}")
 
 
     def eval_action(
@@ -163,7 +180,7 @@ class Evaluator:
     
     def eval_pipeline(
         self, 
-        pipeline: List[Dict[str, Any]],
+        pipeline: List[Component],
         input_data: Transformable
     ) -> Transformable:
         return self.eval_program(pipeline, input_data)
@@ -193,7 +210,7 @@ class Evaluator:
         if isinstance(condition, Condition):
             work_state = condition.get_state()
             if work_state != None:
-                get_command = self.memory_manager.generate_get_memory_command(
+                get_command = GetMemory(
                     work_state, MemoryGetInstruction.GET_AND_GO
                 )
                 input_data = self.memory_manager.resolve_get_memory(
@@ -266,155 +283,35 @@ class Evaluator:
     def eval_filter_statement(
         self, filter_statement: Filter, input_data: Transformable
     ) -> Transformable:
-        return Transformable([
-            s for s in input_data
-            if self.eval_condition(
-                filter_statement.get_condition(),
-                Transformable(s)
-            )
-        ])
+        data = getattr(input_data, filter_statement.get_key)
+        # need check that this is a sequence of dict
+
+        setattr(
+            input_data,
+            filter_statement.set_key,
+            [
+                s for s in data
+                if self.eval_condition(
+                    filter_statement.get_condition(),
+                    Transformable(s)
+                )
+            ]
+        )
+        return input_data
 
     
     def eval_for_each(
         self, for_each_statement: ForEach, input_data: Transformable
     ) -> Transformable:
-        return Transformable([
-            cast(
-                Dict[str, Any],
+        data = getattr(input_data, for_each_statement.get_key)
+        # need check that this is a sequence of dict
+
+        setattr(
+            input_data,
+            for_each_statement.set_key,
+            [
                 Evaluator(for_each_statement.get_statement()).run_program(t)
-            ) for t in input_data
-        ])
-
-# class EvaluatorCycleEvaluator:
-#     # for cyclic constructs
-#     initial_input: str
-#     chunks: List[str]
-#     offset: int 
-#     round: int
-
-
-
-# !!!!restart and other intresting stuff
-
-# class Node:
-#     def __init__(self, action, children=None, restart=False, offset=None):
-#         self.action = action  # The action to be executed
-#         self.children = children if children is not None else []
-#         self.restart = restart  # Whether this node triggers a restart
-#         self.offset = offset  # Optional offset for restarts
-
-
-
-
-# class LoopNode(Node):
-#     def __init__(self, loop_condition, child: Node, **kwargs):
-#         super().__init__(action=None, **kwargs)  # Loop node doesn't have a direct action
-#         self.loop_condition = loop_condition  # Can be a function or a fixed integer
-#         self.child = child
-
-#     def execute(self, memory: Memory, input_data: Any = None):
-#         if isinstance(self.loop_condition, int):  # Fixed number of iterations
-#             for _ in range(self.loop_condition):
-#                 input_data = self.child.execute(memory, input_data)
-#         else:  # Assume loop_condition is a callable for dynamic evaluation
-#             while self.loop_condition(input_data):
-#                 input_data = self.child.execute(memory, input_data)
-#         return input_data
-
-
-
-# def create_statement(action):
-#     return {"statement": action}
-
-# def create_conditional(condition, true_branch, false_branch=None):
-#     return {
-#         "if": {
-#             "condition": condition,
-#             "true_branch": true_branch,
-#             "false_branch": false_branch or []
-#         }
-#     }
-
-# def create_loop(condition, body):
-#     return {
-#         "loop": {
-#             "condition": condition,
-#             "body": body
-#         }
-#     }
-
-
-# !!!!!!!!
-
-
-
-
-# class Command(ABC):
-#     def __init__(self, evaluator: Evaluator) -> None:
-#         self.evaluator = evaluator
-
-
-#     @abstractmethod
-#     def __call__(
-#         self, task: Any
-#     ) -> Evaluator:
-#         ...
-
-
-# class ActionCommand(Command):
-#     def __call__(
-#         self, task: Action
-#     ) -> Evaluator:
-#         self.evaluator.state = task.execute(self.evaluator.state)
-#         return self.evaluator
-
-
-# class MemoryCommand(Command):
-#     def __call__(
-#         self, task: Component, task2: Component
-#     ) -> Evaluator:
-#         ...
-
- 
-
-
-
-# class PipelineCommand(Command):
-#     def __call__(
-#         self, task: List[Dict[Statement, Any]]
-#     ) -> Evaluator:
-#         for stage in task:
-#             for statement, sub_task in stage.items():
-#                 self.evaluator[statement](sub_task)
-
-#         return self.evaluator
-
-
-# class SwitchCommand(Command):
-#     def __call__(
-#         self, 
-#         task: List[
-#             Tuple[
-#                 Callable[[Dict[str, Any]], bool], 
-#                 Dict[Statement, Any]
-#             ]
-#         ]
-#     ) -> Evaluator:
-#         # TODO: multiple exits
-#         for check, stage in task:
-#             if check(self.evaluator.state):
-#                 for statement, sub_task in stage.items(): 
-#                     self.evaluator[statement](sub_task)
-#                 break
-#         return self.evaluator
-
-
-# class LoopCommand(Command):
-#     def __call__(
-#         self, task: List[Dict[Statement, Any]]
-#     ) -> Evaluator:
-#         while condition:
-#             for stage in task:
-#                 for statement, sub_task in stage.items(): 
-#                     self.evaluator[statement](sub_task)
-#         return self.evaluator
+                for t in data
+            ]
+        )
+        return input_data

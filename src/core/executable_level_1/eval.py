@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 from typing import (
-    Callable, List, Any, Dict, Optional, Type,  TypeVar, Union
+    Callable, List, Optional, Type,  TypeVar, Union
 )
 
 from core.executable_level_1.component import Component
@@ -32,7 +32,7 @@ class Serializable:
 
 
 class ExecutionSchema(Component):
-    program: List[Dict[str, Any]]
+    program: List[Component]
 
     def __init__(self, comp: Component) -> None:
         self.program = []
@@ -40,12 +40,11 @@ class ExecutionSchema(Component):
         
 
     def add(self, comp: Component) -> ExecutionSchema:
-        statement: Dict[str, Any] = comp.generate_statement()
-        self.program.append(statement)
+        self.program.append(comp)
         return self
 
     
-    def retrieve_program(self) -> List[Dict[str, Any]]:
+    def retrieve_program(self) -> List[Component]:
         return self.program
     
 
@@ -53,13 +52,14 @@ class ExecutionSchema(Component):
         return self.add(comp)
 
 
-    def generate_statement(self) -> Dict[str, Any]:
-        return {"type": Statement.PIPELINE_STATEMENT, Statement.PIPELINE_STATEMENT.value: self.program}
+    @property
+    def statement(self) -> Statement:
+        return Statement.PIPELINE_STATEMENT
 
-# indicator (condition) ? function
+
 class Condition():
     validator: Callable[[Transformable], bool]
-    statement: ExecutionSchema
+    schema: ExecutionSchema
     state: List[str] | None
     def __init__(
         self, 
@@ -68,32 +68,39 @@ class Condition():
         state: Optional[List[str]]
     ) -> None:
         self.validator = validator
-        self.statement = statement
-        self.constatementition: Dict[str, Any] = statement.generate_statement()
+        self.schema = statement
         self.state = state
 
     
     def get_state(self):
         return self.state
+    
+
     def get_validator(self):
         return self.validator
+    
+
     def get_statement(self):
-        return self.statement
-    def generate_statement(self) ->  Dict[str, Any]:
-        return {"type": Statement.CONDITION, Statement.CONDITION.value: self}
+        return self.schema
+    
+
+    @property
+    def statement(self) ->  Statement:
+        return Statement.CONDITION
 
 
 class IfStatement(Component):
     condition: Union[Callable[[Transformable], bool], Condition]
     # executed if true 
-    right_statement: Dict[str, Any]
+    right_statement: ExecutionSchema
     # executed if false 
-    left_statement: Dict[str, Any] | None
+    left_statement: Optional[ExecutionSchema]
+
     def __init__(
         self, 
-        condition: Union[Callable[..., bool], Condition],
+        condition: Union[Callable[[Transformable], bool], Condition],
         right_statement: ExecutionSchema,
-        left_statement: ExecutionSchema | None
+        left_statement: Optional[ExecutionSchema]=None
         ) -> None:
         # add conditional
         if isinstance(condition, Condition):
@@ -101,47 +108,66 @@ class IfStatement(Component):
         else:
             condition = condition
         # add statements
-        self.right_statement = right_statement.generate_statement()
+        self.right_statement = right_statement
         if left_statement == None:
             self.left_statement = None
         else:
-            self.left_statement = left_statement.generate_statement()
+            self.left_statement = left_statement
+
 
     def get_condition(self):
         return self.condition
 
+
     def get_right_statement(self):
         return self.right_statement 
-    
+
+
     def get_left_statement(self):
         return self.left_statement 
 
-    def generate_statement(self) ->  Dict[str, Any]:
-        return {"type": Statement.IF_STATEMENT, Statement.IF_STATEMENT.value: self}
+
+    @property
+    def statement(self) ->  Statement:
+        return Statement.IF_STATEMENT
 
 
 class ForEach(Component):
-    statement: ExecutionSchema
+    schema: ExecutionSchema
 
-    def __init__(self, statement: ExecutionSchema) -> None:
-        self.statement = statement
+    def __init__(
+        self, 
+        statement: ExecutionSchema,
+        get_key: str,
+        set_key: Optional[str]=None,
+    ) -> None:
+        self.get_key = get_key
+        self.set_key = set_key or get_key
+        self.schema = statement
 
 
     def get_statement(self) -> ExecutionSchema:
-        return self.statement
+        return self.schema
     
     
-    def generate_statement(self) ->  Dict[str, Any]:
-        return {
-            "type": Statement.FOR_EACH_STATEMENT, 
-            Statement.FOR_EACH_STATEMENT.value: self
-        }
-    
+    @property
+    def statement(self) ->  Statement:
+        return Statement.FOR_EACH_STATEMENT
+
 
 class Filter(Component):
+    get_key: str
+    set_key: str
     condition: Union[Callable[..., bool], Condition]
 
-    def __init__(self, condition: Union[Callable[..., bool], Condition]) -> None:
+    def __init__(
+        self,
+        condition: Union[Callable[..., bool], Condition],
+        get_key: str,
+        set_key: Optional[str]=None,
+    ) -> None:
+        self.get_key = get_key
+        self.set_key = set_key or get_key
         self.condition = condition
 
 
@@ -149,18 +175,17 @@ class Filter(Component):
         return self.condition
     
     
-    def generate_statement(self) ->  Dict[str, Any]:
-        return {
-            "type": Statement.FILTER_STATEMENT, 
-            Statement.FILTER_STATEMENT.value: self
-        }
+    @property
+    def statement(self) ->  Statement:
+        return Statement.FILTER_STATEMENT
 
 
 
 class While(Component):
-    statement: Dict[str, Any]
+    schema: ExecutionSchema
     condition:  Condition
     max_retries: Optional[int]
+
     def __init__(
         self, 
         condition: Condition,
@@ -171,68 +196,22 @@ class While(Component):
         self.condition = condition
 
         # add statements
-        self.statement = statement.generate_statement()
+        self.schema = statement
         self.max_retries = max_retries
+
+
     def get_retries(self):
         return self.max_retries
+
+
     def get_condition(self):
         return self.condition
+
+
     def get_statement(self):
-        return self.statement 
-    def generate_statement(self) ->  Dict[str, Any]:
-        return {"type": Statement.WHILE_STATEMEMT, Statement.WHILE_STATEMEMT.value: self}
-
-# class Path():
-#     condition: Callable[[Dict[str, Any]], bool] = lambda _: False
-#     executor: Component
-#     exit: bool = True
+        return self.schema
 
 
-# class Switch(Component):
-#     paths: List[Path]
-#     default: Path
-
-#     def __init__(self, cfg: Config, *path: Path, default: Path) -> None:
-#         self.paths = [*path]
-#         self.default = default
-#         super().__init__(cfg)
-
-    
-#     def generate_statement(self) -> Dict[Statement, Dict[str, Any]]:
-#         return {
-#             Statement.SWITCH_STATEMENT: dict((
-#                 *(
-#                     (path.condition.__name__, path.executor.generate_statement()) 
-#                     for path in self.paths
-#                 ),
-#                 ('default', self.default.executor.generate_statement())
-#             )),
-#         }
-
-
-# class Parallel(Component):
-#     paths: List[Component]
-
-#     def __init__(self, cfg: Config, *path: Component) -> None:
-#         self.paths = [*path]
-#         super().__init__(cfg)
-
-
-#     def generate_statement(self) -> Dict[Statement, List[Any]]:
-#         return {
-#             Statement.PARALLEL_STATEMENT: [
-#                 path.generate_statement() for path in self.paths
-#             ]
-#         }
-
-
-
-
-
-
-
-
-
-
-
-
+    @property
+    def statement(self) ->  Statement:
+        return Statement.WHILE_STATEMEMT
