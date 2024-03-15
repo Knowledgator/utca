@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.eval import ForEach, ExecutionSchema
-from core.executable_level_1.actions import ExecuteFunctionOneToMany
+from core.executable_level_1.actions import ExecuteFunction
 from implementation.tasks.text_processing.entity_linking.transformers.transformers_entity_linking import (
     EntityLinkingTask
 )
@@ -32,8 +32,8 @@ if __name__ == "__main__":
         EntityLinkingTask(
             labels=["positive", "negative", "neutral"]
         )
-        | ExecuteFunctionOneToMany(prepare_to_rescore)
-        | ForEach(ExecutionSchema(ComprehendIt()))
+        | ExecuteFunction(prepare_to_rescore).use(set_key="inputs")
+        | ForEach(ExecutionSchema(ComprehendIt()), get_key="inputs")
     )
 
     res = Evaluator(pipeline).run_program({

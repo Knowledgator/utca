@@ -1,6 +1,3 @@
-from typing import Dict, Any, cast
-
-# from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import Transformable
 from implementation.schemas.semantic_search_schema import SemanticSearchSchema
 
@@ -19,8 +16,8 @@ if __name__ == "__main__":
         dataset=sentences
     )
 
-    res = cast(Dict[str, Any], search.execute(Transformable({
+    res = search(Transformable({
         "query": ["Bad weather"],
         "results_count": 1
-    })).extract())
+    })).extract()
     print(f'About bad weather: {res["search_results"]["texts"][0]}')

@@ -8,22 +8,23 @@ from transformers import ( # type: ignore
 import numpy as np
 
 from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.memory import SetMemory, GetMemory
 from core.executable_level_1.actions import (
-    ExecuteFunctionOneToOne, ExecuteFunctionOneToMany, ExecuteFunctionManyToOne
+    ExecuteFunction
 )
 from implementation.predictors.transformers.transformers_model import (
     TransformersModel,
     TransformersModelConfig
 )
 from implementation.tasks.image_processing.image_classification.transformers.transformers_image_classification import (
-    TransformersImageClassification
+    TransformersImageClassification,
+    TransformersImageClassificationOutputMultipleLabels,
+    ImageModelInput
 )
 from implementation.tasks.image_processing.image_classification.transformers.actions import (
     ImageClassificationPreprocessor,
     ImageClassificationPreprocessorConfig,
     ImageClassificationMultyLabelPostprocessor,
-    ImageClassificationPostprocessorConfig
+    ImageClassificationPostprocessorConfig,
 )
 from implementation.datasources.video.actions import (
     VideoRead,
@@ -41,7 +42,8 @@ task = TransformersImageClassification(
     predictor=TransformersModel(
         TransformersModelConfig(
             model=model # type: ignore
-        )
+        ),
+        input_class=ImageModelInput
     ),
     preprocess=[
         ImageClassificationPreprocessor(
@@ -56,12 +58,15 @@ task = TransformersImageClassification(
                 labels=labels # type: ignore
             )
         )
-    ]
+    ],
+    output_class=TransformersImageClassificationOutputMultipleLabels
 )
 
 def prepare_batch_image_classification_input(state: Dict[str, Any]) -> List[Dict[str, Any]]:
     frames: List[Dict[str, Any]] = []
     ok, frame = state["video_data"].read()
+    if not ok:
+        raise ValueError("No video to read!")
     while ok:
         frames.append({"image": Image.fromarray(frame)}) # type: ignore
         ok, frame = state["video_data"].read()
@@ -70,13 +75,10 @@ def prepare_batch_image_classification_input(state: Dict[str, Any]) -> List[Dict
     ]
 
 
-def group_labels(state: List[Dict[str, Any]]) -> Dict[str, Any]:
-    return {
-        "labels": [
-            output["labels"]
-            for output in state
-        ]
-    }
+def group_labels(state: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return [
+        output["labels"] for output in state
+    ]
 
 
 def prepare_sample(state: Dict[str, Any]) -> Dict[str, Any]:
@@ -94,7 +96,7 @@ def prepare_sample(state: Dict[str, Any]) -> Dict[str, Any]:
     
     width, height = state["frames"][0]["image"].size
     return {
-        "path_to_file": "programs/program6/sample.avi",
+        "path_to_file": "programs/video_processing/frame_by_frame_emotion_detection/sample.avi",
         "frames": video_frames,
         "width": width,
         "height": height,
@@ -106,15 +108,18 @@ def prepare_sample(state: Dict[str, Any]) -> Dict[str, Any]:
 if __name__ == "__main__":
     pipeline = (
         VideoRead()
-        | ExecuteFunctionOneToMany(prepare_batch_image_classification_input)
-        | SetMemory("frames")
-        | task
-        | ExecuteFunctionManyToOne(group_labels)
-        | GetMemory(["frames"])
-        | ExecuteFunctionOneToOne(prepare_sample)
+        | ExecuteFunction(
+            prepare_batch_image_classification_input
+        ).use(set_key="frames")
+        | task.use(get_key="frames", set_key="classifications")
+        | ExecuteFunction(group_labels).use(
+            get_key="classifications",
+            set_key="labels"
+        )
+        | ExecuteFunction(prepare_sample)
         | VideoWrite()
     )
 
     Evaluator(pipeline).run_program({
-        "path_to_file": "programs/program6/White Chicks - short.mp4"
+        "path_to_file": "programs/video_processing/frame_by_frame_emotion_detection/White Chicks - short.mp4"
     })

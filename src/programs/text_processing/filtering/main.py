@@ -28,14 +28,14 @@ if __name__ == "__main__":
         key="text"
     )
     pipeline = (
-        Filter(re_pattern.search) 
+        Filter(re_pattern.search, get_key="texts") 
         | Filter(SemanticCondition(
             distance=1,
             targets=["Positive experience"],
             subject_key="text"
-        ))
+        ), get_key="texts")
     )
     
-    print(Evaluator(pipeline).run_program([
+    print(Evaluator(pipeline).run_program({"texts": [
         {"text": s} for s in sentences
-    ]))
+    ]}))

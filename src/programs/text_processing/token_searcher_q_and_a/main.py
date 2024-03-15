@@ -2,7 +2,7 @@ from typing import Dict, Any
 
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.actions import (
-    ExecuteFunctionOneToOne,
+    ExecuteFunction,
     AddData,
 )
 from implementation.apis.google_cloud.client import GoogleCloudClient
@@ -81,9 +81,9 @@ if __name__ == '__main__':
     # create pipeline with described stages
     pipeline = (
         GoogleSpreadsheetRead(client) 
-        | ExecuteFunctionOneToOne(get_input_for_q_and_a)
+        | ExecuteFunction(get_input_for_q_and_a)
         | q_and_a
-        | ExecuteFunctionOneToOne(create_table)
+        | ExecuteFunction(create_table)
         | AddData({
             'spreadsheet_id': spreadsheet_id,
             'cells_range': 'C1'
