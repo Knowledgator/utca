@@ -22,7 +22,7 @@ class Predictor(
         self, input_data: PredictorInputType
     ) -> Dict[str, Any]:
         return {
-            'outputs': self.get_predictions(**input_data.model_dump())
+            "outputs": self.get_predictions(**input_data.model_dump())
         }
     
 
