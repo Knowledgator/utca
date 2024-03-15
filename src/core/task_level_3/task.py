@@ -63,7 +63,7 @@ class Task(
                 "outputs": getattr(predicts, "outputs")
             }),
             self._postprocess # type: ignore
-        )
+        ).extract()
     
 
     def invoke_batch(
