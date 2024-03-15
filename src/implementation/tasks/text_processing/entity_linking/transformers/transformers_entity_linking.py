@@ -28,7 +28,6 @@ from core.task_level_3.task import Task
 from core.task_level_3.schema import (
     Input, 
     Output,
-    Config 
 )
 from implementation.predictors.transformers.transformers_model import (
     TransformersGenerativeModel,
@@ -151,7 +150,6 @@ class EntityLinkingTask(
     def __init__(
         self,
         *,
-        cfg: Optional[Config]=None,
         labels: List[str],
         tokenizer: Optional[Union[
             str, PreTrainedTokenizer, PreTrainedTokenizerFast
