@@ -1,4 +1,4 @@
-from typing import Type, Optional, Any, List
+from typing import Type, Optional, Any, Dict, List
 
 from PIL import Image
 from transformers import ( # type: ignore
@@ -7,7 +7,9 @@ from transformers import ( # type: ignore
     AutoConfig
 )
 
-from core.executable_level_1.schema import Config, Input, Output
+from core.executable_level_1.schema import (
+    Config, Input, Output, InputType, OutputType
+)
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
 )
@@ -39,14 +41,18 @@ class TransformersImageClassificationOutput(Output):
     label: str
 
 
+class TransformersImageClassificationOutputMultipleLabels(Output):
+    labels: Dict[str, float]
+
+
 class ImageModelInput(PredictorInput):
     pixel_values: Any
 
 
 class TransformersImageClassification(
     Task[
-        TransformersImageClassificationInput, 
-        TransformersImageClassificationOutput
+        InputType, 
+        OutputType
     ]
 ):
     default_model = "facebook/deit-base-distilled-patch16-384"
@@ -61,8 +67,8 @@ class TransformersImageClassification(
         ]]=None,
         preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        input_class: Type[TransformersImageClassificationInput]=TransformersImageClassificationInput,
-        output_class: Type[TransformersImageClassificationOutput]=TransformersImageClassificationOutput
+        input_class: Type[InputType]=TransformersImageClassificationInput,
+        output_class: Type[OutputType]=TransformersImageClassificationOutput
     ) -> None:
         if not predictor:
             model = AutoModelForImageClassification.from_pretrained(self.default_model) # type: ignore
