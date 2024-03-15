@@ -14,15 +14,18 @@ class VideoRead(Action[Dict[str, Any], Dict[str, Any]]):
 
 class VideoWrite(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        w = cv2.VideoWriter(
-            input_data["path_to_file"],
-            cv2.VideoWriter_fourcc(*input_data["fourcc"]), # type: ignore
-            input_data["fps"], 
-            (input_data["width"], input_data["height"])
-        )
-        for frame in input_data["frames"]:
-            w.write(frame)
-        w.release()
+        try:
+            w = cv2.VideoWriter(
+                input_data["path_to_file"],
+                cv2.VideoWriter_fourcc(*input_data["fourcc"]), # type: ignore
+                input_data["fps"], 
+                (input_data["width"], input_data["height"])
+            )
+            for frame in input_data["frames"]:
+                w.write(frame)
+            w.release()
+        except:
+            raise ValueError("Can't open file!")
         return {}
 
 
