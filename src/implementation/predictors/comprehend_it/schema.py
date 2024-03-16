@@ -31,7 +31,9 @@ class ComprehendItPredictorInput(PredictorInput):
 
 
 class ComprehendItPredictorOutput(PredictorOutput):
-    outputs: Dict[str, Any]
+    sequence: str
+    labels: List[str]
+    scores: List[float]
 
 
 ComprehendItPredictorConfigType = TypeVar("ComprehendItPredictorConfigType", bound=ComprehendItPredictorConfig)

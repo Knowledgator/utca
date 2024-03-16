@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 from abc import abstractmethod
 
 from core.executable_level_1.executable import Executable
@@ -13,23 +13,12 @@ class Predictor(
         PredictorOutputType
     ]
 ):
-    @abstractmethod
-    def get_predictions(self, **inputs: Any) -> Any:
-        ...
 
-    
+    @abstractmethod
     def invoke(
         self, input_data: PredictorInputType
-    ) -> Dict[str, Any]:
-        return {
-            "outputs": self.get_predictions(**input_data.model_dump())
-        }
-    
-
-    def invoke_batch(
-        self, input_data: List[PredictorInputType]
-    ) -> List[Dict[str, Any]]:
-        return [self.invoke(i) for i in input_data]
+    ) -> Any:
+        ...
     
 
     @property

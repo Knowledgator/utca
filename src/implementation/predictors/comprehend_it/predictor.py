@@ -30,7 +30,8 @@ class ComprehendItPredictor(
         )
 
     
-    def get_predictions(self, **inputs: Any) -> Any:
+    def invoke(self, input_data: ComprehendItPredictorInputType) -> Any:
+        inputs = input_data.model_dump()
         return self.pipeline( # type: ignore
             inputs.pop("text"), inputs.pop("labels"), **inputs
         )

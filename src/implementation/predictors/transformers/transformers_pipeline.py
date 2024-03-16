@@ -9,9 +9,6 @@ from transformers import ( # type: ignore
     PretrainedConfig,
     PreTrainedTokenizer,
 )
-from transformers.feature_extraction_utils import ( # type: ignore
-    PreTrainedFeatureExtractor # type: ignore
-)
 from transformers.image_processing_utils import ( # type: ignore
     BaseImageProcessor
 )
@@ -98,7 +95,8 @@ class TransformersPipeline(
         super().__init__(input_class, output_class)
 
 
-    def get_predictions(self, **inputs: Any) -> Any:
+    def invoke(self, input_data: PredictorInputType) -> Any:
+        inputs = input_data.model_dump()
         return self.pipeline(**inputs) # type: ignore
     
 
@@ -121,5 +119,6 @@ class TransformersSummarizationPipeline(
         PredictorOutputType
     ]
 ):
-    def get_predictions(self, **inputs: Any) -> Any:
+    def invoke(self, input_data: SummarizationInputType) -> Any:
+        inputs = input_data.model_dump()
         return self.pipeline(inputs.pop("inputs"), **inputs) # type: ignore

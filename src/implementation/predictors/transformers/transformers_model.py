@@ -44,7 +44,8 @@ class TransformersModel(
         super().__init__(input_class, output_class)
 
 
-    def get_predictions(self, **inputs: Any) -> Any:
+    def invoke(self, input_data: PredictorInputType) -> Any:
+        inputs = input_data.model_dump()
         if not "encodings" in inputs:
             return self.cfg.model(**inputs, **self.cfg.get_kwargs())
         else:
@@ -62,7 +63,8 @@ class TransformersGenerativeModel(
         PredictorOutputType
     ]
 ):
-    def get_predictions(self, **inputs: Any) -> Any:
+    def invoke(self, input_data: PredictorInputType) -> Any:
+        inputs = input_data.model_dump()
         if not "encodings" in inputs:
             return self.cfg.model.generate(**inputs, **self.cfg.get_kwargs()) # type: ignore
         else:
