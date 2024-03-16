@@ -24,9 +24,13 @@ class Action(Generic[ActionInput, ActionOutput], Component):
         get_key: Optional[str]=None,
         set_key: Optional[str]=None
     ) -> Transformable:
-        result = self.execute(
-            getattr(register, get_key or "__dict__")
-        )
+        input_data = getattr(register, get_key or "__dict__")
+        try:
+            result = self.execute(input_data)
+        except Exception as e:
+            raise ValueError(
+                f"Action error: {self.__class__}: {e}"
+            )
 
         if not isinstance(result, Dict) and not set_key:
             return Transformable({

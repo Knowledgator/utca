@@ -48,42 +48,53 @@ class Executable(
         data: Dict[str, Any],
         validation_class: Type[ValidationClass]
     ) -> ValidationClass:
-        return validation_class(**data)
-
+        try:
+            return validation_class(**data)
+        except Exception as e:
+            raise ValueError(
+                f"Input validation error: {e}\n"
+                f"Expected schema class: {validation_class!r}"
+                f"Expected schema: {validation_class.model_json_schema()}"
+            )
+        
 
     def execute(
         self, 
         input_data: Dict[str, Any], 
     ) -> Dict[str, Any]:
+        validated_input = self.validate(
+            input_data,
+            self.input_class
+        )
+        
         try:
-            validated_input = self.validate(
-                input_data,
-                self.input_class
-            )
             result: Dict[str, Any] = self.invoke(validated_input)
-            self.validate(
-                result, self.output_class
-            )
-            return result
         except Exception as e:
-            raise ValueError(f"Validation error: {e}")
+            raise Exception(f"Error durring execution: {self.__class__}: {e}")
+        
+        self.validate(
+            result, self.output_class
+        )
+        return result
 
 
     def execute_batch(
         self, 
         input_data: List[Dict[str, Any]],
     ) -> List[Dict[str, Any]]:
-        try:
-            result: List[Dict[str, Any]] = []
-            
-            for i in input_data:
-                validated_input = self.validate(i, self.input_class)
+        result: List[Dict[str, Any]] = []
+
+        for i in input_data:
+            validated_input = self.validate(i, self.input_class)
+            try:
                 tmp = self.invoke(validated_input)
-                self.validate(tmp, self.output_class)
-                result.append(tmp)
-            return result
-        except Exception as e:
-            raise ValueError(f"Validation error: {e}")
+            except Exception as e:
+                raise Exception(
+                    f"Error durring execution: {self.__class__}: {e}"
+                )
+            self.validate(tmp, self.output_class)
+            result.append(tmp)
+        return result
     
 
     def __call__(

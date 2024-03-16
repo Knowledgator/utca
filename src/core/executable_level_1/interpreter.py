@@ -18,7 +18,6 @@ from core.executable_level_1.memory import (
     GetMemory, 
     MemoryGetInstruction,  
     MemoryManager, 
-    # MemorySetInstruction, 
     SetMemory
 )
 from core.executable_level_1.statements_types import Statement
@@ -46,10 +45,12 @@ class Evaluator:
     def __init__(
         self, 
         schema: ExecutionSchema, 
-        cfg: EvaluatorConfigs = EvaluatorConfigs()
+        cfg: EvaluatorConfigs = EvaluatorConfigs(),
+        fast_exit: bool=True
     ) -> None:
         self.program = schema.retrieve_program()  # Corrected typo in 'retrieve'
         self.memory_manager = MemoryManager(None)
+        self.fast_exit = fast_exit
 
 
     def prepare_input(
@@ -83,8 +84,10 @@ class Evaluator:
                 program_input = self.eval(st, program_input)
                 EvaluatorLogger.info(f"Step {i} executed successfully.")
             except Exception as e:
-                EvaluatorLogger.error(f"Error at step {i}: {e}")
+                EvaluatorLogger.error(f"Error at step {i}")
                 EvaluatorLogger.exception(e)
+                if self.fast_exit:
+                    raise Exception("Program failed!")
         return program_input
 
 
@@ -185,22 +188,6 @@ class Evaluator:
     ) -> Transformable:
         return self.eval_program(pipeline, input_data)
 
-
-    # def eval_condition(self, condition: Condition):
-    #     unique_state = generate_unique_state()
-    #     set_commend = self.memory_manager.generate_set_command(unique_state, MemorySetInstruction.SET_AND_FLUSH)
-    #     self.memory_manager.resolve_set_memory(set_commend, self.register)
-    #     work_state = condition.get_state()
-    #     if work_state != None:
-    #         get_command = self.memory_manager.generate_get_memory_command(work_state, MemoryGetInstruction.GET_AND_GO)
-    #         self.register = self.memory_manager.resolve_get_memory(get_command, self.register)
-    #     st = condition.get_statement()
-    #     self.eval(st)
-    #     validator = condition.get_validator()
-    #     res = validator(self.register)
-    #     old_state_get  = self.memory_manager.generate_get_memory_command([unique_state], MemoryGetInstruction.FLUSH_AND_GET)
-    #     self.register = self.memory_manager.resolve_get_memory(old_state_get, self.register)
-    #     return res
         
     def eval_condition(
         self, 
