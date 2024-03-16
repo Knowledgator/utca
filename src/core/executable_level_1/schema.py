@@ -12,7 +12,6 @@ class Input(BaseModel, ABC):
 
 InputType = TypeVar('InputType', bound=Input, contravariant=True)
 
-
 # Task №1 - can validate is it right based on input and output class !!!
 class Transformable:
     def __init__(self, state: Dict[str, Any]) -> None:
@@ -22,6 +21,10 @@ class Transformable:
     def extract(self) -> Dict[str, Any]:
         return self.__dict__
     
+
+    def update(self, data: Dict[str, Any]):
+        self.__dict__.update(data)
+
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.__dict__})"
