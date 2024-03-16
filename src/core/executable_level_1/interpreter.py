@@ -87,7 +87,7 @@ class Evaluator:
                 EvaluatorLogger.error(f"Error at step {i}")
                 EvaluatorLogger.exception(e)
                 if self.fast_exit:
-                    raise Exception("Program failed!")
+                    raise Exception(f"Program failed! {e}")
         return program_input
 
 
