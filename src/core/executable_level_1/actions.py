@@ -33,9 +33,7 @@ class Action(Generic[ActionInput, ActionOutput], Component):
             )
 
         if not isinstance(result, Dict) and not set_key:
-            return Transformable({
-                self.default_key: result
-            })
+            set_key = self.default_key
         setattr(
             register,
             set_key or "__dict__",

@@ -72,10 +72,9 @@ class Executable(
         except Exception as e:
             raise Exception(f"Error durring execution: {self.__class__}: {e}")
         
-        self.validate(
+        return self.validate(
             result, self.output_class
-        )
-        return result
+        ).model_dump()
 
 
     def execute_batch(
@@ -101,20 +100,21 @@ class Executable(
         self, 
         register: Transformable,
         get_key: Optional[str]=None,
-        set_key: Optional[str]=None
+        set_key: Optional[str]=None,
     ) -> Transformable:
         input_data = getattr(register, get_key or "__dict__")
         if isinstance(input_data, Dict):
             result = self.execute(cast(Dict[str, Any], input_data))
-            set_key = set_key or "__dict__"
+            if not set_key:
+                register.update(result)
+            return register
         else:
             result = self.execute_batch(
                 cast(List[Dict[str, Any]], input_data)
             )
-            set_key = set_key or self.default_key
         setattr(
             register, 
-            set_key,
+            set_key or self.default_key,
             result
         )
         return register
