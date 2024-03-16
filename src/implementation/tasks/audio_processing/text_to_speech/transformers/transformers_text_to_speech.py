@@ -1,8 +1,5 @@
 from typing import Type, Optional, List, Any
 
-from core.executable_level_1.schema import (
-    Config, Output
-)
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
 )
@@ -15,16 +12,13 @@ from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline,
     TransformersPipelineConfig
 )
-from implementation.tasks.audio_processing.text_to_speech.transformers.actions import (
-    TextToSpeechPostprocess
-)
 
 class TransformersTextToSpeechInput(PredictorInput):
     text_inputs: str
 
 
-class TransformersTextToSpeechOutput(Output):
-    audio_data: Any
+class TransformersTextToSpeechOutput(PredictorOutput):
+    audio: Any
     sampling_rate: int
 
 
@@ -38,7 +32,6 @@ class TransformersTextToSpeech(
 
     def __init__(
         self, 
-        cfg: Optional[Config]=None,
         predictor: Optional[Predictor[
             PredictorInput, 
             PredictorOutput
@@ -58,9 +51,10 @@ class TransformersTextToSpeech(
                     }
                 ),
                 input_class=TransformersTextToSpeechInput,
+                output_class=TransformersTextToSpeechOutput
             )),
             preprocess=preprocess or [],
-            postprocess=postprocess or [TextToSpeechPostprocess()], # type: ignore
+            postprocess=postprocess or [], # type: ignore
             input_class=input_class, 
             output_class=output_class
         )

@@ -9,7 +9,7 @@ class AudioRead(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         audio_data, samplerate = sf.read(input_data["path_to_file"]) # type: ignore 
         return {
-            'audio_data': audio_data,
+            'audio': audio_data,
             'sample_rate': samplerate
         }
 
@@ -18,7 +18,7 @@ class AudioWrite(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         sf.write( # type: ignore
             input_data["path_to_file"], 
-            np.ravel(input_data["audio_data"]),
+            np.ravel(input_data["audio"]),
             input_data["sampling_rate"]
         )
         return input_data
