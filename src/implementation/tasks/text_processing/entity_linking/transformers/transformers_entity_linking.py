@@ -15,7 +15,6 @@ import torch
 import pyximport # type: ignore
 pyximport.install() # type: ignore
 
-from core.executable_level_1.schema import Transformable
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
 )
@@ -59,6 +58,14 @@ class ModelInput(PredictorInput):
     prefix_allowed_tokens_fn: Callable[
         [torch.Tensor, int], List[int]
     ]
+
+
+class ModelOutput(PredictorOutput):
+    class Config:
+        arbitrary_types_allowed = True
+
+    sequences: Any
+    sequences_scores: Any
 
 
 class EntityLinkingTask(
@@ -189,7 +196,8 @@ class EntityLinkingTask(
                         "output_scores": True, 
                     }
                 ),
-                input_class=ModelInput
+                input_class=ModelInput,
+                output_class=ModelOutput
             )
         self.encoder_decoder: bool = predictor.config.is_encoder_decoder
         self.initialize_labels_trie(labels)
@@ -228,9 +236,6 @@ class EntityLinkingTask(
         processed_input.encodings = tokenized_prompt # type: ignore
         predicts = self.predictor(processed_input)
         return self.process(
-            Transformable({
-                "inputs": processed_input.extract(),
-                "outputs": getattr(predicts, "outputs")
-            }), 
+            predicts, 
             self._postprocess # type: ignore
-        )        
+        ).extract()  

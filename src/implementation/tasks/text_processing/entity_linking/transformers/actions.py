@@ -37,19 +37,19 @@ class EntityLinkingPostprocess(Action[Dict[str, Any], Dict[str, Any]]):
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         decodes = self.tokenizer.batch_decode( # type: ignore
-            input_data["outputs"]["sequences"], # type: ignore
+            input_data["sequences"], # type: ignore
             skip_special_tokens=True
         )
 
-        num_beams = input_data["inputs"]["num_beams"]
+        num_beams = input_data["num_beams"]
         if num_beams <= 1:
-            scores = input_data["outputs"]["sequences_scores"] # type: ignore
+            scores = input_data["sequences_scores"] # type: ignore
         else:
             scores = torch.ones(len(decodes))
         
         outputs2scores: List[List[Tuple[str, float]]] = []
-        for text_id in range(len(input_data["inputs"]["texts"])):
-            input_ = input_data["inputs"]["texts"][text_id]
+        for text_id in range(len(input_data["texts"])):
+            input_ = input_data["texts"][text_id]
             input_len = len(input_)
             batch: List[Tuple[str, float]] = []
             for beam_id in range(num_beams):
