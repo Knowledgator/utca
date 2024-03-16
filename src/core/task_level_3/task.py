@@ -58,20 +58,9 @@ class Task(
         )
         predicts = self.predictor(processed_input)
         return self.process(
-            Transformable({
-                "inputs": processed_input.extract(),
-                "outputs": getattr(predicts, "outputs")
-            }),
+            predicts,
             self._postprocess # type: ignore
         ).extract()
-    
-
-    def invoke_batch(
-        self, input_data: List[InputType]
-    ) -> List[Dict[str, Any]]:
-        return [
-            self.invoke(i) for i in input_data
-        ]
 
 
 class NERTask(
@@ -80,18 +69,3 @@ class NERTask(
     ]
 ):
     ...
-
-
-    # def choose_threshold(self, input_data: InputWithThresholdType) -> float:
-    #     return (
-    #         input_data.threshold 
-    #         if not input_data.threshold is None 
-    #         else self.cfg.threshold
-    #     )
-    
-
-    # def _preprocess(
-    #     self, input_data: InputWithThresholdType
-    # ) -> InputWithThresholdType:
-    #     input_data.threshold = self.choose_threshold(input_data)
-    #     return input_data
