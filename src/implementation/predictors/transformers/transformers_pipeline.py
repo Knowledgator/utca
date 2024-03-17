@@ -121,4 +121,8 @@ class TransformersSummarizationPipeline(
 ):
     def invoke(self, input_data: SummarizationInputType) -> Any:
         inputs = input_data.model_dump()
-        return self.pipeline(inputs.pop("inputs"), **inputs) # type: ignore
+        return self.ensure_dict(
+            self.pipeline( # type: ignore
+                inputs.pop("inputs"), **inputs
+            )
+        )

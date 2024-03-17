@@ -1,4 +1,4 @@
-from typing import Type, Optional, List
+from typing import Any, Type, Optional, List
 
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersSummarizationPipeline,
@@ -7,7 +7,7 @@ from implementation.predictors.transformers.transformers_pipeline import (
 )
 
 from core.executable_level_1.schema import (
-    Config, Output
+    Output
 )
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
@@ -30,6 +30,10 @@ class SummarizationOutput(Output):
     summary_text: str
 
 
+class ModelOutput(PredictorOutput):
+    output: Any
+
+
 class SummarizationTask(
     Task[
         SummarizationTaskInput, 
@@ -41,7 +45,6 @@ class SummarizationTask(
     def __init__(
         self,
         *,
-        cfg: Optional[Config]=None, 
         predictor: Optional[Predictor[
             PredictorInput, 
             PredictorOutput
@@ -60,7 +63,8 @@ class SummarizationTask(
                         "truncation": True
                     }
                 ),
-                input_class=SummarizationTaskInput
+                input_class=SummarizationTaskInput,
+                output_class=ModelOutput
             )
 
         super().__init__(

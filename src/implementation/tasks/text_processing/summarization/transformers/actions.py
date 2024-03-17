@@ -6,4 +6,4 @@ class SummarizationPostprocess(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        return input_data["outputs"][0]
+        return input_data["output"][0]

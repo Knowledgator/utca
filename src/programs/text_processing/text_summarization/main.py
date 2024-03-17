@@ -10,7 +10,7 @@ if __name__ == "__main__":
     with open("programs/text_processing/text_summarization/text.txt", "r") as f:
         text = f.read()
     print(task(Transformable({
-        "inputs": [text],
+        "inputs": text,
         "max_length": 200,
         "min_length": 100
     })).extract())
