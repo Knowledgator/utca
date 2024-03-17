@@ -97,7 +97,7 @@ class TransformersPipeline(
 
     def invoke(self, input_data: PredictorInputType) -> Any:
         inputs = input_data.model_dump()
-        return self.pipeline(**inputs) # type: ignore
+        return self.ensure_dict(self.pipeline(**inputs)) # type: ignore
     
 
     @property

@@ -1,9 +1,9 @@
-from typing import Type, Optional, List
+from typing import Type, Optional, Any, List
 
 from PIL import Image
 
 from core.executable_level_1.schema import (
-    Config, Output
+    Output
 )
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
@@ -34,6 +34,10 @@ class DocumentQandAOutput(Output):
     answer: str
 
 
+class ModelOutput(PredictorOutput):
+    output: Any
+
+
 class DocumentQandATask(
     Task[
         DocumentQandAInput, 
@@ -45,7 +49,6 @@ class DocumentQandATask(
     def __init__(
         self,
         *,
-        cfg: Optional[Config]=None, 
         predictor: Optional[Predictor[
             PredictorInput, 
             PredictorOutput
@@ -61,7 +64,8 @@ class DocumentQandATask(
                     task="document-question-answering", 
                     model=self.default_model
                 ),
-                input_class=DocumentQandAInput
+                input_class=DocumentQandAInput,
+                output_class=ModelOutput
             )
 
         super().__init__(

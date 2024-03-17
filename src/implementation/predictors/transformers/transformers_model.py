@@ -44,13 +44,14 @@ class TransformersModel(
         super().__init__(input_class, output_class)
 
 
-    def invoke(self, input_data: PredictorInputType) -> Any:
+    def invoke(self, input_data: PredictorInputType) -> Dict[str, Any]:
         inputs = input_data.model_dump()
         if not "encodings" in inputs:
-            return self.cfg.model(**inputs, **self.cfg.get_kwargs())
+            res = self.cfg.model(**inputs, **self.cfg.get_kwargs())
         else:
-            return self.cfg.model(**inputs.pop("encodings"), **inputs, **self.cfg.get_kwargs())
-    
+            res = self.cfg.model(**inputs.pop("encodings"), **inputs, **self.cfg.get_kwargs())
+        return self.ensure_dict(res)
+
 
     @property
     def config(self) -> Any:
@@ -63,12 +64,10 @@ class TransformersGenerativeModel(
         PredictorOutputType
     ]
 ):
-    def invoke(self, input_data: PredictorInputType) -> Any:
+    def invoke(self, input_data: PredictorInputType) -> Dict[str, Any]:
         inputs = input_data.model_dump()
         if not "encodings" in inputs:
             res = self.cfg.model.generate(**inputs, **self.cfg.get_kwargs()) # type: ignore
         else:
             res = self.cfg.model.generate(**inputs.pop("encodings"), **inputs, **self.cfg.get_kwargs()) # type: ignore
-        return {
-            "output": res 
-        }
+        return self.ensure_dict(res)

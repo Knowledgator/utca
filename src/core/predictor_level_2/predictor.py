@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 from abc import abstractmethod
 
 from core.executable_level_1.executable import Executable
@@ -17,7 +17,7 @@ class Predictor(
     @abstractmethod
     def invoke(
         self, input_data: PredictorInputType
-    ) -> Any:
+    ) -> Dict[str, Any]:
         ...
     
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import (
-    Any, List, Dict, Type, Generic, Optional, TypeVar, cast
+    Any, List, Dict, Type, Generic, Optional, 
+    TypeVar, cast
 )
 from abc import ABC,  abstractmethod
 
@@ -36,6 +37,16 @@ class Executable(
         self.input_class = input_class
         self.output_class = output_class
         self.default_key = default_key
+
+
+    def ensure_dict(self, input_data: Any) -> Dict[str, Any]:
+        return (
+            {
+                self.default_key: input_data
+            } 
+            if not isinstance(input_data, Dict) 
+            else cast(Dict[str, Any], input_data)
+        )
 
 
     @abstractmethod

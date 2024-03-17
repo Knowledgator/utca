@@ -6,4 +6,4 @@ class DocumentQandAPostprocess(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        return input_data["outputs"][0] if input_data["outputs"] else {"answer": "None"}
+        return input_data["output"][0] if input_data["output"] else {"answer": "None"}
