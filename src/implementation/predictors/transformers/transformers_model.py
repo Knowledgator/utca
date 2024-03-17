@@ -66,6 +66,9 @@ class TransformersGenerativeModel(
     def invoke(self, input_data: PredictorInputType) -> Any:
         inputs = input_data.model_dump()
         if not "encodings" in inputs:
-            return self.cfg.model.generate(**inputs, **self.cfg.get_kwargs()) # type: ignore
+            res = self.cfg.model.generate(**inputs, **self.cfg.get_kwargs()) # type: ignore
         else:
-            return self.cfg.model.generate(**inputs.pop("encodings"), **inputs, **self.cfg.get_kwargs()) # type: ignore
+            res = self.cfg.model.generate(**inputs.pop("encodings"), **inputs, **self.cfg.get_kwargs()) # type: ignore
+        return {
+            "output": res 
+        }

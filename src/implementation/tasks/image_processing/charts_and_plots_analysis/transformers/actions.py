@@ -32,12 +32,11 @@ class ChartsAndPlotsAnalysisPreprocessor(Action[Dict[str, Any], Dict[str, Any]])
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        res = self.cfg.processor(
+        return self.cfg.processor(
             images=input_data["image"],
             text=input_data["text"],
             return_tensors="pt"
-        )
-        return res
+        ).data
 
 
 class ChartsAndPlotsAnalysisPostprocessorConfig(Config):
@@ -58,6 +57,4 @@ class ChartsAndPlotsAnalysisPostprocessor(Action[Dict[str, Any], Dict[str, Any]]
     def execute(
         self, input_data: Dict[str, Any], 
     ) -> Dict[str, Any]:
-        return {
-            "outputs": self.cfg.processor.decode(input_data["outputs"][0], skip_special_tokens=True).replace("<0x0A>", "<br/>")
-        }
+        return self.cfg.processor.decode(input_data["output"][0], skip_special_tokens=True).replace("<0x0A>", "<br/>")

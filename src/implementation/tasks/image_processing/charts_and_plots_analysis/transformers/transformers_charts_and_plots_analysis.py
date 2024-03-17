@@ -5,7 +5,7 @@ from transformers import ( # type: ignore
     Pix2StructProcessor, Pix2StructForConditionalGeneration
 )
 
-from core.executable_level_1.schema import Config, Input, Output
+from core.executable_level_1.schema import Input, Output
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
 )
@@ -36,12 +36,16 @@ class ChartsAndPlotsAnalysisInput(Input):
 
 
 class ChartsAndPlotsAnalysisOutput(Output):
-    outputs: Any
+    output: Any
 
 
 class ModelInput(PredictorInput):
     flattened_patches: Any
     attention_mask: Any
+
+
+class ModelOutput(PredictorOutput):
+    output: Any
 
 
 class ChartsAndPlotsAnalysis(
@@ -55,7 +59,6 @@ class ChartsAndPlotsAnalysis(
     def __init__(
         self,
         *,
-        cfg: Optional[Config]=None, 
         predictor: Optional[Predictor[
             PredictorInput, 
             PredictorOutput
@@ -74,7 +77,8 @@ class ChartsAndPlotsAnalysis(
                         "max_new_tokens": 512
                     }
                 ),
-                input_class=ModelInput
+                input_class=ModelInput,
+                output_class=ModelOutput
             )
         
         if not preprocess or not postprocess:
