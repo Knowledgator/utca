@@ -1,4 +1,4 @@
-from typing import Type, Optional, List
+from typing import Type, Optional, List, Any
 
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
@@ -36,6 +36,10 @@ class ModelInput(PredictorInput):
     inputs: str
 
 
+class ModelOutput(PredictorOutput):
+    output: Any
+
+
 class TokenClassifierTask(
     NERTask[
         TokenClassifierInput, 
@@ -63,7 +67,8 @@ class TokenClassifierTask(
                     task="token-classification", 
                     model=self.default_model
                 ),
-                input_class=ModelInput
+                input_class=ModelInput,
+                output_class=ModelOutput
             )
 
         super().__init__(

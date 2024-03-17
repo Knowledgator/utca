@@ -24,6 +24,6 @@ class TokenClassifierPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
                     **output,
                     "span": output["word"]
                 }
-                for output in input_data["outputs"]
+                for output in input_data["output"]
             ]
         }
