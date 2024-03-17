@@ -54,7 +54,7 @@ class ImageClassificationSingleLabelPostprocessor(Action[Dict[str, Any], Dict[st
     def execute(
         self, input_data: Dict[str, Any], 
     ) -> Dict[str, Any]:
-        predicted_class_idx = input_data["outputs"]["logits"].argmax(-1).item()
+        predicted_class_idx = input_data["logits"].argmax(-1).item()
         return {
             "label": self.cfg.labels[predicted_class_idx]
         }
@@ -72,7 +72,7 @@ class ImageClassificationMultyLabelPostprocessor(Action[Dict[str, Any], Dict[str
         self, input_data: Dict[str, Any], 
     ) -> Dict[str, Any]:
         probabilities = torch.nn.functional.softmax(
-            input_data["outputs"]["logits"], dim=-1
+            input_data["logits"], dim=-1
         )
         probabilities = probabilities.detach().numpy().tolist()[0]
 

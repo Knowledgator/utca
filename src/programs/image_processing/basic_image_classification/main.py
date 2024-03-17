@@ -1,5 +1,3 @@
-from typing import Dict, Any, cast
-
 from implementation.tasks.image_processing.image_classification.transformers.transformers_image_classification import (
     TransformersImageClassification
 )
@@ -13,7 +11,7 @@ if __name__ == "__main__":
         ImageRead() | TransformersImageClassification()
     )
 
-    result = cast(Dict[str, Any], Evaluator(pipeline).run_program({
+    result = Evaluator(pipeline).run_program({
         "path_to_file": "programs/image_processing/basic_image_classification/test.jpg" # Image of German Shepherd Dog
-    }))
+    })
     print(result)

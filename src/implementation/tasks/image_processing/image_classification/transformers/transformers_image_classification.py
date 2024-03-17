@@ -8,7 +8,7 @@ from transformers import ( # type: ignore
 )
 
 from core.executable_level_1.schema import (
-    Config, Input, Output, InputType, OutputType
+    Input, Output, InputType, OutputType
 )
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
@@ -49,6 +49,10 @@ class ImageModelInput(PredictorInput):
     pixel_values: Any
 
 
+class ImageModelOutput(PredictorOutput):
+    logits: Any
+
+
 class TransformersImageClassification(
     Task[
         InputType, 
@@ -60,7 +64,6 @@ class TransformersImageClassification(
     def __init__(
         self,
         *,
-        cfg: Optional[Config] = None, 
         predictor: Optional[Predictor[
             PredictorInput, 
             PredictorOutput
@@ -76,7 +79,8 @@ class TransformersImageClassification(
                 TransformersModelConfig(
                     model=model # type: ignore
                 ),
-                input_class=ImageModelInput
+                input_class=ImageModelInput,
+                output_class=ImageModelOutput
             )
         
         if not preprocess:
