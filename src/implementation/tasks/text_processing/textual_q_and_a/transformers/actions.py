@@ -18,6 +18,8 @@ class QandAPostprocess(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        return {
-            "answer": input_data["outputs"]["answer"]
-        }
+        return (
+            input_data 
+            if input_data["score"] > self.cfg.threshold 
+            else {}
+        )

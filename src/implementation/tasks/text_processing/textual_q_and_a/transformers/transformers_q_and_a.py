@@ -1,8 +1,5 @@
-from typing import Type, Optional, List, Any
+from typing import Type, Optional, List
 
-from core.executable_level_1.schema import (
-    Config, Output
-)
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
 )
@@ -24,8 +21,9 @@ class QandAInput(PredictorInput):
     context: str
 
 
-class QandAOutput(Output):
-    answer: Any
+class QandAOutput(PredictorOutput):
+    answer: Optional[str]=None
+    score: float=0.
 
 
 class QandATask(
@@ -39,7 +37,6 @@ class QandATask(
     def __init__(
         self,
         *,
-        cfg: Optional[Config]=None, 
         predictor: Optional[Predictor[
             PredictorInput, 
             PredictorOutput
@@ -55,7 +52,8 @@ class QandATask(
                     task="question-answering", 
                     model=self.default_model
                 ),
-                input_class=QandAInput
+                input_class=QandAInput,
+                output_class=QandAOutput
             )
 
         super().__init__(
