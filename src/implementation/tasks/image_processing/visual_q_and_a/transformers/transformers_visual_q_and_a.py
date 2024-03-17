@@ -45,6 +45,10 @@ class ModelInput(PredictorInput):
     pixel_mask: Any
 
 
+class ModelOutput(PredictorOutput):
+    logits: Any
+
+
 class TransformersVisualQandA(
     Task[
         TransformersVisualQandAInput, 
@@ -71,7 +75,8 @@ class TransformersVisualQandA(
                 TransformersModelConfig(
                     model=model # type: ignore
                 ),
-                input_class=ModelInput
+                input_class=ModelInput,
+                output_class=ModelOutput
             )
 
         if not preprocess:

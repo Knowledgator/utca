@@ -28,12 +28,11 @@ class VisualQandAPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        res = self.cfg.processor(
+        return self.cfg.processor(
             images=input_data["image"],
             text=input_data["question"],
             return_tensors="pt"
-        )
-        return res
+        ).data
 
 
 class VisualQandAPostprocessorConfig(Config):
@@ -52,7 +51,7 @@ class VisualQandAPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(
         self, input_data: Dict[str, Any], 
     ) -> Dict[str, Any]:
-        predicted_class_idx = input_data["outputs"]["logits"].argmax(-1).item()
+        predicted_class_idx = input_data["logits"].argmax(-1).item()
         return {
             "answer": self.cfg.labels[predicted_class_idx]
         }
