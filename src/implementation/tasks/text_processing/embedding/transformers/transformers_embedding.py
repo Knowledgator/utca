@@ -15,9 +15,7 @@ from core.predictor_level_2.schema import (
 )
 from core.task_level_3.task import Task
 from core.task_level_3.schema import (
-    Input, 
-    Output,
-    Config 
+    Input, Output,
 )
 from implementation.predictors.transformers.transformers_model import (
     TransformersModel,
@@ -42,6 +40,10 @@ class ModelInput(PredictorInput):
     encodings: Any
 
 
+class ModelOutput(PredictorOutput):
+    last_hidden_state: Any
+
+
 class TextEmbeddingTask(
     Task[
         TextEmbeddingInput, 
@@ -53,7 +55,6 @@ class TextEmbeddingTask(
     def __init__(
         self,
         *,
-        cfg: Optional[Config]=None, 
         predictor: Optional[Predictor[
             PredictorInput, 
             PredictorOutput
@@ -71,7 +72,8 @@ class TextEmbeddingTask(
                 TransformersModelConfig(
                     model=model # type: ignore
                 ),
-                input_class=ModelInput
+                input_class=ModelInput,
+                output_class=ModelOutput
             )
 
         super().__init__(

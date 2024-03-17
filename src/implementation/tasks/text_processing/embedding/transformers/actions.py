@@ -41,7 +41,7 @@ class EmbeddingPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        texts_embeddings = input_data["outputs"]["last_hidden_state"][:, 0]
+        texts_embeddings = input_data["last_hidden_state"][:, 0]
         # normalize embeddings
         texts_embeddings = torch.nn.functional.normalize(
             texts_embeddings, p=2, dim=1
