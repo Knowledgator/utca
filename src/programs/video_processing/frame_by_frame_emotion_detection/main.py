@@ -18,7 +18,8 @@ from implementation.predictors.transformers.transformers_model import (
 from implementation.tasks.image_processing.image_classification.transformers.transformers_image_classification import (
     TransformersImageClassification,
     TransformersImageClassificationOutputMultipleLabels,
-    ImageModelInput
+    ImageModelInput,
+    ImageModelOutput
 )
 from implementation.tasks.image_processing.image_classification.transformers.actions import (
     ImageClassificationPreprocessor,
@@ -43,7 +44,8 @@ task = TransformersImageClassification(
         TransformersModelConfig(
             model=model # type: ignore
         ),
-        input_class=ImageModelInput
+        input_class=ImageModelInput,
+        output_class=ImageModelOutput
     ),
     preprocess=[
         ImageClassificationPreprocessor(
