@@ -52,19 +52,19 @@ class TokenSearcherTextCleanerPostprocessor(Action[Dict[str, Any], Dict[str, Any
     ) -> Dict[str, Any]:
         junk = [
             entity
-            for output in input_data["outputs"]
+            for output in input_data["output"]
             for ent in output 
             if (entity := build_entity(
-                input_data["inputs"]["inputs"][0],
+                input_data["inputs"][0],
                 ent, 
                 self.cfg.threshold
             ))
         ]
         return {
-            "text": input_data["inputs"]["text"],
+            "text": input_data["text"],
             "output": junk,
             "cleaned_text": (
-                self.clean_text(input_data["inputs"]["text"], junk) 
+                self.clean_text(input_data["text"], junk) 
                 if self.cfg.clean else None
             )
         }

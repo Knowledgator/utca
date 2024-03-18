@@ -35,5 +35,4 @@ class TokenSearcherPredictorInput(Input):
 
 
 class TokenSearcherPredictorOutput(Output):
-    inputs: List[str]
-    outputs: List[List[Dict[str, Any]]]
+    output: List[List[Dict[str, Any]]]

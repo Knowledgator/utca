@@ -94,18 +94,18 @@ class TokenSearcherNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     ) -> Dict[str, Any]:
         outputs: list[ClassifiedEntity] = []
 
-        for id, output in enumerate(input_data["outputs"]):
+        for id, output in enumerate(input_data["output"]):
             label = cast(str,
-                input_data["inputs"]["labels"]
-                [id//len(input_data["inputs"]["chunks_starts"])]
+                input_data["labels"]
+                [id//len(input_data["chunks_starts"])]
             )
             shift = (
-                input_data["inputs"]["chunks_starts"][id%len(input_data["inputs"]["chunks_starts"])] 
-                - input_data["inputs"]["prompts_lens"][id//len(input_data["inputs"]["chunks_starts"])]
+                input_data["chunks_starts"][id%len(input_data["chunks_starts"])] 
+                - input_data["prompts_lens"][id//len(input_data["chunks_starts"])]
             )
             for ent in output:
                 if entity := build_entity(
-                    input_data["inputs"]["text"], 
+                    input_data["text"], 
                     ent, 
                     self.cfg.threshold, 
                     label, 
@@ -113,6 +113,6 @@ class TokenSearcherNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
                 ):
                     outputs.append(entity)
         return {
-            "text": input_data["inputs"]["text"],
+            "text": input_data["text"],
             "output": outputs
         }
