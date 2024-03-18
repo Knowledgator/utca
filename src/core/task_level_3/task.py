@@ -1,8 +1,10 @@
-from typing import Type, Dict, Any, List, Union, Optional, Callable
-
+from typing import (
+    Any, List, Dict, 
+    Type, Union, Optional, Callable
+)
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
-    Input, Output, InputType, OutputType, Transformable
+    InputType, OutputType, Transformable
 )
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
@@ -11,12 +13,12 @@ from core.task_level_3.schema import (
 )
 
 class Task(
-    Executable[InputType, OutputType],
+    Executable[InputType, OutputType]
 ):
     def __init__(
         self,
         *,
-        predictor: Predictor[Input, Output],
+        predictor: Predictor[Any, Any],
         preprocess: Optional[List[Action[Any, Any]]],
         postprocess: Optional[List[Action[Any, Any]]],
         input_class: Type[InputType],

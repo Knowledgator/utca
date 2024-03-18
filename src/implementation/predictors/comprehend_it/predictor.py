@@ -13,7 +13,7 @@ from implementation.predictors.comprehend_it.schema import (
 
 class ComprehendItPredictor(
     TransformersPipeline[
-        ComprehendItPredictorInputType, 
+        ComprehendItPredictorInputType,
         ComprehendItPredictorOutputType
     ]
 ):

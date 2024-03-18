@@ -1,4 +1,4 @@
-from typing import Type, Optional, List
+from typing import Any, List, Type, Optional
 
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
@@ -12,10 +12,6 @@ from core.task_level_3.schema import (
 )
 from core.task_level_3.objects.objects import (
     Entity
-)
-from implementation.predictors.token_searcher.schema import (
-    TokenSearcherPredictorInput, 
-    TokenSearcherPredictorOutput
 )
 from implementation.predictors.token_searcher.predictor import (
     TokenSearcherPredictor
@@ -45,10 +41,7 @@ class TokenSearcherQandATask(
     def __init__(
         self,
         cfg: Optional[NERConfig]=None, 
-        predictor: Optional[Predictor[
-            TokenSearcherPredictorInput, 
-            TokenSearcherPredictorOutput
-        ]]=None,
+        predictor: Optional[Predictor[Any, Any]]=None,
         preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
         input_class: Type[TokenSearcherQandAInput]=TokenSearcherQandAInput,

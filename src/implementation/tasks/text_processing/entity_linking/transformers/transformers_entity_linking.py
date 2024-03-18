@@ -155,7 +155,7 @@ class EntityLinkingTask(
         tokenizer: Optional[Union[
             str, PreTrainedTokenizer, PreTrainedTokenizerFast
         ]]=None,
-        predictor: Optional[Predictor[Input, Output]]=None,
+        predictor: Optional[Predictor[Any, Any]]=None,
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[EntityLinkingInput]=EntityLinkingInput,

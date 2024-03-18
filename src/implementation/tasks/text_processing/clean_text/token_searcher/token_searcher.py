@@ -1,8 +1,5 @@
 from typing import Any, List, Optional, Type
 
-from core.executable_level_1.schema import (
-    Input, Output
-)
 from core.executable_level_1.actions import (
     Action
 )
@@ -42,7 +39,7 @@ class TokenSearcherTextCleanerTask(
 
     def __init__(
         self,
-        predictor: Optional[Predictor[Input, Output]]=None,
+        predictor: Optional[Predictor[Any, Any]]=None,
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TokenSearcherTextCleanerInput]=TokenSearcherTextCleanerInput,

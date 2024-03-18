@@ -54,7 +54,7 @@ class ChartsAndPlotsAnalysis(
     def __init__(
         self,
         *,
-        predictor: Optional[Predictor[Input, Output]]=None,
+        predictor: Optional[Predictor[Any, Any]]=None,
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[ChartsAndPlotsAnalysisInput]=ChartsAndPlotsAnalysisInput,
