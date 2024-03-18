@@ -36,14 +36,14 @@ class TokenSearcherQandAPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         return {
-            'text': input_data["inputs"]["text"],
-            'question': input_data["inputs"]["question"],
+            'text': input_data["text"],
+            'question': input_data["question"],
             'output': [
                 entity
-                for output in input_data["outputs"]
+                for output in input_data["output"]
                 for ent in output 
                 if (entity := build_entity(
-                    input_data["inputs"]["inputs"][0],
+                    input_data["inputs"][0],
                     ent,
                     self.cfg.threshold
                 ))
