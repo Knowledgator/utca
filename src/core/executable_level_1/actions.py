@@ -1,13 +1,18 @@
+from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import (
-    Callable, Any, Dict, Optional, TypeVar, Generic, cast
+    Any, Dict, Callable, Optional, TypeVar, Generic, 
+    TYPE_CHECKING, cast
 )
 import logging
 
 from core.executable_level_1.schema import Transformable
-from core.executable_level_1.component import Component, Executor
+from core.executable_level_1.component import Component
 from core.executable_level_1.statements_types import Statement
+if TYPE_CHECKING:
+    from core.executable_level_1.executor import Executor
+
 
 ActionInput = TypeVar("ActionInput")
 ActionOutput = TypeVar("ActionOutput")
@@ -40,12 +45,12 @@ class Action(Generic[ActionInput, ActionOutput], Component):
         )
         return register
 
-
     def use(
         self,
         get_key: Optional[str]=None,
         set_key: Optional[str]=None
-    ) -> Executor:
+    ) -> Executor[Action[Any, Any]]:
+        from core.executable_level_1.executor import Executor
         return Executor(
             component=self, 
             get_key=get_key, 

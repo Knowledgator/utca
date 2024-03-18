@@ -1,13 +1,13 @@
 from __future__ import annotations
 from typing import (
     Any, List, Dict, Type, Generic, Optional, 
-    TypeVar, cast
+    TypeVar, TYPE_CHECKING, cast
 )
 from abc import ABC,  abstractmethod
 
 from pydantic import ValidationError
 
-from core.executable_level_1.component import Component, Executor
+from core.executable_level_1.component import Component
 from core.executable_level_1.schema import (
     InputType, 
     OutputType, 
@@ -18,6 +18,8 @@ from core.executable_level_1.schema import (
 from core.executable_level_1.statements_types import (
     Statement
 )
+if TYPE_CHECKING:
+    from core.executable_level_1.executor import Executor
 
 ValidationClass = TypeVar("ValidationClass", Input, Output)
 
@@ -137,7 +139,8 @@ class Executable(
         self,
         get_key: Optional[str]=None,
         set_key: Optional[str]=None
-    ) -> Executor:
+    ) -> Executor[Executable[Any, Any]]:
+        from core.executable_level_1.executor import Executor
         return Executor(
             component=self, 
             get_key=get_key, 

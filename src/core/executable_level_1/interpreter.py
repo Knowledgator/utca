@@ -1,11 +1,12 @@
 from __future__ import annotations
 from typing import (
-    Dict, Any, List, Optional, Union, cast, Callable
+    Dict, Any, List, Callable, Optional, Union, cast
 )
 import logging
 import copy
 
 from core.executable_level_1.component import Component
+from core.executable_level_1.executor import Executor
 from core.executable_level_1.eval import (
     Condition, 
     ExecutionSchema, 
@@ -25,9 +26,7 @@ from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
     Input, Output, Transformable
 )
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
-)
+from core.executable_level_1.actions import Action
 from core.executable_level_1.exceptions import (
     EvaluatorExecutionFailed
 )
@@ -159,7 +158,7 @@ class Evaluator:
 
     def eval_action(
         self, 
-        action: Union[Action[ActionInput, ActionOutput], Callable[[Transformable], Transformable]],
+        action: Union[Action[Any, Any], Executor[Action[Any, Any]]],
         input_data: Transformable
     ) -> Transformable:
         """Evaluates an action statement."""
@@ -171,7 +170,7 @@ class Evaluator:
         self, 
         executable: Union[
             Executable[Input, Output], 
-            Callable[[Transformable], Transformable]
+            Executor[Executable[Input, Output]]
         ],
         input_data: Transformable
     ) -> Transformable:
