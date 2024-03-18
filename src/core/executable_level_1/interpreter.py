@@ -102,7 +102,7 @@ class Evaluator:
             )
         elif st.statement == Statement.ACTION_STATEMENT:
             return self.eval_action(
-                cast(Action[ActionInput, ActionOutput], st),
+                cast(Action[Any, Any], st),
                 input_data
             )
         elif st.statement == Statement.SET_MEMORY_STATEMENT:

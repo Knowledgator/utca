@@ -1,8 +1,6 @@
 from typing import Any, List, Type, Optional
 
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
-)
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
@@ -42,8 +40,8 @@ class TokenSearcherQandATask(
         self,
         cfg: Optional[NERConfig]=None, 
         predictor: Optional[Predictor[Any, Any]]=None,
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        preprocess: Optional[List[Action[Any, Any]]]=None,
+        postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TokenSearcherQandAInput]=TokenSearcherQandAInput,
         output_class: Type[TokenSearcherQandAOutput]=TokenSearcherQandAOutput
     ) -> None:
