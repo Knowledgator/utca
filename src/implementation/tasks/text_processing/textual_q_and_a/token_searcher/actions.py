@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 
 from core.executable_level_1.schema import Config
 from core.executable_level_1.actions import Action
-from core.task_level_3.utils import (
+from implementation.predictors.token_searcher.utils import (
     build_entity
 )
 

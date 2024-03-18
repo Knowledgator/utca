@@ -5,7 +5,7 @@ from core.executable_level_1.actions import Action
 from core.task_level_3.objects.objects import (
     ClassifiedEntity
 )
-from core.task_level_3.utils import (
+from implementation.predictors.token_searcher.utils import (
     build_entity, sent_tokenizer
 )
 
