@@ -1,4 +1,6 @@
-from typing import Optional, cast, Any, Union, Dict
+from typing import (
+    Any, Dict, List, Optional, Union, cast
+) 
 import os.path
 
 import google.auth # type: ignore
@@ -16,6 +18,23 @@ class GoogleCloudClient: # TODO: issue with missmatched scopes
     service: Any
 
     @classmethod
+    def verify_creds(
+        cls, 
+        scopes: List[str],
+        credentials: Optional[Union[Dict[str, Any], str]]=None,
+    ) -> Credentials:
+        flow = (
+            InstalledAppFlow.from_client_secrets_file( # type: ignore
+                credentials, scopes
+            ) if isinstance(credentials, str) else 
+            InstalledAppFlow.from_client_config( # type: ignore
+                credentials, scopes
+            )
+        )
+        return flow.run_local_server(port=0) # type: ignore
+
+
+    @classmethod
     def authorize(
         cls, 
         scopes: list[str],
@@ -31,24 +50,21 @@ class GoogleCloudClient: # TODO: issue with missmatched scopes
                 "token.json", scopes
             )
 
-        if not creds or not creds.valid or not all(s in scopes for s in creds.scopes): # type: ignore
-            if creds and creds.expired and creds.refresh_token: # type: ignore
+        if not creds:
+            creds = cls.verify_creds(scopes, credentials)
+        elif not all(s in scopes for s in creds.scopes): # type: ignore
+            scopes = cast(List[str], [*creds.scopes, *scopes]) # type: ignore
+            creds = cls.verify_creds(scopes, credentials)
+        elif not creds.valid:
+            try:
                 creds.refresh(Request()) # type: ignore
-            else:
-                flow = (
-                    InstalledAppFlow.from_client_secrets_file( # type: ignore
-                        credentials, scopes
-                    ) if isinstance(credentials, str) else 
-                    InstalledAppFlow.from_client_config( # type: ignore
-                        credentials, scopes
-                    )
-                )
-                creds = flow.run_local_server(port=0) # type: ignore
+            except Exception:
+                creds = cls.verify_creds(scopes, credentials) # type: ignore
             
-            # Save the credentials for the next run
-            with open("token.json", "w") as token:
-                token.write(creds.to_json()) # type: ignore
-        return cast(Credentials, creds)
+        # Save the credentials for the next run
+        with open("token.json", "w") as token:
+            token.write(creds.to_json()) # type: ignore
+        return creds
     
 
     def __init__(self, cfg: GoogleCloudClientConfig) -> None:
