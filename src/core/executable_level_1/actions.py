@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import (
     Callable, Any, Dict, Optional, TypeVar, Generic, cast
 )
+import logging
 
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.component import Component, Executor
@@ -65,16 +66,15 @@ class Action(Generic[ActionInput, ActionOutput], Component):
         ...
 
 
-class Logger(Action[ActionInput, ActionOutput]):
-    def __init__(self, message: str="") -> None:
+class Log(Action[ActionInput, ActionOutput]):
+    def __init__(self, logger: logging.Logger, message: str="") -> None:
+        self.logger = logger
         self.message = message
 
+
     def execute(self, input_data: ActionInput) -> ActionOutput:
-        import logging
-        from core.executable_level_1.interpreter import EvaluatorLogger
-        EvaluatorLogger.level = logging.DEBUG
-        EvaluatorLogger.error(self.message)
-        EvaluatorLogger.error(input_data)
+        self.logger.error(self.message)
+        self.logger.error(input_data)
         return cast(ActionOutput, input_data)
 
 
