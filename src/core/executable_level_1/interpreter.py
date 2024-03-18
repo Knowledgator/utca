@@ -28,14 +28,31 @@ from core.executable_level_1.schema import (
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
 )
-# from core.executable_level_1.utils import generate_unique_state
-
-EvaluatorLogger = logging.Logger("EvaluatorLogger", logging.INFO)
+from core.executable_level_1.exceptions import (
+    EvaluatorExecutionFailed
+)
 
 INPUT = "input"
 
-class EvaluatorConfigs():
-    pass
+class EvaluatorConfigs:
+    logging_level: int
+    logging_handler: logging.Handler
+    logger: logging.Logger
+
+    def __init__(
+        self,
+        name: str="Evaluator", 
+        logging_level: int=logging.INFO,
+        logging_handler: Optional[logging.Handler]=None
+    ):
+        self.name = name
+        self.logging_level = logging_level
+        self.logging_handler = logging_handler or logging.StreamHandler()
+        self.logger = logging.Logger(
+            self.name, 
+            self.logging_level
+        )
+        self.logger.addHandler(self.logging_handler)
 
 
 class Evaluator:
@@ -45,9 +62,10 @@ class Evaluator:
     def __init__(
         self, 
         schema: ExecutionSchema, 
-        cfg: EvaluatorConfigs = EvaluatorConfigs(),
+        cfg: Optional[EvaluatorConfigs]=None,
         fast_exit: bool=True
     ) -> None:
+        self.cfg = cfg or EvaluatorConfigs()
         self.program = schema.retrieve_program()  # Corrected typo in 'retrieve'
         self.memory_manager = MemoryManager(None)
         self.fast_exit = fast_exit
@@ -82,12 +100,12 @@ class Evaluator:
         for i, st in enumerate(program):
             try:
                 program_input = self.eval(st, program_input)
-                EvaluatorLogger.info(f"Step {i} executed successfully.")
+                self.cfg.logger.info(f"Step {i} executed successfully.")
             except Exception as e:
-                EvaluatorLogger.error(f"Error at step {i}")
-                EvaluatorLogger.exception(e)
+                self.cfg.logger.error(f"Error at step {i}")
+                self.cfg.logger.exception(e)
                 if self.fast_exit:
-                    raise Exception(f"Program failed! {e}")
+                    raise EvaluatorExecutionFailed(e)
         return program_input
 
 

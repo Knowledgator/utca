@@ -5,6 +5,8 @@ from typing import (
 )
 from abc import ABC,  abstractmethod
 
+from pydantic import ValidationError
+
 from core.executable_level_1.component import Component, Executor
 from core.executable_level_1.schema import (
     InputType, 
@@ -61,10 +63,10 @@ class Executable(
     ) -> ValidationClass:
         try:
             return validation_class(**data)
-        except Exception as e:
+        except ValidationError as e:
             raise ValueError(
-                f"Input validation error: {e}\n"
-                f"Expected schema class: {validation_class!r}"
+                f"Input validation error: {e.json()}: "
+                f"Expected schema class: {validation_class!r}: "
                 f"Expected schema: {validation_class.model_json_schema()}"
             )
         
