@@ -10,7 +10,6 @@ class Input(BaseModel, ABC):
     def generate_transformable(self):
         return Transformable(self.model_dump())
 
-InputType = TypeVar('InputType', bound=Input, contravariant=True)
 
 # Task №1 - can validate is it right based on input and output class !!!
 class Transformable:
@@ -45,5 +44,5 @@ class Config(BaseModel, ABC):
         return f"{self.__class__.__name__}({self.__str__()})"
 
 
-OutputType = TypeVar('OutputType', bound=Output, contravariant=True)
-ConfigType = TypeVar('ConfigType', bound=Config, contravariant=True)
+InputType = TypeVar('InputType', bound=Input)
+OutputType = TypeVar('OutputType', bound=Output)
