@@ -1,4 +1,3 @@
-
 class InputSchemaNotFound(Exception):
     def __init__(self, message: str="InputSchemaNotFound"):
         self.message = message
@@ -22,3 +21,6 @@ class ExecutionSchemaInvalidFlow(Exception):
         super().__init__(self.message)
 
 
+class EvaluatorExecutionFailed(Exception):
+    def __init__(self, e: Exception):
+        super().__init__(f"Program failed! {e}")
