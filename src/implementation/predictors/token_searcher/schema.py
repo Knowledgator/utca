@@ -1,13 +1,13 @@
-from typing import Any, Dict, List, TypeVar, Union, Optional
+from typing import Any, Dict, List, Union, Optional
 
 from transformers import ( # type: ignore
     PreTrainedModel,
     TFPreTrainedModel,
     PreTrainedTokenizer,
 )
-from core.predictor_level_2.schema import (
-    PredictorInput,
-    PredictorOutput
+
+from core.executable_level_1.schema import (
+    Input, Output
 )
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipelineConfig
@@ -30,15 +30,10 @@ class TokenSearcherPredictorConfig(TransformersPipelineConfig):
     }
 
 
-class TokenSearcherPredictorInput(PredictorInput):
+class TokenSearcherPredictorInput(Input):
     inputs: List[str]
 
 
-class TokenSearcherPredictorOutput(PredictorOutput):
+class TokenSearcherPredictorOutput(Output):
     inputs: List[str]
     outputs: List[List[Dict[str, Any]]]
-
-
-TokenSearcherPredictorConfigType = TypeVar("TokenSearcherPredictorConfigType", bound=TokenSearcherPredictorConfig)
-TokenSearcherPredictorInputType = TypeVar("TokenSearcherPredictorInputType", bound=TokenSearcherPredictorInput)
-TokenSearcherPredictorOutputType = TypeVar("TokenSearcherPredictorOutputType", bound=TokenSearcherPredictorOutput)

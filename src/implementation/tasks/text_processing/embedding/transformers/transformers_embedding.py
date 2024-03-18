@@ -2,17 +2,9 @@ from typing import Type, Optional, List, Any
 
 from transformers import AutoModel, AutoTokenizer # type: ignore
 
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
-)
+from core.executable_level_1.schema import Input, Output
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import (
-    PredictorInput, PredictorOutput
-)
-from core.predictor_level_2.schema import (
-    PredictorInput,
-    PredictorOutput
-)
 from core.task_level_3.task import Task
 from core.task_level_3.schema import (
     Input, Output,
@@ -36,11 +28,11 @@ class TextEmbeddingOutput(Output):
     embeddings: Any
 
 
-class ModelInput(PredictorInput):
+class ModelInput(Input):
     encodings: Any
 
 
-class ModelOutput(PredictorOutput):
+class ModelOutput(Output):
     last_hidden_state: Any
 
 
@@ -55,12 +47,9 @@ class TextEmbeddingTask(
     def __init__(
         self,
         *,
-        predictor: Optional[Predictor[
-            PredictorInput, 
-            PredictorOutput
-        ]]=None,
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        predictor: Optional[Predictor[Input, Output]]=None,
+        preprocess: Optional[List[Action[Any, Any]]]=None,
+        postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TextEmbeddingInput]=TextEmbeddingInput,
         output_class: Type[TextEmbeddingOutput]=TextEmbeddingOutput
     ) -> None:
@@ -87,7 +76,7 @@ class TextEmbeddingTask(
                     )
                 )
             ],
-            postprocess=postprocess or [ # type: ignore
+            postprocess=postprocess or [
                 EmbeddingPostprocessor(),
                 ConvertEmbeddingsToNumpyArrays()    
             ],

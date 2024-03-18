@@ -13,16 +13,12 @@ from transformers.image_processing_utils import ( # type: ignore
     BaseImageProcessor
 )
 
-from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import (
-    PredictorInputType,
-    PredictorOutputType,
-    PredictorConfig,
-    PredictorInput,
-    PredictorOutput,
+from core.executable_level_1.schema import (
+    Config, Input, InputType, OutputType
 )
+from core.predictor_level_2.predictor import Predictor
 
-class TransformersPipelineConfig(PredictorConfig):
+class TransformersPipelineConfig(Config):
     class Config:
         arbitrary_types_allowed = True
         protected_namespaces = ()
@@ -76,18 +72,15 @@ TransformersPipelineConfigType = TypeVar(
 )
 
 class TransformersPipeline(
-    Predictor[
-        PredictorInputType,
-        PredictorOutputType
-    ]
+    Predictor[InputType, OutputType]
 ):  
     pipeline: Pipeline
 
     def __init__(
         self,
         cfg: TransformersPipelineConfig,
-        input_class: Type[PredictorInputType]=PredictorInput,
-        output_class: Type[PredictorOutputType]=PredictorOutput,
+        input_class: Type[InputType],
+        output_class: Type[OutputType],
     ) -> None:
         self.pipeline: Pipeline = pipeline(
             **cfg.pipeline_config
@@ -95,7 +88,7 @@ class TransformersPipeline(
         super().__init__(input_class, output_class)
 
 
-    def invoke(self, input_data: PredictorInputType) -> Any:
+    def invoke(self, input_data: InputType) -> Any:
         inputs = input_data.model_dump()
         return self.ensure_dict(self.pipeline(**inputs)) # type: ignore
     
@@ -105,7 +98,7 @@ class TransformersPipeline(
         return self.pipeline.model.config # type: ignore
 
 
-class SummarizationInput(PredictorInput):
+class SummarizationInput(Input):
     inputs: Any
 
 SummarizationInputType = TypeVar(
@@ -116,7 +109,7 @@ SummarizationInputType = TypeVar(
 class TransformersSummarizationPipeline(
     TransformersPipeline[
         SummarizationInputType, 
-        PredictorOutputType
+        OutputType
     ]
 ):
     def invoke(self, input_data: SummarizationInputType) -> Any:

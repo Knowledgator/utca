@@ -1,18 +1,12 @@
-from typing import Type, Optional, Any, List
+from typing import Any, List, Type, Optional
 
 from PIL import Image
 
 from core.executable_level_1.schema import (
-    Output
+    Input, Output
 )
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
-)
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import (
-    PredictorInput,
-    PredictorOutput
-)
 from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline,
@@ -22,7 +16,7 @@ from implementation.tasks.image_processing.documents_q_and_a.transformers.action
     DocumentQandAPostprocess
 )
 
-class DocumentQandAInput(PredictorInput):
+class DocumentQandAInput(Input):
     class Config:
         arbitrary_types_allowed = True
 
@@ -34,7 +28,7 @@ class DocumentQandAOutput(Output):
     answer: str
 
 
-class ModelOutput(PredictorOutput):
+class ModelOutput(Output):
     output: Any
 
 
@@ -49,12 +43,9 @@ class DocumentQandATask(
     def __init__(
         self,
         *,
-        predictor: Optional[Predictor[
-            PredictorInput, 
-            PredictorOutput
-        ]]=None,
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        predictor: Optional[Predictor[Input, Output]]=None,
+        preprocess: Optional[List[Action[Any, Any]]]=None,
+        postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[DocumentQandAInput]=DocumentQandAInput,
         output_class: Type[DocumentQandAOutput]=DocumentQandAOutput
     ) -> None:
@@ -71,7 +62,7 @@ class DocumentQandATask(
         super().__init__(
             predictor=predictor,
             preprocess=preprocess or [],
-            postprocess=postprocess or [DocumentQandAPostprocess()], # type: ignore
+            postprocess=postprocess or [DocumentQandAPostprocess()],
             input_class=input_class, 
             output_class=output_class,
         )

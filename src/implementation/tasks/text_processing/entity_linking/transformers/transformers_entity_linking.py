@@ -15,14 +15,8 @@ import torch
 import pyximport # type: ignore
 pyximport.install() # type: ignore
 
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
-)
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import (
-    PredictorInput,
-    PredictorOutput
-)
 from core.task_level_3.task import Task
 from core.task_level_3.schema import (
     Input, 
@@ -48,7 +42,7 @@ class EntityLinkingOutput(Output):
     classification_output: Any
 
 
-class ModelInput(PredictorInput):
+class ModelInput(Input):
     class Config:
         arbitrary_types_allowed = True
 
@@ -60,7 +54,7 @@ class ModelInput(PredictorInput):
     ]
 
 
-class ModelOutput(PredictorOutput):
+class ModelOutput(Output):
     class Config:
         arbitrary_types_allowed = True
 
@@ -161,12 +155,9 @@ class EntityLinkingTask(
         tokenizer: Optional[Union[
             str, PreTrainedTokenizer, PreTrainedTokenizerFast
         ]]=None,
-        predictor: Optional[Predictor[
-            PredictorInput, 
-            PredictorOutput
-        ]]=None,
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        predictor: Optional[Predictor[Input, Output]]=None,
+        preprocess: Optional[List[Action[Any, Any]]]=None,
+        postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[EntityLinkingInput]=EntityLinkingInput,
         output_class: Type[EntityLinkingOutput]=EntityLinkingOutput
     ) -> None:
@@ -204,10 +195,10 @@ class EntityLinkingTask(
 
         super().__init__(
             predictor=predictor,
-            preprocess=preprocess or [ # type: ignore
+            preprocess=preprocess or [
                 EntityLinkingPreprocessing() 
             ],
-            postprocess=postprocess or [ # type: ignore
+            postprocess=postprocess or [
                 EntityLinkingPostprocess( 
                     tokenizer=self.tokenizer,
                     encoder_decoder=self.encoder_decoder

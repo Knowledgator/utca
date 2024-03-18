@@ -79,17 +79,21 @@ if __name__ == "__main__":
 
     image_processing = (
         PDFExtractImages()
-        | ExecuteFunction(prepare_image_classification_input)
+        | ExecuteFunction(prepare_image_classification_input).use(
+            set_key="images"
+        )
         | ForEach(
-            process_visual_data
+            process_visual_data, get_key="images"
         )
     )
 
     table_processing = (
         PDFFindTables()
-        | ExecuteFunction(crop_tables_from_pages)
+        | ExecuteFunction(crop_tables_from_pages).use(
+            set_key="tables"
+        )
         | ForEach(
-            process_visual_data
+            process_visual_data, get_key="tables"
         )
     )
 

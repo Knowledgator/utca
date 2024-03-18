@@ -29,8 +29,8 @@ from implementation.tasks.text_processing.ner.token_searcher.actions import (
 
 )
 
-def get_page(input: Dict[str, Any]) -> Dict[str, Any]:
-    return {"text": input["pdf_texts"][1]}
+def get_page_text(input: Dict[int, Any]) -> Dict[str, Any]:
+    return {"text": input[1]}
 
 
 if __name__ == "__main__":
@@ -61,12 +61,15 @@ if __name__ == "__main__":
 
     # create pipeline with described stages
     pipeline: ExecutionSchema = (
-        PDFRead()
-        | PDFExtractTexts()
-        | ExecuteFunction(get_page) 
+        PDFRead().use(set_key="pdf")
+        | PDFExtractTexts().use(
+            get_key="pdf", 
+            set_key="texts"
+        )
+        | ExecuteFunction(get_page_text).use(get_key="texts")
         # adapts outputs to inputs 
         
-        | clean_task 
+        | clean_task
         | RenameAttribute("cleaned_text", "text")         
         | AddData({"labels": ["person", "framework"]}) 
         # add labels that will be used by NER task

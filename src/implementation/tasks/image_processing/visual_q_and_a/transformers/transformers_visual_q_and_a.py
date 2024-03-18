@@ -1,4 +1,4 @@
-from typing import Type, Optional, Any, List
+from typing import Any, List, Type, Optional, cast
 
 from PIL import Image
 from transformers import ( # type: ignore
@@ -6,13 +6,8 @@ from transformers import ( # type: ignore
 )
 
 from core.executable_level_1.schema import Input, Output
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
-)
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import (
-    PredictorInput, PredictorOutput
-)
 from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_model import (
     TransformersModel,
@@ -37,7 +32,7 @@ class TransformersVisualQandAOutput(Output):
     answer: str
 
 
-class ModelInput(PredictorInput):
+class ModelInput(Input):
     input_ids: Any
     token_type_ids: Any
     attention_mask: Any
@@ -45,7 +40,7 @@ class ModelInput(PredictorInput):
     pixel_mask: Any
 
 
-class ModelOutput(PredictorOutput):
+class ModelOutput(Output):
     logits: Any
 
 
@@ -60,12 +55,9 @@ class TransformersVisualQandA(
     def __init__(
         self,
         *,
-        predictor: Optional[Predictor[
-            PredictorInput, 
-            PredictorOutput
-        ]]=None,
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        predictor: Optional[Predictor[Input, Output]]=None,
+        preprocess: Optional[List[Action[Any, Any]]]=None,
+        postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TransformersVisualQandAInput]=TransformersVisualQandAInput,
         output_class: Type[TransformersVisualQandAOutput]=TransformersVisualQandAOutput
     ) -> None:
@@ -81,7 +73,7 @@ class TransformersVisualQandA(
 
         if not preprocess:
             processor = ViltProcessor.from_pretrained(self.default_model) # type: ignore
-            preprocess=[ # type: ignore
+            preprocess=[
                 VisualQandAPreprocessor(
                     VisualQandAPreprocessorConfig(
                         processor=processor # type: ignore
@@ -100,7 +92,10 @@ class TransformersVisualQandA(
             ]
 
         super().__init__(
-            predictor=predictor, # type: ignore
+            predictor=cast(
+                Predictor[Input, Output], 
+                predictor
+            ),
             preprocess=preprocess,
             postprocess=postprocess,
             input_class=input_class, 

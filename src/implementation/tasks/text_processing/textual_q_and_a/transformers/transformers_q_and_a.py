@@ -1,12 +1,10 @@
-from typing import Type, Optional, List
+from typing import Any, List, Type, Optional
 
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
+from core.executable_level_1.schema import (
+    Input, Output
 )
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import (
-    PredictorInput, PredictorOutput
-)
 from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline,
@@ -16,12 +14,12 @@ from implementation.tasks.text_processing.textual_q_and_a.transformers.actions i
     QandAPostprocess
 )
 
-class QandAInput(PredictorInput):
+class QandAInput(Input):
     question: str
     context: str
 
 
-class QandAOutput(PredictorOutput):
+class QandAOutput(Output):
     answer: Optional[str]=None
     score: float=0.
 
@@ -37,12 +35,9 @@ class QandATask(
     def __init__(
         self,
         *,
-        predictor: Optional[Predictor[
-            PredictorInput, 
-            PredictorOutput
-        ]]=None,
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        predictor: Optional[Predictor[Input, Output]]=None,
+        preprocess: Optional[List[Action[Any, Any]]]=None,
+        postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[QandAInput]=QandAInput,
         output_class: Type[QandAOutput]=QandAOutput
     ) -> None:
@@ -59,7 +54,7 @@ class QandATask(
         super().__init__(
             predictor=predictor,
             preprocess=preprocess or [],
-            postprocess=postprocess or [QandAPostprocess()], # type: ignore
+            postprocess=postprocess or [QandAPostprocess()],
             input_class=input_class, 
             output_class=output_class,
         )

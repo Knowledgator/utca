@@ -1,19 +1,15 @@
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import (
-    Callable, Any, Dict, List, Optional, TypeVar, Generic, cast
+    Callable, Any, Dict, Optional, TypeVar, Generic, cast
 )
 
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.component import Component, Executor
 from core.executable_level_1.statements_types import Statement
 
-ActionInput = TypeVar(
-    "ActionInput", Dict[str, Any], List[Dict[str, Any]]
-)
-ActionOutput = TypeVar(
-    "ActionOutput", Dict[str, Any], List[Dict[str, Any]]
-)
+ActionInput = TypeVar("ActionInput")
+ActionOutput = TypeVar("ActionOutput")
 
 class Action(Generic[ActionInput, ActionOutput], Component):
     default_key: str = "output"
@@ -31,6 +27,8 @@ class Action(Generic[ActionInput, ActionOutput], Component):
             raise ValueError(
                 f"Action error: {self.__class__}: {e}"
             )
+        if result is None:
+            return register
 
         if not isinstance(result, Dict) and not set_key:
             set_key = self.default_key

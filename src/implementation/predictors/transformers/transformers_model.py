@@ -2,16 +2,12 @@ from typing import TypeVar, Any, Type, Dict, Optional
 
 from transformers import PreTrainedModel # type: ignore
 
-from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import (
-    PredictorConfig, 
-    PredictorInput, 
-    PredictorOutput,
-    PredictorInputType, 
-    PredictorOutputType
+from core.executable_level_1.schema import (
+    Config, InputType, OutputType
 )
+from core.predictor_level_2.predictor import Predictor
 
-class TransformersModelConfig(PredictorConfig):
+class TransformersModelConfig(Config):
     class Config:
         arbitrary_types_allowed = True
 
@@ -29,22 +25,22 @@ TransformersModelConfigType = TypeVar(
 
 class TransformersModel(
     Predictor[
-        PredictorInputType, 
-        PredictorOutputType
+        InputType, 
+        OutputType
     ]
 ):
    
     def __init__(
         self, 
         cfg: TransformersModelConfig,
-        input_class: Type[PredictorInputType]=PredictorInput,
-        output_class: Type[PredictorOutputType]=PredictorOutput
+        input_class: Type[InputType],
+        output_class: Type[OutputType]
     ) -> None:
         self.cfg = cfg
         super().__init__(input_class, output_class)
 
 
-    def invoke(self, input_data: PredictorInputType) -> Dict[str, Any]:
+    def invoke(self, input_data: InputType) -> Dict[str, Any]:
         inputs = input_data.model_dump()
         if not "encodings" in inputs:
             res = self.cfg.model(**inputs, **self.cfg.get_kwargs())
@@ -60,11 +56,11 @@ class TransformersModel(
 
 class TransformersGenerativeModel(
     TransformersModel[
-        PredictorInputType, 
-        PredictorOutputType
+        InputType, 
+        OutputType
     ]
 ):
-    def invoke(self, input_data: PredictorInputType) -> Dict[str, Any]:
+    def invoke(self, input_data: InputType) -> Dict[str, Any]:
         inputs = input_data.model_dump()
         if not "encodings" in inputs:
             res = self.cfg.model.generate(**inputs, **self.cfg.get_kwargs()) # type: ignore

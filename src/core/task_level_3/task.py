@@ -2,15 +2,10 @@ from typing import Type, Dict, Any, List, Union, Optional, Callable
 
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
-    InputType, OutputType, Transformable
+    Input, Output, InputType, OutputType, Transformable
 )
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
-)
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import (
-    PredictorInput, PredictorOutput
-)
 from core.task_level_3.schema import (
     InputWithThresholdType, NEROutputType
 )
@@ -21,12 +16,9 @@ class Task(
     def __init__(
         self,
         *,
-        predictor: Predictor[
-            PredictorInput, 
-            PredictorOutput
-        ],
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]],
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]],
+        predictor: Predictor[Input, Output],
+        preprocess: Optional[List[Action[Any, Any]]],
+        postprocess: Optional[List[Action[Any, Any]]],
         input_class: Type[InputType],
         output_class: Type[OutputType]
     ) -> None:
@@ -40,7 +32,7 @@ class Task(
         self, 
         state: Transformable, 
         actions: List[Union[
-            Action[ActionInput, ActionOutput],
+            Action[Any, Any],
             Callable[[Transformable], Transformable]
         ]]
     ) -> Transformable:

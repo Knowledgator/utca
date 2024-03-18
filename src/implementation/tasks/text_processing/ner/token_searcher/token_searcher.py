@@ -1,15 +1,14 @@
-from typing import Optional, List, Type
+from typing import Any, List, Optional, Type
 
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
+from core.executable_level_1.schema import (
+    Input, Output
 )
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import PredictorInput, PredictorOutput
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
     InputWithThreshold, 
     NEROutput,
-    NERConfig 
 )
 from core.task_level_3.objects.objects import (
     ClassifiedEntity
@@ -39,20 +38,16 @@ class TokenSearcherNERTask(
 ):
     def __init__(
         self,
-        cfg: Optional[NERConfig]=None, 
-        predictor: Optional[Predictor[
-            PredictorInput, 
-            PredictorOutput
-        ]]=None,
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        predictor: Optional[Predictor[Input, Output]]=None,
+        preprocess: Optional[List[Action[Any, Any]]]=None,
+        postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TokenSearcherNERInput]=TokenSearcherNERInput,
         output_class: Type[TokenSearcherNEROutput]=TokenSearcherNEROutput
     ) -> None:
         super().__init__(
             predictor=predictor or TokenSearcherPredictor(),
-            preprocess=preprocess or [TokenSearcherNERPreprocessor()], # type: ignore
-            postprocess=postprocess or [TokenSearcherNERPostprocessor()], # type: ignore
+            preprocess=preprocess or [TokenSearcherNERPreprocessor()],
+            postprocess=postprocess or [TokenSearcherNERPostprocessor()],
             input_class=input_class,
             output_class=output_class
         )

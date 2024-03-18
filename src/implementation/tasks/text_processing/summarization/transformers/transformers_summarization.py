@@ -7,16 +7,10 @@ from implementation.predictors.transformers.transformers_pipeline import (
 )
 
 from core.executable_level_1.schema import (
-    Output
+    Input, Output
 )
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
-)
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import (
-    PredictorInput,
-    PredictorOutput
-)
 from core.task_level_3.task import Task
 from implementation.tasks.text_processing.summarization.transformers.actions import (
     SummarizationPostprocess
@@ -30,7 +24,7 @@ class SummarizationOutput(Output):
     summary_text: str
 
 
-class ModelOutput(PredictorOutput):
+class ModelOutput(Output):
     output: Any
 
 
@@ -45,12 +39,9 @@ class SummarizationTask(
     def __init__(
         self,
         *,
-        predictor: Optional[Predictor[
-            PredictorInput, 
-            PredictorOutput
-        ]]=None,
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        predictor: Optional[Predictor[Input, Output]]=None,
+        preprocess: Optional[List[Action[Any, Any]]]=None,
+        postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[SummarizationTaskInput]=SummarizationTaskInput,
         output_class: Type[SummarizationOutput]=SummarizationOutput
     ) -> None:
@@ -70,7 +61,7 @@ class SummarizationTask(
         super().__init__(
             predictor=predictor,
             preprocess=preprocess or [],
-            postprocess=postprocess or [SummarizationPostprocess()], # type: ignore
+            postprocess=postprocess or [SummarizationPostprocess()],
             input_class=input_class, 
             output_class=output_class,
         )

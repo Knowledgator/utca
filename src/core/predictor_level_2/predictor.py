@@ -1,26 +1,10 @@
-from typing import Any, Dict
+from typing import Any
 from abc import abstractmethod
 
 from core.executable_level_1.executable import Executable
-from core.predictor_level_2.schema import (
-    PredictorInputType,
-    PredictorOutputType,
-)
+from core.executable_level_1.schema import InputType, OutputType
 
-class Predictor(
-    Executable[
-        PredictorInputType, 
-        PredictorOutputType
-    ]
-):
-
-    @abstractmethod
-    def invoke(
-        self, input_data: PredictorInputType
-    ) -> Dict[str, Any]:
-        ...
-    
-
+class Predictor(Executable[InputType, OutputType]):
     @property
     @abstractmethod
     def config(self) -> Any:

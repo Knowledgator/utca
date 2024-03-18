@@ -1,24 +1,22 @@
-from typing import Optional, List, Type
+from typing import Any, List, Optional, Type
 
+from core.executable_level_1.schema import (
+    Input, Output
+)
 from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
+    Action
 )
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
     InputWithThreshold, 
     NEROutput,
-    NERConfig 
 )
 from core.task_level_3.objects.objects import (
     Entity
 )
 from implementation.predictors.token_searcher.predictor import (
     TokenSearcherPredictor
-)
-from implementation.predictors.token_searcher.schema import (
-    TokenSearcherPredictorInput, 
-    TokenSearcherPredictorOutput
 )
 from implementation.tasks.text_processing.clean_text.token_searcher.actions import (
     TokenSeatcherTextCleanerPreprocessor,
@@ -37,26 +35,23 @@ class TokenSearcherTextCleanerOutput(NEROutput[Entity]):
 
 class TokenSearcherTextCleanerTask(
     NERTask[
-        TokenSearcherTextCleanerInput, 
+        TokenSearcherTextCleanerInput,
         TokenSearcherTextCleanerOutput
     ]
 ):
 
     def __init__(
         self,
-        cfg: Optional[NERConfig]=None, 
-        predictor: Optional[Predictor[
-            TokenSearcherPredictorInput, 
-            TokenSearcherPredictorOutput
-        ]]=None,
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        predictor: Optional[Predictor[Input, Output]]=None,
+        preprocess: Optional[List[Action[Any, Any]]]=None,
+        postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TokenSearcherTextCleanerInput]=TokenSearcherTextCleanerInput,
         output_class: Type[TokenSearcherTextCleanerOutput]=TokenSearcherTextCleanerOutput
     ) -> None:
-        self.cfg = cfg or NERConfig()
-        self.predictor = predictor or TokenSearcherPredictor()
-        self._preprocess = preprocess or [TokenSeatcherTextCleanerPreprocessor()],
-        self._postprocess = postprocess or [TokenSearcherTextCleanerPostprocessor()],
-        self.input_class = input_class
-        self.output_class = output_class
+        super().__init__(
+            predictor=predictor or TokenSearcherPredictor(),
+            preprocess=preprocess or [TokenSeatcherTextCleanerPreprocessor()],
+            postprocess=postprocess or [TokenSearcherTextCleanerPostprocessor()],
+            input_class=input_class,
+            output_class=output_class
+        )

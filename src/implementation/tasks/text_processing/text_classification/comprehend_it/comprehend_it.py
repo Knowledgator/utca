@@ -1,17 +1,10 @@
-from typing import List, Optional, Type
+from typing import Any, List, Optional, Type
 
 from core.executable_level_1.schema import (
-    InputType, 
-    OutputType,
+    Input, Output, InputType, OutputType,
 )
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
-)
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import (
-    PredictorInput,
-    PredictorOutput
-)
 from core.task_level_3.task import Task
 from implementation.predictors.comprehend_it.predictor import (
     ComprehendItPredictor, 
@@ -28,12 +21,9 @@ class ComprehendIt(
     def __init__(
         self,
         *,
-        predictor: Optional[Predictor[
-            PredictorInput, 
-            PredictorOutput
-        ]]=None,
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        predictor: Optional[Predictor[Input, Output]]=None,
+        preprocess: Optional[List[Action[Any, Any]]]=None,
+        postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[InputType]=ComprehendItPredictorInput,
         output_class: Type[OutputType]=ComprehendItPredictorOutput
     ) -> None:

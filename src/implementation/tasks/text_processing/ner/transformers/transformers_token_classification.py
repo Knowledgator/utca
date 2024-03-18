@@ -1,21 +1,14 @@
 from typing import Type, Optional, List, Any
 
-from core.executable_level_1.actions import (
-    Action, ActionInput, ActionOutput
+from core.executable_level_1.schema import (
+    Input, Output
 )
+from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.predictor_level_2.schema import (
-    PredictorInput, PredictorOutput
-)
-from core.predictor_level_2.schema import (
-    PredictorInput,
-    PredictorOutput
-)
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
     InputWithThreshold, 
     NEROutput,
-    NERConfig 
 )
 from core.task_level_3.objects.objects import (
     ClassifiedEntity
@@ -32,11 +25,11 @@ class TokenClassifierInput(InputWithThreshold):
     inputs: str
 
 
-class ModelInput(PredictorInput):
+class ModelInput(Input):
     inputs: str
 
 
-class ModelOutput(PredictorOutput):
+class ModelOutput(Output):
     output: Any
 
 
@@ -51,13 +44,9 @@ class TokenClassifierTask(
     def __init__(
         self,
         *,
-        cfg: Optional[NERConfig]=None, 
-        predictor: Optional[Predictor[
-            PredictorInput, 
-            PredictorOutput
-        ]]=None,
-        preprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
-        postprocess: Optional[List[Action[ActionInput, ActionOutput]]]=None,
+        predictor: Optional[Predictor[Input, Output]]=None,
+        preprocess: Optional[List[Action[Any, Any]]]=None,
+        postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TokenClassifierInput]=TokenClassifierInput,
         output_class: Type[NEROutput[ClassifiedEntity]]=NEROutput[ClassifiedEntity]
     ) -> None:
@@ -74,7 +63,7 @@ class TokenClassifierTask(
         super().__init__(
             predictor=predictor,
             preprocess=preprocess or [],
-            postprocess=postprocess or [TokenClassifierPostprocessor()], # type: ignore
+            postprocess=postprocess or [TokenClassifierPostprocessor()],
             input_class=input_class, 
             output_class=output_class,
         )
