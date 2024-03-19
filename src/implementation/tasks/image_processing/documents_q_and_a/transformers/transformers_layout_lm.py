@@ -25,7 +25,7 @@ class DocumentQandAInput(Input):
 
 
 class DocumentQandAOutput(Output):
-    answer: str
+    answer: Optional[str]
 
 
 class ModelOutput(Output):
