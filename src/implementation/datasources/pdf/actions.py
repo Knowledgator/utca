@@ -1,5 +1,4 @@
 from typing import Dict, Any, List, Iterator
-import io
 
 from PIL import Image
 from reportlab.pdfgen.canvas import Canvas # type: ignore
@@ -58,11 +57,18 @@ class PDFExtractImages(Action[Dict[int, Page], Dict[int, Any]]):
         page_height = page.height
 
         for image in page.images:
-            image_bbox = (image['x0'], page_height - image['y1'], image['x1'], page_height - image['y0'])
-            cropped_page = page.crop(image_bbox)
-            tmp = io.BytesIO()
-            cropped_page.to_image(resolution=resolution).save(tmp)
-            yield Image.open(tmp)
+            image_bbox = (
+                image['x0'], 
+                page_height - image['y1'], 
+                image['x1'], 
+                page_height - image['y0']
+            )
+            yield (
+                page
+                .crop(image_bbox)
+                .to_image(resolution=resolution)
+                .original
+            )
 
 
     def execute(self, input_data: Dict[int, Page]) -> Dict[int, Any]:
