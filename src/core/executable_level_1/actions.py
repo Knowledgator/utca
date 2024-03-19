@@ -3,7 +3,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import (
     Any, Dict, List, Callable, Optional, TypeVar, Generic, 
-    TYPE_CHECKING, cast
+    TYPE_CHECKING
 )
 import logging
 
@@ -108,8 +108,12 @@ class Flush(Action[Transformable, Transformable]):
     ) -> Transformable:
         if get_key or set_key:
             raise ValueError("Flush ignores get and set keys!")
-        return self.execute(register)
-
+        try:
+            return self.execute(register)
+        except Exception as e:
+            raise ValueError(
+                f"Action error: {self.__class__}: {e}"
+            )
 
 class Log(Action[ActionInput, ActionOutput]):
     def __init__(self, logger: logging.Logger, message: str="") -> None:
