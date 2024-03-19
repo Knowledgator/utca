@@ -14,6 +14,7 @@ class Statement(Enum):
     EXECUTE_STATEMENT = "execution_statement"
     GET_MEMORY_STATEMENT = "get_memory_statement"
     SET_MEMORY_STATEMENT = "set_memory_statement"
+    DELETE_MEMORY_STATEMENT = "delete_memory_statement"
     PIPELINE_STATEMENT = "pipeline_statement"
     CONDITION = "condition"
     IF_STATEMENT = "if_statement"

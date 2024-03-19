@@ -17,9 +17,10 @@ from core.executable_level_1.eval import (
 )
 from core.executable_level_1.memory import (
     GetMemory, 
+    SetMemory,
+    DeleteMemory,
     MemoryGetInstruction,  
     MemoryManager, 
-    SetMemory
 )
 from core.executable_level_1.statements_types import Statement
 from core.executable_level_1.executable import Executable
@@ -132,6 +133,11 @@ class Evaluator:
                 cast(GetMemory, st), 
                 input_data
             )
+        elif st.statement == Statement.DELETE_MEMORY_STATEMENT:
+            return self.eval_delete_memory(
+                cast(DeleteMemory, st), 
+                input_data
+            )
         elif st.statement == Statement.PIPELINE_STATEMENT:
             st = cast(ExecutionSchema, st)
             return self.eval_pipeline(
@@ -197,6 +203,17 @@ class Evaluator:
             input_data
         )
     
+
+    def eval_delete_memory(
+        self,
+        delete_memory_command: DeleteMemory,
+        input_data: Transformable
+    ) -> Transformable:
+        self.memory_manager.resolve_delete_memory(
+            delete_memory_command
+        )
+        return input_data
+    
     
     def eval_pipeline(
         self, 
@@ -215,7 +232,7 @@ class Evaluator:
             work_state = condition.get_state()
             if work_state != None:
                 get_command = GetMemory(
-                    work_state, MemoryGetInstruction.GET_AND_GO
+                    work_state, MemoryGetInstruction.GET
                 )
                 input_data = self.memory_manager.resolve_get_memory(
                     get_command, input_data
@@ -229,7 +246,7 @@ class Evaluator:
         elif callable(condition):
             return condition(copy.deepcopy(input_data))
         else:
-            raise Exception()
+            raise ValueError("Unsupported type of condition!")
     
 
     def eval_if_statement(

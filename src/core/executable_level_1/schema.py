@@ -21,9 +21,12 @@ class Transformable:
         return self.__dict__
     
 
-    def update(self, data: Dict[str, Any]):
+    def update(self, data: Dict[str, Any]) -> None:
         self.__dict__.update(data)
 
+    
+    def flush(self) -> None:
+        self.__dict__ = {}
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.__dict__})"

@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import (
-    Any, Dict, Callable, Optional, TypeVar, Generic, 
+    Any, Dict, List, Callable, Optional, TypeVar, Generic, 
     TYPE_CHECKING, cast
 )
 import logging
@@ -69,6 +69,46 @@ class Action(Generic[ActionInput, ActionOutput], Component):
         input_data: ActionInput
     ) -> ActionOutput:
         ...
+
+
+class Flush(Action[Transformable, Transformable]):
+    def __init__(
+        self, 
+        keys: Optional[List[str]]=None
+    ) -> None:
+        self.keys = keys
+
+
+    def execute(
+        self, input_data: Transformable
+    ) -> Transformable:
+        if self.keys is None:
+            input_data.flush()
+            return input_data
+        for k in self.keys:
+            delattr( # possibly dangerous?
+                input_data, k
+            )
+        return input_data
+    
+
+    def use(
+        self,
+        get_key: Optional[str]=None,
+        set_key: Optional[str]=None
+    ) -> Executor[Action[Any, Any]]:
+        raise AttributeError("Flush action doesn't support use!")
+
+
+    def __call__(
+        self, 
+        register: Transformable,
+        get_key: Optional[str]=None,
+        set_key: Optional[str]=None
+    ) -> Transformable:
+        if get_key or set_key:
+            raise ValueError("Flush ignores get and set keys!")
+        return self.execute(register)
 
 
 class Log(Action[ActionInput, ActionOutput]):

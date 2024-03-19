@@ -1,7 +1,9 @@
 import os
 import json
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import (
+    Any, Dict, List, Optional, Tuple, Union
+)
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.schema import Transformable
@@ -11,19 +13,24 @@ INPUT: str = 'input'
 
 class Memory:
     memory: Dict[str, Any]
-    def __init__(self, directory: Optional[str] = None) -> None:
+
+    def __init__(self, directory: Optional[str]=None) -> None:
         self.memory = {}
         self.directory = directory
         if directory:
             os.makedirs(directory, exist_ok=True)
 
+
     # def add_input(self, input_state: Dict[str, Any]):
     #     self.add_store(INPUT, input_state)
+            
+
     def _get_file_path(self, identifier: str) -> str:
         """Constructs a file path for a given identifier."""
         if not self.directory:
             raise ValueError("No directory set for file-based storage.")
         return os.path.join(self.directory, f"{identifier}.json")
+
 
     def add_store(self, identifier: str, state: Any) -> None:
         """Saves a state with the given identifier."""
@@ -32,6 +39,7 @@ class Memory:
             file_path = self._get_file_path(identifier)
             with open(file_path, 'w') as f:
                 json.dump(state, f)
+
 
     def retrieve_store(self, identifier: str) -> Any:
         """Retrieves a state by its identifier, either from memory or disk."""
@@ -56,34 +64,33 @@ class Memory:
             file_path = self._get_file_path(identifier)
             if os.path.exists(file_path):
                 os.remove(file_path)
+    
+
+    def flush(self) -> None:
+        self.memory = {}
 
 
 class MemorySetInstruction(Enum):
-    SET_AND_GO = "setandgo" # set and continue
-    SET_AND_FLUSH = "setandflush" # clean all objects
-    FLUSH = "flush"
-
+    SET = "setandgo" # set and continue
+    MOVE = "move" # clean all objects
     # FLUSH_AND_RESTORE_INPUT = "restoreinput" # clean all objects + set initial input state
 
 
-
-
 class SetMemory(Component):
-    identifier: str
+    get_key: str
+    set_key: str
     memory_instruction: MemorySetInstruction
 
     def __init__(
         self, 
-        identifier: str,
-        memory_instruction: MemorySetInstruction=MemorySetInstruction.SET_AND_GO,
+        set_key: str,
+        get_key: Optional[str]=None,
+        memory_instruction: MemorySetInstruction=MemorySetInstruction.SET,
     ) -> None:
         super().__init__()
-        self.identifier = identifier
+        self.set_key = set_key
+        self.get_key = get_key or "__dict__"
         self.memory_instruction = memory_instruction
-
-
-    def get_identifier(self):
-        return self.identifier
     
     
     def get_memory_instruction(self):
@@ -96,25 +103,26 @@ class SetMemory(Component):
 
 
 class MemoryGetInstruction(Enum):
-    GET_AND_GO = "getandgo" # get and merge
-    FLUSH_AND_GET = "flushandget" # clean all objects and get
+    GET = "get" # get and merge
+    REPLACE = "replace" # clean all objects and get
+    POP = "pop"
 
 
 class GetMemory(Component):
-    identifiers: List[str]
+    identifiers: List[Union[str, Tuple[str, str]]]
     memory_instruction: MemoryGetInstruction
 
     def __init__(
         self, 
-        identifiers: List[str],
-        memory_instruction: MemoryGetInstruction=MemoryGetInstruction.GET_AND_GO,
+        identifiers: List[Union[str, Tuple[str, str]]],
+        memory_instruction: MemoryGetInstruction=MemoryGetInstruction.GET,
     ):
         super().__init__()
         self.identifiers = identifiers
         self.memory_instruction = memory_instruction
 
     
-    def get_identifiers(self) -> List[str]:
+    def get_identifiers(self) -> List[Union[str, Tuple[str, str]]]:
         return self.identifiers
     
     
@@ -125,78 +133,107 @@ class GetMemory(Component):
     @property
     def statement(self) -> Statement:
         return Statement.GET_MEMORY_STATEMENT
-    
 
-class MemoryManager():
+
+class DeleteMemory(Component):
+    def __init__(
+        self, identifiers: Optional[List[str]]=None,
+    ):
+        self.identifiers = identifiers
+
+
+    @property
+    def statement(self) -> Statement:
+        return Statement.DELETE_MEMORY_STATEMENT
+
+
+    def get_identifiers(self) -> Optional[List[str]]:
+        return self.identifiers
+
+
+class MemoryManager:
     memory: Memory
-    def __init__(self, path: Optional[str]) -> None:
+
+    def __init__(self, path: Optional[str]=None) -> None:
         if path:
             self.memory = Memory(path)
         else:
             self.memory = Memory()
 
 
-    def resolve_get_memory(self, command: GetMemory, register: Transformable):
+    def resolve_get_memory(
+        self, 
+        command: GetMemory, 
+        register: Transformable
+    ) -> Transformable:
         instr = command.get_memory_instruction()
         identifiers = command.get_identifiers()
-        if instr == MemoryGetInstruction.GET_AND_GO:
-            register = self.get_and_go(register, identifiers)
-        elif  instr == MemoryGetInstruction.FLUSH_AND_GET: 
-            register = self.flush_and_get(identifiers)
+        if instr == MemoryGetInstruction.GET:
+            register = self.get(register, identifiers)
+        elif instr == MemoryGetInstruction.REPLACE: 
+            register = self.get(Transformable({}), identifiers)
+        elif instr == MemoryGetInstruction.POP:
+            register = self.get(register, identifiers, delete=True)
         return register
 
         
-    def get_and_go(
+    def get(
         self, 
         register: Transformable, 
-        identifiers: List[str],
+        identifiers: List[Union[str, Tuple[str, str]]],
+        delete: bool=False
     ) -> Transformable:
         for identifier in identifiers:
+            if isinstance(identifier, tuple):
+                get_key = identifier[0]
+                set_key = identifier[1]
+            else:
+                get_key = identifier
+                set_key = identifier
             setattr(
                 register,
-                identifier,
-                self.memory.retrieve_store(identifier)
+                set_key,
+                self.memory.retrieve_store(get_key)
             )
+            if delete: # need refactor!
+                self.memory.delete_store(get_key)
         return register
-    
-
-    def flush_and_get(self, identifiers: List[str]) -> Transformable:
-        return self.get_and_go(Transformable({}), identifiers)
 
 
-     # set memory commands
-
-    def resolve_set_memory(self, command: SetMemory, register: Transformable):
-        ## TODO: refactor redundant transformable and dict transversion
-        registerDict = register.extract()
+    def resolve_set_memory(
+        self, command: SetMemory, register: Transformable
+    ) -> Transformable:
         instr = command.get_memory_instruction()
-        identifiers = command.get_identifier()
 
-        if instr == MemorySetInstruction.SET_AND_GO:
-            self.set_and_go(registerDict, identifiers)
-        elif  instr == MemorySetInstruction.SET_AND_FLUSH: 
-            registerDict = self.set_and_flush(registerDict, identifiers)
-        elif instr == MemorySetInstruction.FLUSH:
-            registerDict = self.flush()
-        return Transformable(registerDict)
+        if instr == MemorySetInstruction.SET:
+            self.set(
+                register, command.get_key, command.set_key
+            )
+        elif  instr == MemorySetInstruction.MOVE: 
+            self.set(
+                register, command.get_key, command.set_key
+            )
+            register.flush()
+        return register
 
     
-    def set_and_go(
+    def set(
         self, 
-        register: Union[Dict[str, Any], List[Dict[str, Any]]], 
-        identifier: str
+        register: Transformable, 
+        get_key: str,
+        set_key: str,
     ):
-        self.memory.add_store(identifier, register)
+        self.memory.add_store(
+            set_key, getattr(register, get_key)
+        )
+
     
-    
-    def set_and_flush(
+    def resolve_delete_memory(
         self, 
-        register: Union[Dict[str, Any], List[Dict[str, Any]]], 
-        identifier: str
-    ) -> Dict[str, Any]:
-        self.set_and_go(register, identifier)
-        return {}
-    
-    
-    def flush(self) -> Dict[str, Any]:
-        return {}
+        command: DeleteMemory, 
+    ) -> None:
+        identifiers = command.get_identifiers()
+        if not identifiers:
+            return self.memory.flush()
+        for i in identifiers:
+            self.memory.delete_store(i)

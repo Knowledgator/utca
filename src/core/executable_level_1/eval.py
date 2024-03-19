@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 from typing import (
-    Callable, List, Optional, Type,  TypeVar, Union
+    List, Callable, Optional, Tuple, Type,  TypeVar, Union
 )
 
 from core.executable_level_1.component import Component
@@ -60,12 +60,12 @@ class ExecutionSchema(Component):
 class Condition():
     validator: Callable[[Transformable], bool]
     schema: ExecutionSchema
-    state: List[str] | None
+    state: Optional[List[Union[str, Tuple[str, str]]]]
     def __init__(
         self, 
         validator: Callable[[Transformable], bool],
         statement: ExecutionSchema,
-        state: Optional[List[str]]
+        state: Optional[List[Union[str, Tuple[str, str]]]]=None
     ) -> None:
         self.validator = validator
         self.schema = statement
@@ -158,11 +158,11 @@ class ForEach(Component):
 class Filter(Component):
     get_key: str
     set_key: str
-    condition: Union[Callable[..., bool], Condition]
+    condition: Union[Callable[[Transformable], bool], Condition]
 
     def __init__(
         self,
-        condition: Union[Callable[..., bool], Condition],
+        condition: Union[Callable[[Transformable], bool], Condition],
         get_key: str,
         set_key: Optional[str]=None,
     ) -> None:
@@ -171,7 +171,7 @@ class Filter(Component):
         self.condition = condition
 
 
-    def get_condition(self) -> Union[Callable[..., bool], Condition]:
+    def get_condition(self) -> Union[Callable[[Transformable], bool], Condition]:
         return self.condition
     
     
