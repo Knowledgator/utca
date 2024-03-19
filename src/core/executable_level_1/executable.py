@@ -107,7 +107,10 @@ class Executable(
                     f"Error durring execution: {self.__class__}: {e}"
                 )
             self.validate(tmp, self.output_class)
-            result.append(tmp)
+            result.append({
+                **i,
+                **tmp,
+            })
         return result
     
 
