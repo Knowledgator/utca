@@ -1,3 +1,6 @@
+import pathlib
+PATH = pathlib.Path(__file__).parent.resolve()
+
 from implementation.tasks.image_processing.image_classification.transformers.transformers_image_classification import (
     TransformersImageClassification
 )
@@ -12,6 +15,6 @@ if __name__ == "__main__":
     )
 
     result = Evaluator(pipeline).run_program({
-        "path_to_file": "programs/image_processing/basic_image_classification/test.jpg" # Image of German Shepherd Dog
+        "path_to_file": f"{PATH}/test.jpg" # Image of German Shepherd Dog
     })
     print(result)

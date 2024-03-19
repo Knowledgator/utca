@@ -1,5 +1,5 @@
 import pathlib
-path = pathlib.Path(__file__).parent.resolve()
+PATH = pathlib.Path(__file__).parent.resolve()
 
 from implementation.tasks.audio_processing.text_to_speech.transformers.transformers_text_to_speech import (
     TransformersTextToSpeech
@@ -17,5 +17,5 @@ if __name__ == "__main__":
 
     Evaluator(pipeline).run_program({
         "text_inputs": "Hello world!",
-        "path_to_file": f"{path}/test.wav"
+        "path_to_file": f"{PATH}/test.wav"
     })

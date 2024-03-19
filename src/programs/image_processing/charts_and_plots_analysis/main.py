@@ -1,3 +1,6 @@
+import pathlib
+PATH = pathlib.Path(__file__).parent.resolve()
+
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.actions import (
     AddData
@@ -17,5 +20,5 @@ if __name__ == "__main__":
     )
 
     print(Evaluator(pipeline).run_program({
-        "path_to_file": "programs/image_processing/charts_and_plots_analysis/test.png"
+        "path_to_file": f"{PATH}/test.png"
     }))

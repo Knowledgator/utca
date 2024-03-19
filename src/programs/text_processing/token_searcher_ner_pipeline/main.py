@@ -1,4 +1,6 @@
 from typing import Dict, Any
+import pathlib
+PATH = pathlib.Path(__file__).parent.resolve()
 
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.eval import ExecutionSchema
@@ -37,7 +39,7 @@ if __name__ == "__main__":
     # model that will be used for clean text and NER tasks
     model = TokenSearcherPredictor(
         TokenSearcherPredictorConfig(
-            device='cpu'
+            device="cpu"
         )
     )
 
@@ -79,7 +81,7 @@ if __name__ == "__main__":
 
     # call pipeline
     res = Evaluator(pipeline).run_program({
-        "path_to_file": "programs/text_processing/token_searcher_ner_pipeline/test.pdf"
+        "path_to_file": f"{PATH}/test.pdf"
     })
 
     print(res)

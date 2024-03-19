@@ -1,4 +1,6 @@
 from typing import Dict, Any
+import pathlib
+PATH = pathlib.Path(__file__).parent.resolve()
 
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.actions import (
@@ -29,25 +31,25 @@ from implementation.tasks.text_processing.textual_q_and_a.token_searcher.actions
 
 def get_input_for_q_and_a(input: Dict[str, Any]) -> Dict[str, Any]:
     return {
-        'text': input['table'][0][0],
-        'question': input['table'][0][1]
+        "text": input["table"][0][0],
+        "question": input["table"][0][1]
     }
 
 
 def create_table(input: Dict[str, Any]) -> Dict[str, Any]:
     return {
-        'table': [
-            [f'Answer {i+1}', input['output'][i]['span']]
-            for i in range(len(input['output']))
+        "table": [
+            [f"Answer {i+1}", input["output"][i]["span"]]
+            for i in range(len(input["output"]))
         ],
-        'dimension': Dimension.COLUMNS
+        "dimension": Dimension.COLUMNS
     }
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Google Spreadsheet client
     client = GoogleCloudClient(GoogleSpreadsheetClientConfig(
-        credentials='credentials.json',
+        credentials=f"{PATH}/credentials.json",
         # path to your credentials. 
         # Can be not provided if you are using 
         # environment credentials for Google cloud.
@@ -60,7 +62,7 @@ if __name__ == '__main__':
     # model that will be used for Q&A task
     model = TokenSearcherPredictor(
         TokenSearcherPredictorConfig(
-            device='cpu'
+            device="cpu"
         )
     )
 
@@ -75,7 +77,7 @@ if __name__ == '__main__':
     )
 
 
-    spreadsheet_id = '1k4pSzvMClric29a_2w-pKjJJQvU2Dq59SrZIy6XUVU4'#'your_spread_sheet_id'
+    spreadsheet_id = "1k4pSzvMClric29a_2w-pKjJJQvU2Dq59SrZIy6XUVU4"#"your_spread_sheet_id"
     # can be found in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0
 
     # create pipeline with described stages
@@ -85,8 +87,8 @@ if __name__ == '__main__':
         | q_and_a
         | ExecuteFunction(create_table)
         | AddData({
-            'spreadsheet_id': spreadsheet_id,
-            'cells_range': 'C1'
+            "spreadsheet_id": spreadsheet_id,
+            "cells_range": "C1"
         }) 
         | GoogleSpreadsheetWrite(client)
     )

@@ -1,5 +1,7 @@
-from core.executable_level_1.schema import Transformable
+import pathlib
+PATH = pathlib.Path(__file__).parent.resolve()
 
+from core.executable_level_1.schema import Transformable
 from implementation.tasks.text_processing.summarization.transformers.transformers_summarization import (
     SummarizationTask
 )
@@ -7,7 +9,7 @@ from implementation.tasks.text_processing.summarization.transformers.transformer
 task = SummarizationTask()
 
 if __name__ == "__main__":
-    with open("programs/text_processing/text_summarization/text.txt", "r") as f:
+    with open(f"{PATH}/text.txt", "r") as f:
         text = f.read()
     print(task(Transformable({
         "inputs": text,
