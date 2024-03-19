@@ -115,16 +115,29 @@ class Flush(Action[Transformable, Transformable]):
                 f"Action error: {self.__class__}: {e}"
             )
 
-class Log(Action[ActionInput, ActionOutput]):
-    def __init__(self, logger: logging.Logger, message: str="") -> None:
+class Log(Action[ActionInput, None]):
+    def __init__(
+        self, 
+        logger: logging.Logger, 
+        message: str="",
+        open: str="-"*40,
+        close: str="-"*40,
+    ) -> None:
         self.logger = logger
         self.message = message
+        self.open = open
+        self.close = close
 
 
-    def execute(self, input_data: ActionInput) -> ActionOutput:
-        self.logger.error(self.message)
-        self.logger.error(input_data)
-        return cast(ActionOutput, input_data)
+    def execute(self, input_data: ActionInput) -> None:
+        self.logger.debug(
+            "\n".join((
+                self.open, 
+                self.message, 
+                input_data.__repr__(), 
+                self.close
+            ))
+        )
 
 
 @dataclass(slots=True)
