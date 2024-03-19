@@ -213,7 +213,10 @@ class MemoryManager:
             self.set(
                 register, command.get_key, command.set_key
             )
-            register.flush()
+            if command.get_key == "__dict__":
+                register.flush()
+            else:
+                delattr(register, command.get_key) 
         return register
 
     
