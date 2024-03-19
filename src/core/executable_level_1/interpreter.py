@@ -88,22 +88,24 @@ class Evaluator:
     ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:    
         return self.eval_program(
             self.program,
-            self.prepare_input(program_input)
+            self.prepare_input(program_input),
+            self.cfg.logger.name
         ).extract()
     
     
     def eval_program(
         self, 
         program: List[Component], 
-        program_input: Transformable
+        program_input: Transformable,
+        evaluator_name: str
     ) -> Transformable:
         """Evaluates the program based on the input provided."""
         for i, st in enumerate(program):
             try:
-                program_input = self.eval(st, program_input)
-                self.cfg.logger.info(f"Step {i} executed successfully.")
+                program_input = self.eval(st, program_input, evaluator_name)
+                self.cfg.logger.info(f"{evaluator_name}: Step {i} executed successfully.")
             except Exception as e:
-                self.cfg.logger.error(f"Error at step {i}")
+                self.cfg.logger.error(f"{evaluator_name}: Error at step {i}")
                 self.cfg.logger.exception(e)
                 if self.cfg.fast_exit:
                     raise EvaluatorExecutionFailed(e)
@@ -111,7 +113,10 @@ class Evaluator:
 
 
     def eval(
-        self, st: Component, input_data: Transformable
+        self, 
+        st: Component, 
+        input_data: Transformable,
+        evaluator_name: str
     ) -> Transformable:
         """Evaluates a single statement."""
         if st.statement == Statement.EXECUTE_STATEMENT:
@@ -140,15 +145,16 @@ class Evaluator:
                 input_data
             )
         elif st.statement == Statement.PIPELINE_STATEMENT:
-            st = cast(ExecutionSchema, st)
             return self.eval_pipeline(
-                st.retrieve_program(), 
-                input_data
+                cast(ExecutionSchema, st), 
+                input_data, 
+                evaluator_name
             )
         elif st.statement == Statement.IF_STATEMENT:
             return self.eval_if_statement(
                 cast(IfStatement, st), 
-                input_data
+                input_data,
+                evaluator_name
             )
         elif st.statement == Statement.FILTER_STATEMENT:
             return self.eval_filter_statement(
@@ -159,6 +165,12 @@ class Evaluator:
             return self.eval_for_each(
                 cast(ForEach, st), 
                 input_data
+            )
+        elif st.statement == Statement.WHILE_STATEMEMT:
+            return self.eval_while_statement(
+                cast(While, st),
+                input_data,
+                evaluator_name
             )
         raise ValueError(f"Unexpected statement type!: {st.statement}")
 
@@ -218,10 +230,15 @@ class Evaluator:
     
     def eval_pipeline(
         self, 
-        pipeline: List[Component],
-        input_data: Transformable
+        pipeline: ExecutionSchema,
+        input_data: Transformable,
+        evaluator_name: str
     ) -> Transformable:
-        return self.eval_program(pipeline, input_data)
+        return self.eval_program(
+            pipeline.retrieve_program(), 
+            input_data,
+            f"{evaluator_name}.{pipeline.__class__.__name__}"
+        )
 
         
     def eval_condition(
@@ -238,10 +255,19 @@ class Evaluator:
                 input_data = self.memory_manager.resolve_get_memory(
                     get_command, input_data
                 )
-            ev = Evaluator(condition.get_statement())
+            ev = Evaluator(
+                condition.get_statement(),
+                cfg=EvaluatorConfigs(
+                    name=f"{self.cfg.name}.{condition.__class__.__name__}",
+                    logging_level=self.cfg.logging_level,
+                    logging_handler=self.cfg.logging_handler,
+                    fast_exit=self.cfg.fast_exit
+                )
+            )
             input_data = ev.eval_program(
                 ev.program,
-                copy.deepcopy(input_data)
+                copy.deepcopy(input_data),
+                ev.cfg.name,
             )
             return condition.validator(input_data)
         elif callable(condition):
@@ -253,7 +279,8 @@ class Evaluator:
     def eval_if_statement(
         self, 
         if_statement: IfStatement,
-        input_data: Transformable
+        input_data: Transformable,
+        evaluator_name: str
     ) -> Transformable:
         bool_flag = self.eval_condition(
             condition=if_statement.get_condition(),
@@ -263,19 +290,26 @@ class Evaluator:
         if bool_flag == True:
             right_stetement = if_statement.get_right_statement()
             return self.eval(
-                right_stetement, input_data
+                right_stetement, 
+                input_data, 
+                f"{evaluator_name}.{right_stetement.__class__.__name__}"
             )
         else:
             left_stetement = if_statement.get_left_statement()
             if left_stetement == None:
                 return input_data
             return self.eval(
-                left_stetement, input_data
+                left_stetement, 
+                input_data,
+                f"{evaluator_name}.{left_stetement.__class__.__name__}"
             )
 
 
     def eval_while_statement(
-        self, while_statement: While, input_data: Transformable
+        self, 
+        while_statement: While, 
+        input_data: Transformable,
+        evaluator_name: str
     ) -> Transformable:
         retries = while_statement.get_retries()
         if retries == None:
@@ -285,7 +319,8 @@ class Evaluator:
             ):
                 input_data = self.eval(
                     while_statement.get_statement(),
-                    input_data
+                    input_data,
+                    f"{evaluator_name}.{while_statement.__class__.__name__}"
                 )
         else:
             while (
@@ -296,7 +331,8 @@ class Evaluator:
             ):
                 input_data = self.eval(
                     while_statement.get_statement(),
-                    input_data
+                    input_data,
+                    f"{evaluator_name}.{while_statement.__class__.__name__}"
                 )
                 retries -= 1
         return input_data
@@ -332,7 +368,15 @@ class Evaluator:
             input_data,
             for_each_statement.set_key,
             [
-                Evaluator(for_each_statement.get_statement()).run_program(t)
+                Evaluator(
+                    for_each_statement.get_statement(),
+                    cfg=EvaluatorConfigs(
+                        name=f"{self.cfg.name}.{for_each_statement.__class__.__name__}",
+                        logging_level=self.cfg.logging_level,
+                        logging_handler=self.cfg.logging_handler,
+                        fast_exit=self.cfg.fast_exit
+                    )
+                ).run_program(t)
                 for t in data
             ]
         )
