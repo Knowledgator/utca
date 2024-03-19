@@ -38,12 +38,14 @@ class EvaluatorConfigs:
     logging_level: int
     logging_handler: logging.Handler
     logger: logging.Logger
+    fast_exit: bool
 
     def __init__(
         self,
         name: str="Evaluator", 
         logging_level: int=logging.INFO,
-        logging_handler: Optional[logging.Handler]=None
+        logging_handler: Optional[logging.Handler]=None,
+        fast_exit: bool=True
     ):
         self.name = name
         self.logging_level = logging_level
@@ -53,6 +55,7 @@ class EvaluatorConfigs:
             self.logging_level
         )
         self.logger.addHandler(self.logging_handler)
+        self.fast_exit = fast_exit
 
 
 class Evaluator:
@@ -63,12 +66,10 @@ class Evaluator:
         self, 
         schema: ExecutionSchema, 
         cfg: Optional[EvaluatorConfigs]=None,
-        fast_exit: bool=True
     ) -> None:
         self.cfg = cfg or EvaluatorConfigs()
         self.program = schema.retrieve_program()  # Corrected typo in 'retrieve'
         self.memory_manager = MemoryManager(None)
-        self.fast_exit = fast_exit
 
 
     def prepare_input(
@@ -104,7 +105,7 @@ class Evaluator:
             except Exception as e:
                 self.cfg.logger.error(f"Error at step {i}")
                 self.cfg.logger.exception(e)
-                if self.fast_exit:
+                if self.cfg.fast_exit:
                     raise EvaluatorExecutionFailed(e)
         return program_input
 
