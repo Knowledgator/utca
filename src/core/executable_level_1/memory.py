@@ -50,8 +50,7 @@ class Memory:
             if os.path.exists(file_path):
                 with open(file_path, 'r') as f:
                     return json.load(f)
-        return None  # Return None if the state is not found
-
+        raise KeyError(f"No specified identifier found: {identifier}")
 
     def delete_store(self, identifier: str) -> None:
         """Deletes a state by its identifier from both memory and disk."""
