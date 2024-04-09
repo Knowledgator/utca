@@ -7,7 +7,7 @@ from pdfminer.pdfpage import PDFPage
 from pdfplumber.page import Page
 from pdfplumber.pdf import PDF
 from pdfplumber._typing import T_num,  T_bbox, T_obj, T_obj_list
-from pdfplumber.table import Table, TableSettings
+from pdfplumber.table import Table
 from pdfplumber.utils.text import TextMap, extract_text, chars_to_textmap
 
 
@@ -112,8 +112,7 @@ class CustomPage(Page):
 
 
     def extract_text(self, **kwargs: Any) -> str:
-        tset = TableSettings.resolve(kwargs.get("table_settings", {}))
-        tables = self.find_tables(tset)
+        tables = self.find_tables(kwargs.get("table_settings", {}))
 
         if tables:
             processed_tables, unprocessed_chars = process_tables_chars(
