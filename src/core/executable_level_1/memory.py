@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import json
 from enum import Enum
@@ -6,8 +7,9 @@ from typing import (
 )
 
 from core.executable_level_1.component import Component
+from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import Transformable
-from core.executable_level_1.statements_types import Statement
+from exceptions import InavalidMemoryInstruction
 
 INPUT: str = 'input'
 
@@ -52,6 +54,7 @@ class Memory:
                     return json.load(f)
         raise KeyError(f"No specified identifier found: {identifier}")
 
+
     def delete_store(self, identifier: str) -> None:
         """Deletes a state by its identifier from both memory and disk."""
         # Remove from memory
@@ -90,15 +93,24 @@ class SetMemory(Component):
         self.set_key = set_key
         self.get_key = get_key or "__dict__"
         self.memory_instruction = memory_instruction
-    
-    
-    def get_memory_instruction(self):
-        return self.memory_instruction
-    
 
-    @property
-    def statement(self) -> Statement:
-        return Statement.SET_MEMORY_STATEMENT
+
+    def __call__(
+        self, input_data: Transformable, evaluator: Evaluator
+    ) -> Transformable:
+        evaluator.set_memory(
+            input_data, self.get_key, self.set_key
+        )
+        if self.memory_instruction == MemorySetInstruction.SET:
+            return input_data
+        elif self.memory_instruction == MemorySetInstruction.MOVE: 
+            if self.get_key == "__dict__":
+                input_data.flush()
+            else:
+                delattr(input_data, self.get_key)
+        else:
+            raise InavalidMemoryInstruction() 
+        return input_data
 
 
 class MemoryGetInstruction(Enum):
@@ -121,17 +133,18 @@ class GetMemory(Component):
         self.memory_instruction = memory_instruction
 
     
-    def get_identifiers(self) -> List[Union[str, Tuple[str, str]]]:
-        return self.identifiers
-    
-    
-    def get_memory_instruction(self) -> MemoryGetInstruction:
-        return self.memory_instruction
-    
-
-    @property
-    def statement(self) -> Statement:
-        return Statement.GET_MEMORY_STATEMENT
+    def __call__(
+        self, input_data: Transformable, evaluator: Evaluator
+    ) -> Transformable:
+        if self.memory_instruction == MemoryGetInstruction.GET:
+            register = evaluator.get_memory(input_data, self.identifiers)
+        elif self.memory_instruction == MemoryGetInstruction.REPLACE: 
+            register = evaluator.get_memory(Transformable(), self.identifiers)
+        elif self.memory_instruction == MemoryGetInstruction.POP:
+            register = evaluator.get_memory(input_data, self.identifiers, delete=True)
+        else:
+            raise InavalidMemoryInstruction()
+        return register
 
 
 class DeleteMemory(Component):
@@ -141,13 +154,15 @@ class DeleteMemory(Component):
         self.identifiers = identifiers
 
 
-    @property
-    def statement(self) -> Statement:
-        return Statement.DELETE_MEMORY_STATEMENT
-
-
-    def get_identifiers(self) -> Optional[List[str]]:
-        return self.identifiers
+    def execute(
+        self, register: Transformable, memory_manager: MemoryManager
+    ) -> Transformable:
+        if not self.identifiers:
+            memory_manager.flush()
+        else:
+            for i in self.identifiers:
+                memory_manager.delete(i)
+        return register
 
 
 class MemoryManager:
@@ -158,22 +173,6 @@ class MemoryManager:
             self.memory = Memory(path)
         else:
             self.memory = Memory()
-
-
-    def resolve_get_memory(
-        self, 
-        command: GetMemory, 
-        register: Transformable
-    ) -> Transformable:
-        instr = command.get_memory_instruction()
-        identifiers = command.get_identifiers()
-        if instr == MemoryGetInstruction.GET:
-            register = self.get(register, identifiers)
-        elif instr == MemoryGetInstruction.REPLACE: 
-            register = self.get(Transformable({}), identifiers)
-        elif instr == MemoryGetInstruction.POP:
-            register = self.get(register, identifiers, delete=True)
-        return register
 
         
     def get(
@@ -198,27 +197,7 @@ class MemoryManager:
                 self.memory.delete_store(get_key)
         return register
 
-
-    def resolve_set_memory(
-        self, command: SetMemory, register: Transformable
-    ) -> Transformable:
-        instr = command.get_memory_instruction()
-
-        if instr == MemorySetInstruction.SET:
-            self.set(
-                register, command.get_key, command.set_key
-            )
-        elif  instr == MemorySetInstruction.MOVE: 
-            self.set(
-                register, command.get_key, command.set_key
-            )
-            if command.get_key == "__dict__":
-                register.flush()
-            else:
-                delattr(register, command.get_key) 
-        return register
-
-    
+        
     def set(
         self, 
         register: Transformable, 
@@ -229,13 +208,12 @@ class MemoryManager:
             set_key, getattr(register, get_key)
         )
 
-    
-    def resolve_delete_memory(
-        self, 
-        command: DeleteMemory, 
+
+    def delete(
+        self, identifier: str
     ) -> None:
-        identifiers = command.get_identifiers()
-        if not identifiers:
-            return self.memory.flush()
-        for i in identifiers:
-            self.memory.delete_store(i)
+        self.memory.delete_store(identifier)
+        
+
+    def flush(self) -> None:
+        self.memory.flush()

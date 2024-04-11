@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC
 from typing import (
-    TypeVar, Any, Dict
+    Optional, TypeVar, Any, Dict
 )
 
 from pydantic import BaseModel
@@ -13,8 +13,8 @@ class Input(BaseModel, ABC):
 
 # Task №1 - can validate is it right based on input and output class !!!
 class Transformable:
-    def __init__(self, state: Dict[str, Any]) -> None:
-        self.__dict__ = state
+    def __init__(self, state: Optional[Dict[str, Any]]=None) -> None:
+        self.__dict__ = state or {}
     
 
     def extract(self) -> Dict[str, Any]:
@@ -27,6 +27,7 @@ class Transformable:
     
     def flush(self) -> None:
         self.__dict__ = {}
+
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.__dict__})"

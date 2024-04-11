@@ -9,6 +9,7 @@ class OutputSchemaNotFound(Exception):
         self.message = message
         super().__init__(self.message)
 
+
 class ExecutionSchemaInvalidFirstComponent(Exception):
     def __init__(self, message: str="First component should be executable or input"):
         self.message = message
@@ -24,3 +25,11 @@ class ExecutionSchemaInvalidFlow(Exception):
 class EvaluatorExecutionFailed(Exception):
     def __init__(self, e: Exception):
         super().__init__(f"Program failed! {e}")
+
+
+class InavalidMemoryInstruction(ValueError):
+    ...
+
+
+class IvalidInputDataValue(ValueError):
+    ...

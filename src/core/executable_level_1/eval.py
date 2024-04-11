@@ -1,12 +1,15 @@
 from __future__ import annotations
 import json
 from typing import (
-    List, Callable, Optional, Tuple, Type,  TypeVar, Union
+    List, Callable, Optional, Tuple, Type,  TypeVar, Union, Protocol
 )
+import copy
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.schema import Transformable
-from core.executable_level_1.statements_types import Statement
+from core.executable_level_1.interpreter import Evaluator, EvaluatorConfigs
+from core.executable_level_1.memory import GetMemory, MemoryGetInstruction
+from exceptions import EvaluatorExecutionFailed
 
 T = TypeVar('T', bound='Serializable')
 
@@ -42,25 +45,41 @@ class ExecutionSchema(Component):
     def add(self, comp: Component) -> ExecutionSchema:
         self.program.append(comp)
         return self
-
-    
-    def retrieve_program(self) -> List[Component]:
-        return self.program
     
 
     def __or__(self, comp: Component) -> ExecutionSchema:
         return self.add(comp)
+    
+
+    def __call__(
+        self, input_data: Transformable, evaluator: Evaluator
+    ) -> Transformable:
+        for i, component in enumerate(self.program):
+            try:
+                input_data = component(input_data, evaluator)
+                evaluator.cfg.logger.info(
+                    f"{self.__class__.__name__}: Step {i} executed successfully."
+                )
+            except Exception as e:
+                evaluator.cfg.logger.error(f"{self.__class__.__name__}: Error at step {i}")
+                evaluator.cfg.logger.exception(e)
+                if evaluator.cfg.fast_exit:
+                    raise EvaluatorExecutionFailed(e)
+        return input_data
 
 
-    @property
-    def statement(self) -> Statement:
-        return Statement.PIPELINE_STATEMENT
+class ConditionType(Protocol):
+    def __call__(
+        self, input_data: Transformable, evaluator: Evaluator
+    ) -> bool:
+        ...
 
 
-class Condition():
+class Condition:
     validator: Callable[[Transformable], bool]
     schema: ExecutionSchema
     state: Optional[List[Union[str, Tuple[str, str]]]]
+
     def __init__(
         self, 
         validator: Callable[[Transformable], bool],
@@ -70,66 +89,68 @@ class Condition():
         self.validator = validator
         self.schema = statement
         self.state = state
-
-    
-    def get_state(self):
-        return self.state
     
 
-    def get_validator(self):
-        return self.validator
-    
+    def __call__(
+        self, input_data: Transformable, evaluator: Evaluator
+    ) -> bool:
+        if self.state != None:
+            input_data = GetMemory(
+                self.state, MemoryGetInstruction.GET
+            )(
+                input_data, evaluator
+            )
+            
+        tmp = (
+            evaluator
+            .create_child(self.schema, self.__class__.__name__)
+            .eval(copy.deepcopy(input_data))
+        )
+        return self.validator(tmp)
 
-    def get_statement(self):
-        return self.schema
-    
 
-    @property
-    def statement(self) ->  Statement:
-        return Statement.CONDITION
-
-
-class IfStatement(Component):
-    condition: Union[Callable[[Transformable], bool], Condition]
-    # executed if true 
-    right_statement: ExecutionSchema
-    # executed if false 
-    left_statement: Optional[ExecutionSchema]
+class BranchStatement:
+    condition: Optional[ConditionType]
+    schema: Component
+    exit_branch: bool
 
     def __init__(
         self, 
-        condition: Union[Callable[[Transformable], bool], Condition],
-        right_statement: ExecutionSchema,
-        left_statement: Optional[ExecutionSchema]=None
-        ) -> None:
-        # add conditional
-        if isinstance(condition, Condition):
-            self.condition = condition
-        else:
-            condition = condition
-        # add statements
-        self.right_statement = right_statement
-        if left_statement == None:
-            self.left_statement = None
-        else:
-            self.left_statement = left_statement
+        schema: Component,
+        condition: Optional[ConditionType]=None, 
+        exit_branch: bool=True
+    ):
+        self.condition = condition
+        self.schema = schema
+        self.exit_branch = exit_branch
 
 
-    def get_condition(self):
-        return self.condition
+    def __call__(
+        self, input_data: Transformable, evaluator: Evaluator
+    ) -> Optional[Transformable]:
+        if self.condition is None or self.condition(
+            input_data, evaluator
+        ):
+            return self.schema(input_data, evaluator)
 
 
-    def get_right_statement(self):
-        return self.right_statement 
+class SwitchStatement(Component):
+    branches: Tuple[BranchStatement, ...]
+
+    def __init__(
+        self, 
+        *branches: BranchStatement,
+    ) -> None:
+        self.branches = branches
 
 
-    def get_left_statement(self):
-        return self.left_statement 
-
-
-    @property
-    def statement(self) ->  Statement:
-        return Statement.IF_STATEMENT
+    def __call__(self, input_data: Transformable, evaluator: Evaluator) -> Transformable:
+        for branch in self.branches:
+            if res := branch(input_data, evaluator):
+                input_data = res
+                if branch.exit_branch:
+                    break
+        return input_data
 
 
 class ForEach(Component):
@@ -146,23 +167,37 @@ class ForEach(Component):
         self.schema = statement
 
 
-    def get_statement(self) -> ExecutionSchema:
-        return self.schema
-    
-    
-    @property
-    def statement(self) ->  Statement:
-        return Statement.FOR_EACH_STATEMENT
+    def __call__(self, input_data: Transformable, evaluator: Evaluator) -> Transformable:
+        data = getattr(input_data, self.get_key)
+        # need check that this is a sequence of dict
 
+        setattr(
+            input_data,
+            self.set_key,
+            [
+                Evaluator(
+                    self.schema,
+                    cfg=EvaluatorConfigs(
+                        name=f"{evaluator.cfg.name}.{self.__class__.__name__}",
+                        logging_level=evaluator.cfg.logging_level,
+                        logging_handler=evaluator.cfg.logging_handler,
+                        fast_exit=evaluator.cfg.fast_exit
+                    )
+                ).run_program(t)
+                for t in data
+            ]
+        )
+        return input_data
+    
 
 class Filter(Component):
     get_key: str
     set_key: str
-    condition: Union[Callable[[Transformable], bool], Condition]
+    condition: ConditionType
 
     def __init__(
         self,
-        condition: Union[Callable[[Transformable], bool], Condition],
+        condition: ConditionType,
         get_key: str,
         set_key: Optional[str]=None,
     ) -> None:
@@ -171,47 +206,45 @@ class Filter(Component):
         self.condition = condition
 
 
-    def get_condition(self) -> Union[Callable[[Transformable], bool], Condition]:
-        return self.condition
-    
-    
-    @property
-    def statement(self) ->  Statement:
-        return Statement.FILTER_STATEMENT
-
+    def __call__(
+        self, input_data: Transformable, evaluator: Evaluator
+    ) -> Transformable:
+        data = getattr(input_data, self.get_key)
+        setattr(
+            input_data,
+            self.set_key,
+            [
+                s for s in data
+                if self.condition(Transformable(s), evaluator)
+            ]
+        )
+        return input_data
 
 
 class While(Component):
     schema: ExecutionSchema
     condition:  Condition
-    max_retries: Optional[int]
+    max_iterations: int
 
     def __init__(
         self, 
         condition: Condition,
-        statement: ExecutionSchema,
-        max_retries: Optional[int]
-        ) -> None:
-        # add conditional
+        schema: ExecutionSchema,
+        max_iterations: int=-1
+    ) -> None:
         self.condition = condition
-
-        # add statements
-        self.schema = statement
-        self.max_retries = max_retries
+        self.schema = schema
+        self.max_iterations = max_iterations
 
 
-    def get_retries(self):
-        return self.max_retries
-
-
-    def get_condition(self):
-        return self.condition
-
-
-    def get_statement(self):
-        return self.schema
-
-
-    @property
-    def statement(self) ->  Statement:
-        return Statement.WHILE_STATEMEMT
+    def __call__(
+        self, input_data: Transformable, evaluator: Evaluator
+    ) -> Transformable:
+        i = self.max_iterations
+        while i != 0 and self.condition(
+            input_data,
+            evaluator
+        ):
+            input_data = self.schema(input_data, evaluator)
+            i -= 1
+        return input_data

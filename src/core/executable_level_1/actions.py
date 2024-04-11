@@ -3,15 +3,15 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import (
     Any, Dict, List, Callable, Optional, TypeVar, Generic, 
-    TYPE_CHECKING
+    TYPE_CHECKING, cast
 )
 import logging
 
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.component import Component
-from core.executable_level_1.statements_types import Statement
+from core.executable_level_1.interpreter import Evaluator
 if TYPE_CHECKING:
-    from core.executable_level_1.executor import Executor
+    from core.executable_level_1.executor import ActionExecutor
 
 
 ActionInput = TypeVar("ActionInput")
@@ -22,45 +22,41 @@ class Action(Generic[ActionInput, ActionOutput], Component):
 
     def __call__(
         self, 
-        register: Transformable,
-        get_key: Optional[str]=None,
-        set_key: Optional[str]=None
+        input_data: Transformable,
+        evaluator: Evaluator
     ) -> Transformable:
-        input_data = getattr(register, get_key or "__dict__")
+        data = input_data.__dict__
         try:
-            result = self.execute(input_data)
+            result = self.execute(cast(ActionInput, data))
         except Exception as e:
             raise ValueError(
                 f"Action error: {self.__class__}: {e}"
             )
         if result is None:
-            return register
+            return input_data
 
-        if not isinstance(result, Dict) and not set_key:
-            set_key = self.default_key
+        if isinstance(result, Dict):
+            input_data.update(cast(Dict[str, Any], result))
+            return input_data
         setattr(
-            register,
-            set_key or "__dict__",
+            input_data,
+            self.default_key,
             result
         )
-        return register
+        return input_data
+
 
     def use(
         self,
         get_key: Optional[str]=None,
         set_key: Optional[str]=None
-    ) -> Executor[Action[Any, Any]]:
-        from core.executable_level_1.executor import Executor
-        return Executor(
+    ) -> ActionExecutor:
+        from core.executable_level_1.executor import ActionExecutor
+        return ActionExecutor(
             component=self, 
             get_key=get_key, 
             set_key=set_key
         )
-
-
-    @property
-    def statement(self) -> Statement:
-        return Statement.ACTION_STATEMENT
 
 
     @abstractmethod
@@ -96,24 +92,22 @@ class Flush(Action[Transformable, Transformable]):
         self,
         get_key: Optional[str]=None,
         set_key: Optional[str]=None
-    ) -> Executor[Action[Any, Any]]:
+    ) -> ActionExecutor:
         raise AttributeError("Flush action doesn't support use!")
 
 
     def __call__(
         self, 
         register: Transformable,
-        get_key: Optional[str]=None,
-        set_key: Optional[str]=None
+        evaluator: Evaluator
     ) -> Transformable:
-        if get_key or set_key:
-            raise ValueError("Flush ignores get and set keys!")
         try:
             return self.execute(register)
         except Exception as e:
             raise ValueError(
                 f"Action error: {self.__class__}: {e}"
             )
+
 
 class Log(Action[ActionInput, None]):
     def __init__(

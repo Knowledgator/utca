@@ -1,7 +1,8 @@
 from typing import (
-    Any, List, Dict, 
-    Type, Union, Optional, Callable
+    Any, List, Dict, Type, Optional
 )
+
+from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
     InputType, OutputType, Transformable
@@ -26,34 +27,34 @@ class Task(
     ) -> None:
         super().__init__(input_class, output_class)
         self.predictor = predictor
-        self._preprocess = preprocess
-        self._postprocess = postprocess
+        self._preprocess = preprocess or []
+        self._postprocess = postprocess or []
 
     
     def process(
         self, 
         state: Transformable, 
-        actions: List[Union[
-            Action[Any, Any],
-            Callable[[Transformable], Transformable]
-        ]]
+        actions: List[Action[Any, Any]],
+        evaluator: Evaluator
     ) -> Transformable:
         for action in actions:
-            state = action(state)
+            state = action(state, evaluator)
         return state
 
 
     def invoke(
-        self, input_data: InputType
+        self, input_data: InputType, evaluator: Evaluator
     ) -> Dict[str, Any]:
         processed_input = self.process(
             input_data.generate_transformable(), 
-            self._preprocess # type: ignore
+            self._preprocess,
+            evaluator
         )
-        predicts = self.predictor(processed_input)
+        predicts = self.predictor(processed_input, evaluator)
         return self.process(
             predicts,
-            self._postprocess # type: ignore
+            self._postprocess,
+            evaluator
         ).extract()
 
 
