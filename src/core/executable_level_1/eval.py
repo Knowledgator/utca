@@ -111,13 +111,11 @@ class Condition:
             )(
                 input_data, evaluator
             )
-            
-        tmp = (
+        return self.validator(
             evaluator
             .create_child(self.schema, self.name)
             .eval(copy.deepcopy(input_data))
         )
-        return self.validator(tmp)
     
 
     def __repr__(self) -> str:
