@@ -3,7 +3,7 @@ from core.executable_level_1.actions import Action
 
 import faiss # type: ignore
 
-class BuildIndex(Action[Dict[str, Any], Dict[str, Any]]):
+class CreateIndex(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(self, dataset_dimensions: int=1024):
         self.dataset_dimensions = dataset_dimensions
 
@@ -13,7 +13,7 @@ class BuildIndex(Action[Dict[str, Any], Dict[str, Any]]):
         return input_data
     
 
-class AddDataset(Action[Dict[str, Any], Dict[str, Any]]):
+class IndexData(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         input_data["index"].add(input_data["dataset"]) # type: ignore
         return input_data

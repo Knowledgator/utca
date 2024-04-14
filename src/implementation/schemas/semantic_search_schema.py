@@ -12,7 +12,7 @@ from implementation.tasks.text_processing.embedding.transformers.transformers_em
     TextEmbeddingTask
 )
 from implementation.datasources.index.actions import (
-    BuildIndex, AddDataset, SearchIndex, GetTextsByIndexes,
+    CreateIndex, IndexData, SearchIndex, GetTextsByIndexes,
 )
 
 class SemanticSearchSchemaInput(Input):
@@ -63,7 +63,7 @@ class SemanticSearchSchema(
     def add(self, dataset: List[str]) -> SemanticSearchSchema:
         embeddings = self.get_embeddings(dataset)
         self.dataset.extend(dataset)
-        AddDataset().execute({
+        IndexData().execute({
             "index": self.index,
             "dataset": embeddings
         })
@@ -71,7 +71,7 @@ class SemanticSearchSchema(
 
 
     def build_index(self) -> Any:
-        return BuildIndex(
+        return CreateIndex(
             self.encoder.predictor.config.hidden_size # type: ignore
         ).execute({})["index"]
 
