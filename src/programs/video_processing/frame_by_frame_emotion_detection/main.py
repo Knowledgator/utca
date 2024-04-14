@@ -14,7 +14,7 @@ from implementation.predictors import (
     TransformersModel,
     TransformersModelConfig,
     TransformersImageClassificationModelInput,
-    TransformersImageClassificationModelOutput
+    TransformersLogitsOutput
 )
 from implementation.tasks import (
     TransformersImageClassification,
@@ -40,7 +40,7 @@ task = TransformersImageClassification(
             model=model # type: ignore
         ),
         input_class=TransformersImageClassificationModelInput,
-        output_class=TransformersImageClassificationModelOutput,
+        output_class=TransformersLogitsOutput,
     ),
     preprocess=[
         ImageClassificationPreprocessor(

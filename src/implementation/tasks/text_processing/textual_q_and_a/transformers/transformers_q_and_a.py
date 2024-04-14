@@ -1,8 +1,5 @@
 from typing import Any, List, Type, Optional
 
-from core.executable_level_1.schema import (
-    Input, Output
-)
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
@@ -10,24 +7,18 @@ from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline,
     TransformersPipelineConfig
 )
+from predictors.transformers.schema import (
+    TransformersTextualQandAInput,
+    TransformersTextualQandAOutput
+)
 from implementation.tasks.text_processing.textual_q_and_a.transformers.actions import (
     QandAPostprocess
 )
 
-class QandAInput(Input):
-    question: str
-    context: str
-
-
-class QandAOutput(Output):
-    answer: Optional[str]=None
-    score: float=0.
-
-
 class TransformersTextualQandA(
     Task[
-        QandAInput, 
-        QandAOutput,
+        TransformersTextualQandAInput, 
+        TransformersTextualQandAOutput,
     ]
 ):
     default_model: str = "deepset/roberta-base-squad2"
@@ -38,8 +29,8 @@ class TransformersTextualQandA(
         predictor: Optional[Predictor[Any, Any]]=None,
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
-        input_class: Type[QandAInput]=QandAInput,
-        output_class: Type[QandAOutput]=QandAOutput
+        input_class: Type[TransformersTextualQandAInput]=TransformersTextualQandAInput,
+        output_class: Type[TransformersTextualQandAOutput]=TransformersTextualQandAOutput
     ) -> None:
         if not predictor:
             predictor = TransformersPipeline(
@@ -47,8 +38,8 @@ class TransformersTextualQandA(
                     task="question-answering", 
                     model=self.default_model
                 ),
-                input_class=QandAInput,
-                output_class=QandAOutput
+                input_class=TransformersTextualQandAInput,
+                output_class=TransformersTextualQandAOutput
             )
 
         super().__init__(

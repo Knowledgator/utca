@@ -1,5 +1,5 @@
 from typing import (
-    Any, Dict, List, Callable, Type, Optional, Union, cast
+    Any, Dict, List, Type, Optional, Union, cast
 ) 
 
 from transformers import ( # type: ignore
@@ -15,17 +15,18 @@ import torch
 import pyximport # type: ignore
 pyximport.install() # type: ignore
 
+from core.executable_level_1.schema import Input, Output
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
-from core.task_level_3.schema import (
-    Input, 
-    Output,
-)
 from implementation.predictors.transformers.transformers_model import (
     TransformersGenerativeModel,
     TransformersModelConfig
+)
+from implementation.predictors.transformers.schema import (
+    TransformersEntityLinkingInput,
+    TransformersEntityLinkingOutput,
 )
 from implementation.datasources.trie.labels_trie import LabelsTrie # type: ignore
 from implementation.tasks.text_processing.entity_linking.transformers.actions import (
@@ -41,26 +42,6 @@ class EntityLinkingInput(Input):
 
 class EntityLinkingOutput(Output):
     classification_output: Any
-
-
-class ModelInput(Input):
-    class Config:
-        arbitrary_types_allowed = True
-
-    encodings: Any
-    num_beams: int
-    num_return_sequences: int
-    prefix_allowed_tokens_fn: Callable[
-        [torch.Tensor, int], List[int]
-    ]
-
-
-class ModelOutput(Output):
-    class Config:
-        arbitrary_types_allowed = True
-
-    sequences: Any
-    sequences_scores: Any
 
 
 class TransformersEntityLinking(
@@ -188,8 +169,8 @@ class TransformersEntityLinking(
                         "output_scores": True, 
                     }
                 ),
-                input_class=ModelInput,
-                output_class=ModelOutput
+                input_class=TransformersEntityLinkingInput,
+                output_class=TransformersEntityLinkingOutput,
             )
         self.encoder_decoder: bool = predictor.config.is_encoder_decoder
         self.initialize_labels_trie(labels)

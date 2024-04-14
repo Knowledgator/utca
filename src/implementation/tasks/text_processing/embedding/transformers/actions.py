@@ -4,7 +4,6 @@ import torch
 import numpy as np
 
 from core.executable_level_1.actions import Action
-from core.executable_level_1.schema import Config
 
 @runtime_checkable
 class Tokenizer(Protocol):
@@ -13,22 +12,15 @@ class Tokenizer(Protocol):
         ...
 
 
-class EmbeddingPreprocessorConfig(Config):
-    class Config:
-        arbitrary_types_allowed = True
-
-    tokenizer: Tokenizer
-
-
 class EmbeddingPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
-    def __init__(self, cfg: EmbeddingPreprocessorConfig) -> None:
-        self.cfg = cfg
+    def __init__(self, tokenizer: Tokenizer) -> None:
+        self.tokenizer = tokenizer
 
 
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        input_data["encodings"] = self.cfg.tokenizer(
+        input_data["encodings"] = self.tokenizer(
             input_data["texts"], 
             padding=True, 
             truncation=True, 

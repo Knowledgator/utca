@@ -9,9 +9,7 @@ from core.executable_level_1.schema import (
 )
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
-from core.task_level_3.schema import (
-    InputWithThresholdType, NEROutputType
-)
+from core.task_level_3.schema import NEROutputType
 
 class Task(
     Executable[InputType, OutputType]
@@ -60,7 +58,7 @@ class Task(
 
 class NERTask(
     Task[
-        InputWithThresholdType, NEROutputType,
+        InputType, NEROutputType,
     ]
 ):
     ...

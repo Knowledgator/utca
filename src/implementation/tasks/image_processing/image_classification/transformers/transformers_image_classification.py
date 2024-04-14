@@ -19,7 +19,7 @@ from implementation.predictors.transformers.transformers_model import (
 )
 from implementation.predictors.transformers.schema import (
     TransformersImageClassificationModelInput,
-    TransformersImageClassificationModelOutput,
+    TransformersLogitsOutput,
 )
 from implementation.tasks.image_processing.image_classification.transformers.actions import (
     ImageClassificationPreprocessor,
@@ -66,7 +66,7 @@ class TransformersImageClassification(
                     model=model # type: ignore
                 ),
                 input_class=TransformersImageClassificationModelInput,
-                output_class=TransformersImageClassificationModelOutput
+                output_class=TransformersLogitsOutput,
             )
         
         if not preprocess:

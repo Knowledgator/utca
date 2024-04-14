@@ -1,6 +1,5 @@
 from typing import Any, List, Type, Optional, cast
 
-from PIL import Image
 from transformers import ( # type: ignore
     ViltProcessor, ViltForQuestionAnswering, AutoConfig
 )
@@ -13,6 +12,11 @@ from implementation.predictors.transformers.transformers_model import (
     TransformersModel,
     TransformersModelConfig
 )
+from implementation.predictors.transformers.schema import (
+    TransformersVisualQandAInput,
+    TransformersImageModelRawInput,
+    TransformersLogitsOutput
+)
 from implementation.tasks.image_processing.visual_q_and_a.transformers.actions import (
     VisualQandAPreprocessor,
     VisualQandAPreprocessorConfig,
@@ -20,28 +24,8 @@ from implementation.tasks.image_processing.visual_q_and_a.transformers.actions i
     VisualQandAPostprocessorConfig
 )
 
-class TransformersVisualQandAInput(Input):
-    class Config:
-        arbitrary_types_allowed = True
-        
-    image: Image.Image
-    question: str
-
-
 class TransformersVisualQandAOutput(Output):
     answer: str
-
-
-class ModelInput(Input):
-    input_ids: Any
-    token_type_ids: Any
-    attention_mask: Any
-    pixel_values: Any
-    pixel_mask: Any
-
-
-class ModelOutput(Output):
-    logits: Any
 
 
 class TransformersVisualQandA(
@@ -67,8 +51,8 @@ class TransformersVisualQandA(
                 TransformersModelConfig(
                     model=model # type: ignore
                 ),
-                input_class=ModelInput,
-                output_class=ModelOutput
+                input_class=TransformersImageModelRawInput,
+                output_class=TransformersLogitsOutput
             )
 
         if not preprocess:

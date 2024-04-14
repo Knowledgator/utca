@@ -1,10 +1,6 @@
 from typing import Any, List, Type, Optional
 
-from PIL import Image
-
-from core.executable_level_1.schema import (
-    Input, Output
-)
+from core.executable_level_1.schema import Output
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
@@ -12,29 +8,22 @@ from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline,
     TransformersPipelineConfig
 )
+from implementation.predictors.transformers.schema import (
+    TransformersVisualQandAInput,
+    TransformersBasicOutput
+)
 from implementation.tasks.image_processing.documents_q_and_a.transformers.actions import (
     DocumentQandAPostprocess
 )
-
-class DocumentQandAInput(Input):
-    class Config:
-        arbitrary_types_allowed = True
-
-    image: Image.Image
-    question: str
 
 
 class DocumentQandAOutput(Output):
     answer: Optional[str]
 
 
-class ModelOutput(Output):
-    output: Any
-
-
 class TransformersDocumentQandA(
     Task[
-        DocumentQandAInput, 
+        TransformersVisualQandAInput, 
         DocumentQandAOutput,
     ]
 ):
@@ -46,7 +35,7 @@ class TransformersDocumentQandA(
         predictor: Optional[Predictor[Any, Any]]=None,
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
-        input_class: Type[DocumentQandAInput]=DocumentQandAInput,
+        input_class: Type[TransformersVisualQandAInput]=TransformersVisualQandAInput,
         output_class: Type[DocumentQandAOutput]=DocumentQandAOutput
     ) -> None:
         if not predictor:
@@ -55,8 +44,8 @@ class TransformersDocumentQandA(
                     task="document-question-answering", 
                     model=self.default_model
                 ),
-                input_class=DocumentQandAInput,
-                output_class=ModelOutput
+                input_class=TransformersVisualQandAInput,
+                output_class=TransformersBasicOutput
             )
 
         super().__init__(

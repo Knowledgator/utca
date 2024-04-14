@@ -7,7 +7,6 @@ from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
-    InputWithThreshold, 
     NEROutput,
 )
 from core.task_level_3.objects.objects import (
@@ -17,25 +16,17 @@ from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline,
     TransformersPipelineConfig
 )
+from implementation.predictors.transformers.schema import (
+    TransformersBasicInput,
+    TransformersBasicOutput
+)
 from implementation.tasks.text_processing.ner.transformers.actions import (
     TokenClassifierPostprocessor
 )
 
-class TokenClassifierInput(InputWithThreshold):
-    inputs: str
-
-
-class ModelInput(Input):
-    inputs: str
-
-
-class ModelOutput(Output):
-    output: Any
-
-
 class TransformersTokenClassifier(
     NERTask[
-        TokenClassifierInput, 
+        TransformersBasicInput, 
         NEROutput[ClassifiedEntity],
     ]
 ):
@@ -47,7 +38,7 @@ class TransformersTokenClassifier(
         predictor: Optional[Predictor[Input, Output]]=None,
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
-        input_class: Type[TokenClassifierInput]=TokenClassifierInput,
+        input_class: Type[TransformersBasicInput]=TransformersBasicInput,
         output_class: Type[NEROutput[ClassifiedEntity]]=NEROutput[ClassifiedEntity]
     ) -> None:
         if not predictor:
@@ -56,8 +47,8 @@ class TransformersTokenClassifier(
                     task="token-classification", 
                     model=self.default_model
                 ),
-                input_class=ModelInput,
-                output_class=ModelOutput
+                input_class=TransformersBasicInput,
+                output_class=TransformersBasicOutput
             )
 
         super().__init__(

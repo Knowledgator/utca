@@ -1,12 +1,12 @@
 from typing import Any, List, Optional, Type
 
+from core.executable_level_1.schema import Input
 from core.executable_level_1.actions import (
     Action
 )
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
-    InputWithThreshold, 
     NEROutput,
 )
 from core.task_level_3.objects.objects import (
@@ -20,7 +20,7 @@ from implementation.tasks.text_processing.clean_text.token_searcher.actions impo
     TokenSearcherTextCleanerPostprocessor
 )
 
-class TokenSearcherTextCleanerInput(InputWithThreshold):
+class TokenSearcherTextCleanerInput(Input):
     text: str
     clean: Optional[bool] = None
 

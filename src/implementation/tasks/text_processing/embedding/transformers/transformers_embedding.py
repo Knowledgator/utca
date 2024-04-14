@@ -6,16 +6,16 @@ from core.executable_level_1.schema import Input, Output
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
-from core.task_level_3.schema import (
-    Input, Output,
-)
 from implementation.predictors.transformers.transformers_model import (
     TransformersModel,
     TransformersModelConfig
 )
+from implementation.predictors.transformers.schema import (
+    TransformersEmbeddingInput,
+    TransformersEmbeddingOutput,
+)
 from implementation.tasks.text_processing.embedding.transformers.actions import (
     EmbeddingPreprocessor,
-    EmbeddingPreprocessorConfig,
     EmbeddingPostprocessor,
     ConvertEmbeddingsToNumpyArrays,
 )
@@ -26,14 +26,6 @@ class TextEmbeddingInput(Input):
 
 class TextEmbeddingOutput(Output):
     embeddings: Any
-
-
-class ModelInput(Input):
-    encodings: Any
-
-
-class ModelOutput(Output):
-    last_hidden_state: Any
 
 
 class TextEmbeddingTask(
@@ -61,18 +53,16 @@ class TextEmbeddingTask(
                 TransformersModelConfig(
                     model=model # type: ignore
                 ),
-                input_class=ModelInput,
-                output_class=ModelOutput
+                input_class=TransformersEmbeddingInput,
+                output_class=TransformersEmbeddingOutput,
             )
 
         super().__init__(
             predictor=predictor,
             preprocess=preprocess or [
                 EmbeddingPreprocessor(
-                    EmbeddingPreprocessorConfig(
-                        tokenizer=AutoTokenizer.from_pretrained( # type: ignore 
-                            self.default_model
-                        )
+                    tokenizer=AutoTokenizer.from_pretrained( # type: ignore 
+                        self.default_model
                     )
                 )
             ],

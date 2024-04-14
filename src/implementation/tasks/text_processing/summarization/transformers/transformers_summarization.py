@@ -7,27 +7,22 @@ from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersSummarizationPipeline,
     TransformersPipelineConfig,
-    SummarizationInput
+)
+from implementation.predictors.transformers.schema import (
+    TransformersBasicInput,
+    TransformersBasicOutput
 )
 from implementation.tasks.text_processing.summarization.transformers.actions import (
     SummarizationPostprocess
 )
 
-class SummarizationTaskInput(SummarizationInput):
-    inputs: str
-
-
 class SummarizationOutput(Output):
     summary_text: str
 
 
-class ModelOutput(Output):
-    output: Any
-
-
 class TransformersTextSummarization(
     Task[
-        SummarizationTaskInput, 
+        TransformersBasicInput, 
         SummarizationOutput,
     ]
 ):
@@ -39,7 +34,7 @@ class TransformersTextSummarization(
         predictor: Optional[Predictor[Any, Any]]=None,
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
-        input_class: Type[SummarizationTaskInput]=SummarizationTaskInput,
+        input_class: Type[TransformersBasicInput]=TransformersBasicInput,
         output_class: Type[SummarizationOutput]=SummarizationOutput
     ) -> None:
         if not predictor:
@@ -51,8 +46,8 @@ class TransformersTextSummarization(
                         "truncation": True
                     }
                 ),
-                input_class=SummarizationTaskInput,
-                output_class=ModelOutput
+                input_class=TransformersBasicInput,
+                output_class=TransformersBasicOutput
             )
 
         super().__init__(

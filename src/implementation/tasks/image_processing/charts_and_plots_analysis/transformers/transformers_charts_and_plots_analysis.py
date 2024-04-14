@@ -15,6 +15,10 @@ from implementation.predictors.transformers.transformers_model import (
     TransformersGenerativeModel, 
     TransformersModelConfig
 )
+from implementation.predictors.transformers.schema import (
+    TransformersChartsAndPlotsModelInput,
+    TransformersBasicOutput
+)
 from implementation.tasks.image_processing.charts_and_plots_analysis.transformers.actions import (
     ChartsAndPlotsAnalysisPreprocessor,
     ChartsAndPlotsAnalysisPreprocessorConfig,
@@ -31,15 +35,6 @@ class ChartsAndPlotsAnalysisInput(Input):
 
 
 class ChartsAndPlotsAnalysisOutput(Output):
-    output: Any
-
-
-class ModelInput(Input):
-    flattened_patches: Any
-    attention_mask: Any
-
-
-class ModelOutput(Output):
     output: Any
 
 
@@ -69,8 +64,8 @@ class TransformersChartsAndPlotsAnalysis(
                         "max_new_tokens": 512
                     }
                 ),
-                input_class=ModelInput,
-                output_class=ModelOutput
+                input_class=TransformersChartsAndPlotsModelInput,
+                output_class=TransformersBasicOutput
             )
         
         if not preprocess or not postprocess:
