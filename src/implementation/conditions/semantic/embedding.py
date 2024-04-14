@@ -1,5 +1,6 @@
 from typing import Dict, Any, List, Optional
 
+from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.eval import Condition, ExecutionSchema
 from core.executable_level_1.actions import (
@@ -17,30 +18,32 @@ class SemanticCondition(Condition):
         distance: float,
         targets: List[str],
         semantic_schema: Optional[SemanticSearchSchema]=None,
-        subject_key: str
+        subject_key: str,
+        name: Optional[str]=None
     ) -> None:
         if semantic_schema is None:
             semantic_schema = SemanticSearchSchema()
         self.semantic_schema = semantic_schema
         super().__init__(
             self.validator_wrapper(distance), 
-            self.build_statement(subject_key, targets, self.semantic_schema),
-            None
+            self.build_schema(subject_key, targets, self.semantic_schema),
+            None,
+            name
         )
 
     
-    def build_statement(
+    def build_schema(
         self, 
         subject_key: str,
         targets: List[str],
         semantic_schema: SemanticSearchSchema
     ) -> ExecutionSchema:
-        def build_dataset(input_data: Dict[str, Any]) -> Dict[str, Any]:
+        def build_index(input_data: Dict[str, Any]) -> Dict[str, Any]:
             semantic_schema.add([input_data[subject_key]])
             return input_data
 
         return (
-            ExecuteFunction(build_dataset)
+            ExecuteFunction(build_index)
             | AddData({
                 "query": targets,
                 "results_count": 1
@@ -60,6 +63,8 @@ class SemanticCondition(Condition):
         return validator
     
 
-    def get_statement(self) -> ExecutionSchema:
+    def __call__(
+        self, input_data: Transformable, evaluator: Evaluator
+    ) -> bool:
         self.semantic_schema.drop_index()
-        return super().get_statement()
+        return super()(input_data, evaluator)

@@ -15,6 +15,7 @@ import torch
 import pyximport # type: ignore
 pyximport.install() # type: ignore
 
+from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
@@ -209,10 +210,11 @@ class EntityLinkingTask(
         )
 
 
-    def invoke(self, input_data: EntityLinkingInput) -> Dict[str, Any]:
+    def invoke(self, input_data: EntityLinkingInput, evaluator: Evaluator) -> Dict[str, Any]:
         processed_input = self.process(
             input_data.generate_transformable(), 
-            self._preprocess # type: ignore
+            self._preprocess,
+            evaluator
         ) 
         tokenized_prompt = self.tokenizer( # type: ignore
             getattr(processed_input, "texts"), 
@@ -228,5 +230,6 @@ class EntityLinkingTask(
         predicts = self.predictor(processed_input)
         return self.process(
             predicts, 
-            self._postprocess # type: ignore
+            self._postprocess,
+            evaluator
         ).extract()  

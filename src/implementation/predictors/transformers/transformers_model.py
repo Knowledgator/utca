@@ -2,6 +2,7 @@ from typing import TypeVar, Any, Type, Dict, Optional
 
 from transformers import PreTrainedModel # type: ignore
 
+from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import (
     Config, InputType, OutputType
 )
@@ -40,7 +41,7 @@ class TransformersModel(
         super().__init__(input_class, output_class)
 
 
-    def invoke(self, input_data: InputType) -> Dict[str, Any]:
+    def invoke(self, input_data: InputType, evaluator: Evaluator) -> Dict[str, Any]:
         inputs = input_data.model_dump()
         if not "encodings" in inputs:
             res = self.cfg.model(**inputs, **self.cfg.get_kwargs())
@@ -60,7 +61,7 @@ class TransformersGenerativeModel(
         OutputType
     ]
 ):
-    def invoke(self, input_data: InputType) -> Dict[str, Any]:
+    def invoke(self, input_data: InputType, evaluator: Evaluator) -> Dict[str, Any]:
         inputs = input_data.model_dump()
         if not "encodings" in inputs:
             res = self.cfg.model.generate(**inputs, **self.cfg.get_kwargs()) # type: ignore

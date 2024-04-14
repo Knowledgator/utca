@@ -3,6 +3,7 @@ from typing import List, Optional, Dict, Any
 
 import numpy.typing as npt
 
+from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
     Input, Output, Transformable
@@ -79,7 +80,7 @@ class SemanticSearchSchema(
         self.index = self.build_index()
 
 
-    def invoke(self, input_data: SemanticSearchSchemaInput) -> Dict[str, Any]:
+    def invoke(self, input_data: SemanticSearchSchemaInput, evaluator: Evaluator) -> Dict[str, Any]:
         search_results = SearchIndex(input_data.results_count).execute({
             "query": self.get_embeddings(input_data.query),
             "index": self.index
@@ -91,9 +92,3 @@ class SemanticSearchSchema(
             }
         )
         return search_results
-    
-    
-    def invoke_batch(self, input_data: List[SemanticSearchSchemaInput]) -> List[Dict[str, Any]]:
-        return [
-            self.invoke(i) for i in input_data 
-        ]

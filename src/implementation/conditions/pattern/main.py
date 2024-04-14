@@ -1,8 +1,8 @@
 from typing import Union
 import re
 
+from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import Transformable
-# query / subject
 
 class RePattern:
     def __init__(
@@ -16,9 +16,9 @@ class RePattern:
         self.key = key
 
 
-    def search(self, input_data: Transformable) -> bool:
+    def search(self, input_data: Transformable, evaluator: Evaluator) -> bool:
         return bool(self.pattern.search(getattr(input_data, self.key)))
     
 
-    def match(self, input_data: Transformable) -> bool:
+    def match(self, input_data: Transformable, evaluator: Evaluator) -> bool:
         return bool(self.pattern.match(getattr(input_data, self.key)))

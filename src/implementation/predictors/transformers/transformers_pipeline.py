@@ -13,6 +13,7 @@ from transformers.image_processing_utils import ( # type: ignore
     BaseImageProcessor
 )
 
+from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import (
     Config, Input, InputType, OutputType
 )
@@ -88,7 +89,7 @@ class TransformersPipeline(
         super().__init__(input_class, output_class)
 
 
-    def invoke(self, input_data: InputType) -> Any:
+    def invoke(self, input_data: InputType, evaluator: Evaluator) -> Any:
         inputs = input_data.model_dump()
         return self.ensure_dict(self.pipeline(**inputs)) # type: ignore
     
@@ -112,7 +113,7 @@ class TransformersSummarizationPipeline(
         OutputType
     ]
 ):
-    def invoke(self, input_data: SummarizationInputType) -> Any:
+    def invoke(self, input_data: SummarizationInputType, evaluator: Evaluator) -> Any:
         inputs = input_data.model_dump()
         return self.ensure_dict(
             self.pipeline( # type: ignore

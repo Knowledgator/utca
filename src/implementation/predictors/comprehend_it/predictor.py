@@ -1,5 +1,6 @@
 from typing import Any, Type
 
+from core.executable_level_1.interpreter import Evaluator
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline
 )
@@ -30,7 +31,7 @@ class ComprehendItPredictor(
         )
 
     
-    def invoke(self, input_data: ComprehendItPredictorInputType) -> Any:
+    def invoke(self, input_data: ComprehendItPredictorInputType, evaluator: Evaluator) -> Any:
         inputs = input_data.model_dump()
         return self.pipeline( # type: ignore
             inputs.pop("text"), inputs.pop("labels"), **inputs
