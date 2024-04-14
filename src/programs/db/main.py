@@ -40,7 +40,8 @@ class Address(BaseModel):
     
     def __repr__(self) -> str:
         return f"Address(id={self.id!r}, email_address={self.email_address!r})"
-    
+
+
 if __name__ == "__main__":
     s = SQLSessionFactory("sqlite+pysqlite:///:memory:")
     s.create_tables()
