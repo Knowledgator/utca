@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from core.executable_level_1.eval import ExecutionSchema
@@ -40,7 +40,7 @@ class Component(ABC):
 
     def run(
         self, input_data: Optional[Dict[str, Any]]=None
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:    
+    ) -> Dict[str, Any]:    
         return self(self.prepare_input(input_data)).extract()
 
     

@@ -61,7 +61,7 @@ class Evaluator:
 
     def run(
         self, input_data: Optional[Dict[str, Any]]=None
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:    
+    ) -> Dict[str, Any]:    
         return self.eval(self.prepare_input(input_data)).extract()
     
 
