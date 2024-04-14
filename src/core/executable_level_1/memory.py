@@ -72,6 +72,10 @@ class Memory:
         self.memory = {}
 
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.__dict__})"
+
+
 class MemorySetInstruction(Enum):
     SET = "setandgo" # set and continue
     MOVE = "move" # clean all objects
@@ -96,8 +100,11 @@ class SetMemory(Component):
 
 
     def __call__(
-        self, input_data: Transformable, evaluator: Evaluator
+        self, input_data: Transformable, evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+        
         evaluator.set_memory(
             input_data, self.get_key, self.set_key
         )
@@ -134,8 +141,11 @@ class GetMemory(Component):
 
     
     def __call__(
-        self, input_data: Transformable, evaluator: Evaluator
+        self, input_data: Transformable, evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+
         if self.memory_instruction == MemoryGetInstruction.GET:
             register = evaluator.get_memory(input_data, self.identifiers)
         elif self.memory_instruction == MemoryGetInstruction.REPLACE: 
@@ -217,3 +227,7 @@ class MemoryManager:
 
     def flush(self) -> None:
         self.memory.flush()
+
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.__dict__})"

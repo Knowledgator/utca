@@ -51,19 +51,18 @@ class Evaluator:
 
     def prepare_input(
         self, 
-        program_input: Optional[Dict[str, Any]]=None
+        input_data: Optional[Dict[str, Any]]=None
     ) -> Transformable:
         """Sets the initial input for the program."""
-        if program_input is not None:
-            return Transformable(program_input)  # Assuming this method correctly instantiates a Transformable
+        if input_data is not None:
+            return Transformable(input_data)
         return Transformable({})
 
 
-    def run_program(
-        self, 
-        program_input: Optional[Dict[str, Any]]=None
+    def run(
+        self, input_data: Optional[Dict[str, Any]]=None
     ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:    
-        return self.eval(self.prepare_input(program_input)).extract()
+        return self.eval(self.prepare_input(input_data)).extract()
     
 
     def eval(self, input_data: Transformable) -> Transformable:
@@ -130,3 +129,7 @@ class Evaluator:
                 fast_exit=self.cfg.fast_exit
             )
         )
+    
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.cfg.name} ({self.__dict__})"

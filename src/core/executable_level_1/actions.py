@@ -1,6 +1,5 @@
 from __future__ import annotations
 from abc import abstractmethod
-from dataclasses import dataclass
 from typing import (
     Any, Dict, List, Callable, Optional, TypeVar, Generic, 
     TYPE_CHECKING, cast
@@ -10,6 +9,7 @@ import logging
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.component import Component
 from core.executable_level_1.interpreter import Evaluator
+from core.executable_level_1.exceptions import ActionError
 if TYPE_CHECKING:
     from core.executable_level_1.executor import ActionExecutor
 
@@ -23,15 +23,19 @@ class Action(Generic[ActionInput, ActionOutput], Component):
     def __call__(
         self, 
         input_data: Transformable,
-        evaluator: Evaluator
+        evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+
         data = input_data.__dict__
         try:
             result = self.execute(cast(ActionInput, data))
         except Exception as e:
-            raise ValueError(
-                f"Action error: {self.__class__}: {e}"
-            )
+            raise ActionError(self.name, e)
+        
+        evaluator.log_debug(f"Action: {self.name}: Executed")
+
         if result is None:
             return input_data
 
@@ -70,8 +74,10 @@ class Action(Generic[ActionInput, ActionOutput], Component):
 class Flush(Action[Transformable, Transformable]):
     def __init__(
         self, 
-        keys: Optional[List[str]]=None
+        keys: Optional[List[str]]=None,
+        name: Optional[str]=None
     ) -> None:
+        super().__init__(name)
         self.keys = keys
 
 
@@ -93,20 +99,21 @@ class Flush(Action[Transformable, Transformable]):
         get_key: Optional[str]=None,
         set_key: Optional[str]=None
     ) -> ActionExecutor:
-        raise AttributeError("Flush action doesn't support use!")
+        raise AttributeError("Flush action doesn't support use method!")
 
 
     def __call__(
         self, 
         register: Transformable,
-        evaluator: Evaluator
+        evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+
         try:
             return self.execute(register)
         except Exception as e:
-            raise ValueError(
-                f"Action error: {self.__class__}: {e}"
-            )
+            raise ActionError(self.name, e)
 
 
 class Log(Action[ActionInput, None]):
@@ -116,7 +123,9 @@ class Log(Action[ActionInput, None]):
         message: str="",
         open: str="-"*40,
         close: str="-"*40,
+        name: Optional[str]=None
     ) -> None:
+        super().__init__(name)
         self.logger = logger
         self.message = message
         self.open = open
@@ -134,9 +143,15 @@ class Log(Action[ActionInput, None]):
         )
 
 
-@dataclass(slots=True)
 class AddData(Action[Dict[str, Any], Dict[str, Any]]):
-    data: Dict[str, Any]
+    def __init__(
+        self, 
+        data: Dict[str, Any],
+        name: Optional[str]=None
+    ) -> None:
+        super().__init__(name)
+        self.data = data
+
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
@@ -145,38 +160,64 @@ class AddData(Action[Dict[str, Any], Dict[str, Any]]):
         }
 
 
-@dataclass(slots=True)
 class RenameAttribute(Action[Dict[str, Any], Dict[str, Any]]):
-    old_name: str
-    new_name: str
+    def __init__(
+        self, 
+        old_name: str,
+        new_name: str,
+        name: Optional[str]=None
+    ) -> None:
+        super().__init__(name)
+        self.old_name = old_name
+        self.new_name = new_name
+
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         input_data[self.new_name] = input_data.pop(self.old_name)
         return input_data
 
 
-@dataclass(slots=True)
 class ChangeValue(Action[Dict[str, Any], Dict[str, Any]]):
-    key: str
-    value: Any
+    def __init__(
+        self, 
+        key: str,
+        value: Any,
+        name: Optional[str]=None
+    ) -> None:
+        super().__init__(name)
+        self.key = key
+        self.value = value
+
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         input_data[self.key] = self.value
         return input_data
 
 
-@dataclass(slots=True)
 class UnpackValue(Action[Dict[str, Any], Dict[str, Any]]):
-    key: str
+    def __init__(
+        self, 
+        key: str,
+        name: Optional[str]=None
+    ) -> None:
+        super().__init__(name)
+        self.key = key
+
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         input_data.update(input_data.pop(self.key))
         return input_data 
     
 
-@dataclass(slots=True)
 class NestToKey(Action[Dict[str, Any], Dict[str, Any]]):
-    key: str
+    def __init__(
+        self, 
+        key: str,
+        name: Optional[str]=None
+    ) -> None:
+        super().__init__(name)
+        self.key = key
+
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
@@ -184,12 +225,18 @@ class NestToKey(Action[Dict[str, Any], Dict[str, Any]]):
         }
 
 
-@dataclass(slots=True)
 class RenameAttributeQuery(Action[Dict[str, Any], Dict[str, Any]]):
     TRANSFORMATION_DELIMITER = ";"
     TRANSFORMATION_POINTER = "<-"
     
-    query: str
+    def __init__(
+        self, 
+        query: str,
+        name: Optional[str]=None
+    ) -> None:
+        super().__init__(name)
+        self.query = query
+
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Return the new name."""
@@ -213,10 +260,17 @@ class RenameAttributeQuery(Action[Dict[str, Any], Dict[str, Any]]):
         return input_data
 
 
-@dataclass(slots=True)
 class MergeData(Action[Dict[str, Any], Dict[str, Any]]):
-    data: Dict[str, Any]
-    new_priority: bool
+    def __init__(
+        self, 
+        data: Dict[str, Any],
+        new_priority: bool=False,
+        name: Optional[str]=None
+    ) -> None:
+        super().__init__(name)
+        self.data = data
+        self.new_priority = new_priority
+
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         if self.new_priority:
@@ -225,9 +279,15 @@ class MergeData(Action[Dict[str, Any], Dict[str, Any]]):
             return {**self.data, **input_data}
 
 
-@dataclass(slots=True)
 class ExecuteFunction(Action[ActionInput, ActionOutput]):
-    f: Callable[[ActionInput], ActionOutput]
+    def __init__(
+        self, 
+        f: Callable[[ActionInput], ActionOutput],
+        name: Optional[str]=None
+    ) -> None:
+        super().__init__(name)
+        self.f = f
+
 
     def execute(self, input_data: ActionInput) -> ActionOutput:
         return self.f(input_data)

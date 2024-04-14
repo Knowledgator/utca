@@ -25,7 +25,7 @@ class MyExecutable(Executable[MyInput, MyOutput]):
         super().__init__(input_class, output_class)
 
 
-    def invoke(self, input_data: MyInput) -> Dict[str, Any]:
+    def invoke(self, input_data: MyInput, evaluator: Evaluator) -> Dict[str, Any]:
         # Implementation of the processing logic
         return {"f": input_data.f + 1}
 
@@ -35,7 +35,7 @@ def test_executable():
     input = {"f": 4}
     example = MyExecutable()
 
-    logging.info(example(Transformable(input)).__repr__())
+    logging.info(example.run(input).__repr__())
 
     # use get and set key
     logging.info(example.use(
@@ -58,5 +58,5 @@ def test_pipeline():
         )
     )
     logging.info(pipeline.program)
-    res = Evaluator(pipeline).run_program({"f": 1})
+    res = Evaluator(pipeline).run({"f": 1})
     logging.info(f"Pipeline res: {res}")

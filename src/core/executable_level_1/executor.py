@@ -1,5 +1,5 @@
 from typing import (
-    Any, Dict, List, Optional, TYPE_CHECKING, cast
+    Any, Dict, List, Generic, Optional, TypeVar, TYPE_CHECKING, cast
 )
 
 from core.executable_level_1.executable import Executable
@@ -10,23 +10,43 @@ from exceptions import IvalidInputDataValue
 if TYPE_CHECKING:
     from core.executable_level_1.interpreter import Evaluator
 
-class ExecutableExecutor(Component):
+
+ExecutorComponent = TypeVar("ExecutorComponent", Executable[Any, Any], Action[Any, Any])
+
+
+class BasicExecutor(Component, Generic[ExecutorComponent]):
     def __init__(
         self, 
-        component: Executable[Any, Any], 
+        component: ExecutorComponent, 
         get_key: Optional[str]=None,
         set_key: Optional[str]=None
     ) -> None:
         self.component = component
         self.get_key = get_key or "__dict__"
         self.set_key = set_key
-
     
+
+    @property
+    def name(self) -> str:
+        return self.component.name
+
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}({self.__dict__}):"
+            f"{self.component.__class__.__name__}: {self.component.name} ({self.component.__dict__})"
+        )
+
+
+class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
     def __call__(
         self, 
         input_data: Transformable,
-        evaluator: Evaluator
+        evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+
         data = getattr(input_data, self.get_key)
         if isinstance(input_data, Dict):
             result = self.component.execute(cast(Dict[str, Any], data), evaluator)
@@ -47,24 +67,16 @@ class ExecutableExecutor(Component):
         return input_data
     
 
-class ActionExecutor(Component):
-    def __init__(
-        self, 
-        component: Action[Any, Any], 
-        get_key: Optional[str]=None,
-        set_key: Optional[str]=None
-    ) -> None:
-        self.component = component
-        self.get_key = get_key
-        self.set_key = set_key
-
-    
+class ActionExecutor(BasicExecutor[Action[Any, Any]]):
     def __call__(
         self, 
         input_data: Transformable,
-        evaluator: Evaluator,
+        evaluator: Optional[Evaluator]=None
     ) -> Transformable:
-        data = getattr(input_data, self.get_key or "__dict__")
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+        
+        data = getattr(input_data, self.get_key)
         try:
             result = self.component.execute(data)
         except Exception as e:

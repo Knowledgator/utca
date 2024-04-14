@@ -117,8 +117,11 @@ class Executable(
     def __call__(
         self, 
         input_data: Transformable,
-        evaluator: Evaluator
+        evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+            
         data = input_data.__dict__
         result = self.execute(data, evaluator)
         input_data.update(result)

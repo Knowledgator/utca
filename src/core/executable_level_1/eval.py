@@ -37,9 +37,15 @@ class Serializable:
 class ExecutionSchema(Component):
     program: List[Component]
 
-    def __init__(self, comp: Component) -> None:
+    def __init__(
+        self, 
+        comp: Optional[Component]=None, 
+        name: Optional[str]=None
+    ) -> None:
+        super().__init__(name)
         self.program = []
-        self.add(comp)
+        if comp:
+            self.add(comp)
         
 
     def add(self, comp: Component) -> ExecutionSchema:
@@ -52,23 +58,26 @@ class ExecutionSchema(Component):
     
 
     def __call__(
-        self, input_data: Transformable, evaluator: Evaluator
+        self, input_data: Transformable, evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+
         for i, component in enumerate(self.program):
             try:
                 input_data = component(input_data, evaluator)
                 evaluator.cfg.logger.info(
-                    f"{self.__class__.__name__}: Step {i} executed successfully."
+                    f"{self.name}: Step {i} executed successfully."
                 )
             except Exception as e:
-                evaluator.cfg.logger.error(f"{self.__class__.__name__}: Error at step {i}")
+                evaluator.cfg.logger.error(f"{self.name}: Error at step {i}")
                 evaluator.cfg.logger.exception(e)
                 if evaluator.cfg.fast_exit:
                     raise EvaluatorExecutionFailed(e)
         return input_data
 
 
-class ConditionType(Protocol):
+class ConditionProtocol(Protocol):
     def __call__(
         self, input_data: Transformable, evaluator: Evaluator
     ) -> bool:
@@ -84,11 +93,13 @@ class Condition:
         self, 
         validator: Callable[[Transformable], bool],
         statement: ExecutionSchema,
-        state: Optional[List[Union[str, Tuple[str, str]]]]=None
+        state: Optional[List[Union[str, Tuple[str, str]]]]=None,
+        name: Optional[str]=None
     ) -> None:
         self.validator = validator
         self.schema = statement
         self.state = state
+        self.name = name or self.__class__.__name__
     
 
     def __call__(
@@ -103,26 +114,32 @@ class Condition:
             
         tmp = (
             evaluator
-            .create_child(self.schema, self.__class__.__name__)
+            .create_child(self.schema, self.name)
             .eval(copy.deepcopy(input_data))
         )
         return self.validator(tmp)
+    
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.name} ({self.__dict__})"
 
 
 class BranchStatement:
-    condition: Optional[ConditionType]
+    condition: Optional[ConditionProtocol]
     schema: Component
     exit_branch: bool
 
     def __init__(
         self, 
         schema: Component,
-        condition: Optional[ConditionType]=None, 
-        exit_branch: bool=True
+        condition: Optional[ConditionProtocol]=None, 
+        exit_branch: bool=True,
+        name: Optional[str]=None
     ):
         self.condition = condition
         self.schema = schema
         self.exit_branch = exit_branch
+        self.name = name
 
 
     def __call__(
@@ -132,6 +149,10 @@ class BranchStatement:
             input_data, evaluator
         ):
             return self.schema(input_data, evaluator)
+        
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.name} ({self.__dict__})"
 
 
 class SwitchStatement(Component):
@@ -140,11 +161,18 @@ class SwitchStatement(Component):
     def __init__(
         self, 
         *branches: BranchStatement,
+        name: Optional[str]=None
     ) -> None:
+        super().__init__(name)
         self.branches = branches
 
 
-    def __call__(self, input_data: Transformable, evaluator: Evaluator) -> Transformable:
+    def __call__(
+        self, input_data: Transformable, evaluator: Optional[Evaluator]=None
+    ) -> Transformable:
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+        
         for branch in self.branches:
             if res := branch(input_data, evaluator):
                 input_data = res
@@ -161,13 +189,20 @@ class ForEach(Component):
         statement: ExecutionSchema,
         get_key: str,
         set_key: Optional[str]=None,
+        name: Optional[str]=None
     ) -> None:
+        super().__init__(name)
         self.get_key = get_key
         self.set_key = set_key or get_key
         self.schema = statement
 
 
-    def __call__(self, input_data: Transformable, evaluator: Evaluator) -> Transformable:
+    def __call__(
+        self, input_data: Transformable, evaluator: Optional[Evaluator]=None
+    ) -> Transformable:
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+        
         data = getattr(input_data, self.get_key)
         # need check that this is a sequence of dict
 
@@ -178,12 +213,12 @@ class ForEach(Component):
                 Evaluator(
                     self.schema,
                     cfg=EvaluatorConfigs(
-                        name=f"{evaluator.cfg.name}.{self.__class__.__name__}",
+                        name=f"{evaluator.cfg.name}.{self.name}",
                         logging_level=evaluator.cfg.logging_level,
                         logging_handler=evaluator.cfg.logging_handler,
                         fast_exit=evaluator.cfg.fast_exit
                     )
-                ).run_program(t)
+                ).run(t)
                 for t in data
             ]
         )
@@ -193,22 +228,27 @@ class ForEach(Component):
 class Filter(Component):
     get_key: str
     set_key: str
-    condition: ConditionType
+    condition: ConditionProtocol
 
     def __init__(
         self,
-        condition: ConditionType,
+        condition: ConditionProtocol,
         get_key: str,
         set_key: Optional[str]=None,
+        name: Optional[str]=None
     ) -> None:
+        super().__init__(name)
         self.get_key = get_key
         self.set_key = set_key or get_key
         self.condition = condition
 
 
     def __call__(
-        self, input_data: Transformable, evaluator: Evaluator
+        self, input_data: Transformable, evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+
         data = getattr(input_data, self.get_key)
         setattr(
             input_data,
@@ -230,16 +270,21 @@ class While(Component):
         self, 
         condition: Condition,
         schema: ExecutionSchema,
-        max_iterations: int=-1
+        max_iterations: int=-1,
+        name: Optional[str]=None
     ) -> None:
+        super().__init__(name)
         self.condition = condition
         self.schema = schema
         self.max_iterations = max_iterations
 
 
     def __call__(
-        self, input_data: Transformable, evaluator: Evaluator
+        self, input_data: Transformable, evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+            
         i = self.max_iterations
         while i != 0 and self.condition(
             input_data,

@@ -1,3 +1,8 @@
+class ActionError(Exception):
+    def __init__(self, action_class: str, e: Exception):
+        super().__init__(f"Action error: {action_class}: {e}")
+
+
 class InputSchemaNotFound(Exception):
     def __init__(self, message: str="InputSchemaNotFound"):
         self.message = message
