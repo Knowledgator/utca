@@ -15,7 +15,7 @@ from implementation.apis.google_cloud.schema import (
     GoogleCloudClientConfig
 )
 
-class GoogleCloudClient: # TODO: issue with missmatched scopes
+class GoogleCloudClient:
     creds: Optional[Credentials]
     service: Any
 
@@ -47,10 +47,13 @@ class GoogleCloudClient: # TODO: issue with missmatched scopes
             creds, _ = google.auth.default() # type: ignore
             return creds # type: ignore
         
-        src = os.getenv('UTCA_TOKENS_DIRECTORY', DEFAULT_TOKENS_DIRECTORY)
-        if os.path.exists(f"{src}/google/token.json"):
+        src = (
+            os.getenv('UTCA_TOKENS_DIRECTORY', DEFAULT_TOKENS_DIRECTORY)
+            + f"/google/token.json"
+        )
+        if os.path.exists(src):
             creds = Credentials.from_authorized_user_file( # type: ignore
-                "token.json", scopes
+                src, scopes
             )
 
         if not creds:
@@ -65,7 +68,7 @@ class GoogleCloudClient: # TODO: issue with missmatched scopes
                 creds = cls.verify_creds(scopes, credentials) # type: ignore
             
         # Save the credentials for the next run
-        with open("token.json", "w") as token:
+        with open(src, "w") as token:
             token.write(creds.to_json()) # type: ignore
         return creds
     
