@@ -1,18 +1,15 @@
 from core.executable_level_1.schema import Transformable
 from implementation.tasks.text_processing.clean_text.token_searcher.token_searcher import (
-    TokenSearcherTextCleanerTask
+    TokenSearcherTextCleaner
 )
 from implementation.tasks.text_processing.clean_text.token_searcher.actions import (
     TokenSearcherTextCleanerPostprocessor,
-    TokenSearcherTextCleanerPostprocessorConfig
 )
 
 def test_tokensearcher_cleaner():
-    task = TokenSearcherTextCleanerTask(
+    task = TokenSearcherTextCleaner(
         postprocess=[TokenSearcherTextCleanerPostprocessor( # type: ignore
-            TokenSearcherTextCleanerPostprocessorConfig(
-                clean=True
-            )
+            clean=True
         )]
     )
     

@@ -14,7 +14,7 @@ from sqlalchemy.orm import (
     relationship
 )
 
-from implementation.datasources.db.sqlalchemy.main import (
+from implementation.datasources.db import (
     SQLSessionFactory, BaseModel, SQLAction, SQLActionWithReturns
 )
 

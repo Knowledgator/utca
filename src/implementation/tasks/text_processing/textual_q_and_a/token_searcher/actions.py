@@ -1,6 +1,5 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-from core.executable_level_1.schema import Config
 from core.executable_level_1.actions import Action
 from implementation.predictors.token_searcher.utils import (
     build_entity
@@ -20,16 +19,12 @@ Text:
         return input_data
     
 
-class TokenSearcherQandAPostprocessorConfig(Config):
-    threshold: float = 0.
-
-
 class TokenSearcherQandAPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
-        cfg: Optional[TokenSearcherQandAPostprocessorConfig]=None
+        threshold: float = 0.
     ) -> None:
-        self.cfg = cfg or TokenSearcherQandAPostprocessorConfig()
+        self.threshold = threshold
     
     
     def execute(
@@ -45,7 +40,7 @@ class TokenSearcherQandAPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
                 if (entity := build_entity(
                     input_data["inputs"][0],
                     ent,
-                    self.cfg.threshold
+                    self.threshold
                 ))
             ]
         }

@@ -63,7 +63,7 @@ class ModelOutput(Output):
     sequences_scores: Any
 
 
-class EntityLinkingTask(
+class TransformersEntityLinking(
     Task[
         EntityLinkingInput, 
         EntityLinkingOutput,

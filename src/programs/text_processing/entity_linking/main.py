@@ -1,12 +1,8 @@
 from typing import Any, Dict, List
 
-from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.eval import ForEach, ExecutionSchema
-from core.executable_level_1.actions import ExecuteFunction
-from implementation.tasks.text_processing.entity_linking.transformers.transformers_entity_linking import (
-    EntityLinkingTask
-)
-from implementation.tasks.text_processing.text_classification.comprehend_it.comprehend_it import (
+from core import ForEach, ExecuteFunction
+from implementation.tasks import (
+    TransformersEntityLinking,
     ComprehendIt
 )
 
@@ -29,14 +25,14 @@ def prepare_to_rescore(input_data: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 if __name__ == "__main__":
     pipeline = (
-        EntityLinkingTask(
+        TransformersEntityLinking(
             labels=["positive", "negative", "neutral"]
         )
         | ExecuteFunction(prepare_to_rescore).use(set_key="inputs")
-        | ForEach(ExecutionSchema(ComprehendIt()), get_key="inputs")
+        | ForEach(ComprehendIt(), get_key="inputs")
     )
 
-    res = Evaluator(pipeline).run_program({
+    res = pipeline.run({
         "num_beams": 2,
         "texts": sentences,
         "num_return_sequences": 2

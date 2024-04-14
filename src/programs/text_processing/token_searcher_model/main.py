@@ -1,17 +1,12 @@
 from typing import Dict, Any
 
-from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.actions import (
-    ExecuteFunction
+from core import ExecuteFunction
+from implementation.apis.google_cloud import GoogleCloudClient
+from implementation.datasources.google_docs import (
+    GoogleDocsClientConfig,
+    GoogleDocsRead,
 )
-from implementation.apis.google_cloud.client import GoogleCloudClient
-from implementation.datasources.google_docs.schema import (
-    GoogleDocsClientConfig
-)
-from implementation.datasources.google_docs.actions import (
-    GoogleDocsRead
-)
-from implementation.predictors.token_searcher.predictor import (
+from implementation.predictors import (
     TokenSearcherPredictor, TokenSearcherPredictorConfig
 )
 
@@ -65,7 +60,7 @@ if __name__ == "__main__":
         | model
     )
 
-    print(Evaluator(pipeline).run_program({
+    print(pipeline.run({
         "document_id": document_id
     }))
     # result should be written to specified spreadsheet

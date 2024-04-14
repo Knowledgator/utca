@@ -1,9 +1,7 @@
 import re
 
-from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.eval import Filter
-from implementation.conditions.pattern.main import RePattern
-from implementation.conditions.semantic.embedding import SemanticCondition
+from core import Filter
+from implementation.conditions import RePattern, SemanticCondition
 
 sentences = [
     "I love exploring new restaurants and trying different cuisines when I travel.",
@@ -36,6 +34,6 @@ if __name__ == "__main__":
         ), get_key="texts")
     )
     
-    print(Evaluator(pipeline).run_program({"texts": [
+    print(pipeline.run({"texts": [
         {"text": s} for s in sentences
     ]}))

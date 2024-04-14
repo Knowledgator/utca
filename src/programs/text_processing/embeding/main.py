@@ -1,5 +1,4 @@
-from core.executable_level_1.schema import Transformable
-from implementation.schemas.semantic_search_schema import SemanticSearchSchema
+from implementation.schemas import SemanticSearchSchema
 
 # Sentences for dataset
 sentences = [
@@ -16,8 +15,8 @@ if __name__ == "__main__":
         dataset=sentences
     )
 
-    res = search(Transformable({
+    res = search.run({
         "query": ["Bad weather"],
         "results_count": 1
-    })).extract()
+    })
     print(f'About bad weather: {res["search_results"]["texts"][0]}')

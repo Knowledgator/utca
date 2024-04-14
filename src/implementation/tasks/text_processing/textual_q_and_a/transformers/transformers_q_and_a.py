@@ -24,7 +24,7 @@ class QandAOutput(Output):
     score: float=0.
 
 
-class QandATask(
+class TransformersTextualQandA(
     Task[
         QandAInput, 
         QandAOutput,

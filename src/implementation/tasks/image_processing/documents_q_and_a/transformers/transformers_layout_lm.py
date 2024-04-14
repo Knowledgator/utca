@@ -32,7 +32,7 @@ class ModelOutput(Output):
     output: Any
 
 
-class DocumentQandATask(
+class TransformersDocumentQandA(
     Task[
         DocumentQandAInput, 
         DocumentQandAOutput,

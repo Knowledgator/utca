@@ -33,7 +33,7 @@ class ModelOutput(Output):
     output: Any
 
 
-class TokenClassifierTask(
+class TransformersTokenClassifier(
     NERTask[
         TokenClassifierInput, 
         NEROutput[ClassifiedEntity],

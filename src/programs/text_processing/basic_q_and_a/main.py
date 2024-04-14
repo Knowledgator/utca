@@ -1,9 +1,9 @@
 from core.executable_level_1.schema import Transformable
 from implementation.tasks.text_processing.textual_q_and_a.transformers.transformers_q_and_a import (
-    QandATask
+    TransformersTextualQandA
 )
 
-task = QandATask()
+task = TransformersTextualQandA()
 
 if __name__ == "__main__":
     print(task(Transformable({

@@ -2,33 +2,22 @@ from typing import Dict, Any
 import pathlib
 PATH = pathlib.Path(__file__).parent.resolve()
 
-from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.eval import ExecutionSchema
-from core.executable_level_1.actions import (
+from core import (
     ExecuteFunction,
     AddData,
     RenameAttribute
 )
-from implementation.datasources.pdf.actions import (
+from implementation.datasources.pdf import (
     PDFRead, PDFExtractTexts
 )
-from implementation.predictors.token_searcher.predictor import (
+from implementation.predictors import (
     TokenSearcherPredictor, TokenSearcherPredictorConfig
 )
-from implementation.tasks.text_processing.clean_text.token_searcher.token_searcher import (
-    TokenSearcherTextCleanerTask
-)
-from implementation.tasks.text_processing.clean_text.token_searcher.actions import (
+from implementation.tasks import (
+    TokenSearcherTextCleaner,
     TokenSearcherTextCleanerPostprocessor,
-    TokenSearcherTextCleanerPostprocessorConfig
-)
-from implementation.tasks.text_processing.ner.token_searcher.token_searcher import (
-    TokenSearcherNERTask
-)
-from implementation.tasks.text_processing.ner.token_searcher.actions import (
+    TokenSearcherNER,
     TokenSearcherNERPostprocessor,
-    TokenSearcherNERPostprocessorConfig
-
 )
 
 def get_page_text(input: Dict[int, Any]) -> Dict[str, Any]:
@@ -44,25 +33,23 @@ if __name__ == "__main__":
     )
 
     # clean text stage
-    clean_task = TokenSearcherTextCleanerTask(
+    clean_task = TokenSearcherTextCleaner(
         predictor=model,
         postprocess=[TokenSearcherTextCleanerPostprocessor(
-            TokenSearcherTextCleanerPostprocessorConfig(clean=True),
+            clean=True,
         )]
     )
 
     # NER stage
-    ner_task = TokenSearcherNERTask(
+    ner_task = TokenSearcherNER(
         predictor=model,
         postprocess=[TokenSearcherNERPostprocessor(
-            TokenSearcherNERPostprocessorConfig(
-                threshold=0.8
-            )
+            threshold=0.8
         )]
     )
 
     # create pipeline with described stages
-    pipeline: ExecutionSchema = (
+    pipeline = (
         PDFRead().use(set_key="pdf")
         | PDFExtractTexts().use(
             get_key="pdf", 
@@ -80,7 +67,7 @@ if __name__ == "__main__":
     )
 
     # call pipeline
-    res = Evaluator(pipeline).run_program({
+    res = pipeline.run({
         "path_to_file": f"{PATH}/test.pdf"
     })
 

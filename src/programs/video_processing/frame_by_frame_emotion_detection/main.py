@@ -7,27 +7,22 @@ from transformers import ( # type: ignore
 )
 import numpy as np
 
-from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.actions import (
+from core import (
     ExecuteFunction
 )
-from implementation.predictors.transformers.transformers_model import (
+from implementation.predictors import (
     TransformersModel,
-    TransformersModelConfig
+    TransformersModelConfig,
+    TransformersImageClassificationModelInput,
+    TransformersImageClassificationModelOutput
 )
-from implementation.tasks.image_processing.image_classification.transformers.transformers_image_classification import (
+from implementation.tasks import (
     TransformersImageClassification,
-    TransformersImageClassificationOutputMultipleLabels,
-    ImageModelInput,
-    ImageModelOutput
-)
-from implementation.tasks.image_processing.image_classification.transformers.actions import (
+    TransformersImageClassificationMultilabelOutput,
     ImageClassificationPreprocessor,
-    ImageClassificationPreprocessorConfig,
-    ImageClassificationMultyLabelPostprocessor,
-    ImageClassificationPostprocessorConfig,
+    ImageClassificationMultilabelPostprocessor,
 )
-from implementation.datasources.video.actions import (
+from implementation.datasources.video import (
     VideoRead,
     VideoWrite
 )
@@ -44,24 +39,20 @@ task = TransformersImageClassification(
         TransformersModelConfig(
             model=model # type: ignore
         ),
-        input_class=ImageModelInput,
-        output_class=ImageModelOutput
+        input_class=TransformersImageClassificationModelInput,
+        output_class=TransformersImageClassificationModelOutput,
     ),
     preprocess=[
         ImageClassificationPreprocessor(
-            ImageClassificationPreprocessorConfig(
-                processor=processor # type: ignore
-            )
+            processor=processor # type: ignore
         )
     ],
     postprocess=[
-        ImageClassificationMultyLabelPostprocessor(
-            ImageClassificationPostprocessorConfig(
-                labels=labels # type: ignore
-            )
+        ImageClassificationMultilabelPostprocessor(
+            labels=labels # type: ignore
         )
     ],
-    output_class=TransformersImageClassificationOutputMultipleLabels
+    output_class=TransformersImageClassificationMultilabelOutput
 )
 
 def prepare_batch_image_classification_input(state: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -122,6 +113,6 @@ if __name__ == "__main__":
         | VideoWrite()
     )
 
-    Evaluator(pipeline).run_program({
+    pipeline.run({
         "path_to_file": "programs/video_processing/frame_by_frame_emotion_detection/White Chicks - short.mp4"
     })

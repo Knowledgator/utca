@@ -3,32 +3,25 @@ import logging
 import pathlib
 PATH = pathlib.Path(__file__).parent.resolve()
 
-from core.executable_level_1.interpreter import (
-    Evaluator, EvaluatorConfigs
-)
-from core.executable_level_1.eval import (
-    ForEach
-)
-from core.executable_level_1.memory import (
+from core import (
+    Evaluator, 
+    EvaluatorConfigs,
+    ForEach,
     SetMemory, 
     MemorySetInstruction,
     GetMemory, 
     MemoryGetInstruction,
-)
-from core.executable_level_1.actions import (
     Log,
     Flush,
     AddData,
     ExecuteFunction,
 )
-from implementation.datasources.pdf.actions import (
+from implementation.datasources.pdf import (
     PDFRead, PDFExtractTexts, PDFExtractImages, PDFFindTables
 )
-from implementation.tasks.text_processing.summarization.transformers.transformers_summarization import (
-    SummarizationTask
-)
-from implementation.tasks.image_processing.documents_q_and_a.transformers.transformers_layout_lm import (
-    DocumentQandATask
+from implementation.tasks import (
+    TransformersTextSummarization,
+    TransformersDocumentQandA
 )
 
 def prepare_text_summarization_input(
@@ -104,7 +97,7 @@ if __name__ == "__main__":
 
     process_visual_data = (
         AddData({"question": "What is described here?"})
-        | DocumentQandATask()
+        | TransformersDocumentQandA()
     )
 
     image_processing = (
@@ -162,7 +155,7 @@ if __name__ == "__main__":
             prepare_text_summarization_input
         ).use(set_key="texts")
         | Log(logger, "Texts:")
-        | SummarizationTask().use(
+        | TransformersTextSummarization().use(
             get_key="texts",
             set_key="summaries"
         )
@@ -195,7 +188,7 @@ if __name__ == "__main__":
     inputs = Evaluator(
         pipeline,
         cfg=EvaluatorConfigs()
-    ).run_program({
+    ).run({
         "path_to_file": f"{PATH}/pfizer-report.pdf",
         "pages": [10, 11, 12]
     })

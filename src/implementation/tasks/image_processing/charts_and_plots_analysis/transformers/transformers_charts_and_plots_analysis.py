@@ -43,7 +43,7 @@ class ModelOutput(Output):
     output: Any
 
 
-class ChartsAndPlotsAnalysis(
+class TransformersChartsAndPlotsAnalysis(
     Task[
         ChartsAndPlotsAnalysisInput, 
         ChartsAndPlotsAnalysisOutput

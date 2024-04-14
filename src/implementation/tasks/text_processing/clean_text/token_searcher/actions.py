@@ -1,7 +1,6 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from core.executable_level_1.actions import Action
-from core.executable_level_1.schema import Config
 from implementation.predictors.token_searcher.utils import (
     build_entity
 )
@@ -23,17 +22,14 @@ Clean the following text extracted from the web matching not relevant parts:
         return input_data
 
 
-class TokenSearcherTextCleanerPostprocessorConfig(Config):
-    clean: bool = False
-    threshold: float = 0.
-
-
 class TokenSearcherTextCleanerPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
-        cfg: Optional[TokenSearcherTextCleanerPostprocessorConfig] = None
+        clean: bool=False,
+        threshold: float=0.
     ) -> None:
-        self.cfg = cfg or TokenSearcherTextCleanerPostprocessorConfig()
+        self.clean = clean
+        self.threshold = threshold
 
 
     @classmethod
@@ -57,7 +53,7 @@ class TokenSearcherTextCleanerPostprocessor(Action[Dict[str, Any], Dict[str, Any
             if (entity := build_entity(
                 input_data["inputs"][0],
                 ent, 
-                self.cfg.threshold
+                self.threshold
             ))
         ]
         return {
@@ -65,6 +61,6 @@ class TokenSearcherTextCleanerPostprocessor(Action[Dict[str, Any], Dict[str, Any
             "output": junk,
             "cleaned_text": (
                 self.clean_text(input_data["text"], junk) 
-                if self.cfg.clean else None
+                if self.clean else None
             )
         }

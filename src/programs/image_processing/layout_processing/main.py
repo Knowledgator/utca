@@ -1,16 +1,15 @@
 import pathlib
 PATH = pathlib.Path(__file__).parent.resolve()
 
-from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.actions import (
+from core import (
     AddData
 )
-from implementation.tasks.image_processing.documents_q_and_a.transformers.transformers_layout_lm import (
-    DocumentQandATask
+from implementation.tasks import (
+    TransformersDocumentQandA
 )
-from implementation.datasources.image.actions import ImageRead
+from implementation.datasources.image import ImageRead
 
-task = DocumentQandATask()
+task = TransformersDocumentQandA()
 
 if __name__ == "__main__":
     pipeline = (
@@ -21,6 +20,6 @@ if __name__ == "__main__":
         | task
     )
 
-    print(Evaluator(pipeline).run_program({
+    print(pipeline.run({
         "path_to_file": f"{PATH}/test.jpeg"
     }))

@@ -30,7 +30,7 @@ class TokenSearcherTextCleanerOutput(NEROutput[Entity]):
     cleaned_text: Optional[str] = None
 
 
-class TokenSearcherTextCleanerTask(
+class TokenSearcherTextCleaner(
     NERTask[
         TokenSearcherTextCleanerInput,
         TokenSearcherTextCleanerOutput

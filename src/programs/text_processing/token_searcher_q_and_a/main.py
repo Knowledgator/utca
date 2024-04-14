@@ -2,31 +2,24 @@ from typing import Dict, Any
 import pathlib
 PATH = pathlib.Path(__file__).parent.resolve()
 
-from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.actions import (
+from core import (
     ExecuteFunction,
     AddData,
 )
-from implementation.apis.google_cloud.client import GoogleCloudClient
-from implementation.datasources.google_spreadsheet.schema import (
+from implementation.apis.google_cloud import GoogleCloudClient
+from implementation.datasources.google_spreadsheet import (
     GoogleSpreadsheetClientConfig,
-)
-from implementation.datasources.google_spreadsheet.actions import (
     GoogleSpreadsheetRead,
-    GoogleSpreadsheetWrite
+    GoogleSpreadsheetWrite,
+    Dimension,
 )
-from implementation.datasources.google_spreadsheet.schema import (
-    Dimension
+from implementation.predictors import (
+    TokenSearcherPredictor, 
+    TokenSearcherPredictorConfig
 )
-from implementation.predictors.token_searcher.predictor import (
-    TokenSearcherPredictor, TokenSearcherPredictorConfig
-)
-from implementation.tasks.text_processing.textual_q_and_a.token_searcher.token_searcher import (
-    TokenSearcherQandATask
-)
-from implementation.tasks.text_processing.textual_q_and_a.token_searcher.actions import (
+from implementation.tasks import (
+    TokenSearcherQandATask,
     TokenSearcherQandAPostprocessor,
-    TokenSearcherQandAPostprocessorConfig
 )
 
 def get_input_for_q_and_a(input: Dict[str, Any]) -> Dict[str, Any]:
@@ -70,9 +63,7 @@ if __name__ == "__main__":
     q_and_a = TokenSearcherQandATask(
         predictor=model,
         postprocess=[TokenSearcherQandAPostprocessor(
-            TokenSearcherQandAPostprocessorConfig(
-                threshold=0.7
-            )
+            threshold=0.7
         )]
     )
 
@@ -93,7 +84,7 @@ if __name__ == "__main__":
         | GoogleSpreadsheetWrite(client)
     )
 
-    Evaluator(pipeline).run_program({
+    pipeline.run({
         "spreadsheet_id": spreadsheet_id,
         "cells_range": "A2:B2"
     })

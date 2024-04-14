@@ -17,11 +17,13 @@ from implementation.predictors.transformers.transformers_model import (
     TransformersModel,
     TransformersModelConfig
 )
+from implementation.predictors.transformers.schema import (
+    TransformersImageClassificationModelInput,
+    TransformersImageClassificationModelOutput,
+)
 from implementation.tasks.image_processing.image_classification.transformers.actions import (
     ImageClassificationPreprocessor,
-    ImageClassificationPreprocessorConfig,
     ImageClassificationSingleLabelPostprocessor,
-    ImageClassificationPostprocessorConfig
 )
 from implementation.datasources.image.actions import ImagePad
 
@@ -36,16 +38,8 @@ class TransformersImageClassificationOutput(Output):
     label: str
 
 
-class TransformersImageClassificationOutputMultipleLabels(Output):
+class TransformersImageClassificationMultilabelOutput(Output):
     labels: Dict[str, float]
-
-
-class ImageModelInput(Input):
-    pixel_values: Any
-
-
-class ImageModelOutput(Output):
-    logits: Any
 
 
 class TransformersImageClassification(
@@ -71,8 +65,8 @@ class TransformersImageClassification(
                 TransformersModelConfig(
                     model=model # type: ignore
                 ),
-                input_class=ImageModelInput,
-                output_class=ImageModelOutput
+                input_class=TransformersImageClassificationModelInput,
+                output_class=TransformersImageClassificationModelOutput
             )
         
         if not preprocess:
@@ -80,9 +74,7 @@ class TransformersImageClassification(
             preprocess = [
                 ImagePad(width=224, height=224),
                 ImageClassificationPreprocessor(
-                    ImageClassificationPreprocessorConfig(
-                        processor=processor # type: ignore
-                    )
+                    processor=processor # type: ignore
                 )
             ]
 
@@ -90,9 +82,7 @@ class TransformersImageClassification(
             labels = AutoConfig.from_pretrained(self.default_model).id2label # type: ignore
             postprocess = [
                 ImageClassificationSingleLabelPostprocessor(
-                    ImageClassificationPostprocessorConfig(
-                        labels=labels # type: ignore
-                    )
+                    labels=labels # type: ignore
                 )
             ]
 

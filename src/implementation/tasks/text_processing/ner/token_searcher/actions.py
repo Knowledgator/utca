@@ -1,6 +1,5 @@
-from typing import Any, Dict, Tuple, Optional, cast
+from typing import Any, Dict, Tuple, cast
 
-from core.executable_level_1.schema import Config
 from core.executable_level_1.actions import Action
 from core.task_level_3.objects.objects import (
     ClassifiedEntity
@@ -8,10 +7,6 @@ from core.task_level_3.objects.objects import (
 from implementation.predictors.token_searcher.utils import (
     build_entity, sent_tokenizer
 )
-
-class TokenSearcherNERPreprocessorConfig(Config):
-    sents_batch: int=10
-
 
 class TokenSearcherNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     prompt: str = """
@@ -21,13 +16,13 @@ Text:
  """
     def __init__(
         self, 
-        cfg: Optional[TokenSearcherNERPreprocessorConfig]=None
+        sents_batch: int=10
     ) -> None:
-        self.cfg = cfg or TokenSearcherNERPreprocessorConfig()
+        self.sents_batch = sents_batch
 
     
     def get_last_sentence_id(self, i: int, sentences_len: int) -> int:
-        return min(i + self.cfg.sents_batch, sentences_len) - 1
+        return min(i + self.sents_batch, sentences_len) - 1
 
 
     def chunkanize(self, text: str) -> Tuple[list[str], list[int]]:
@@ -36,7 +31,7 @@ Text:
 
         sentences: list[Tuple[int, int]] = [*sent_tokenizer(text)]
 
-        for i in range(0, len(sentences), self.cfg.sents_batch):
+        for i in range(0, len(sentences), self.sents_batch):
             start = sentences[i][0]
             starts.append(start)
 
@@ -77,16 +72,12 @@ Text:
         return input_data
 
 
-class TokenSearcherNERPostprocessorConfig(Config):
-    threshold: float = 0.
-
-
 class TokenSearcherNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
-        cfg: Optional[TokenSearcherNERPostprocessorConfig]=None
+        threshold: float=0.
     ) -> None:
-        self.cfg = cfg or TokenSearcherNERPostprocessorConfig()
+        self.threshold = threshold
     
     
     def execute(
@@ -107,7 +98,7 @@ class TokenSearcherNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
                 if entity := build_entity(
                     input_data["text"], 
                     ent, 
-                    self.cfg.threshold, 
+                    self.threshold, 
                     label, 
                     shift=shift
                 ):

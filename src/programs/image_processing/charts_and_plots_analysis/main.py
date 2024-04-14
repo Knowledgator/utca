@@ -1,16 +1,15 @@
 import pathlib
 PATH = pathlib.Path(__file__).parent.resolve()
 
-from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.actions import (
+from core import (
     AddData
 )
-from implementation.tasks.image_processing.charts_and_plots_analysis.transformers.transformers_charts_and_plots_analysis import (
-    ChartsAndPlotsAnalysis
+from implementation.tasks import (
+    TransformersChartsAndPlotsAnalysis
 )
-from implementation.datasources.image.actions import ImageRead
+from implementation.datasources.image import ImageRead
 
-task = ChartsAndPlotsAnalysis()
+task = TransformersChartsAndPlotsAnalysis()
 
 if __name__ == "__main__":
     pipeline = (
@@ -19,6 +18,6 @@ if __name__ == "__main__":
         | task
     )
 
-    print(Evaluator(pipeline).run_program({
+    print(pipeline.run({
         "path_to_file": f"{PATH}/test.png"
     }))

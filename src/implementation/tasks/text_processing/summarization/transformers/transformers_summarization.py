@@ -25,7 +25,7 @@ class ModelOutput(Output):
     output: Any
 
 
-class SummarizationTask(
+class TransformersTextSummarization(
     Task[
         SummarizationTaskInput, 
         SummarizationOutput,

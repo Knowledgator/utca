@@ -27,7 +27,7 @@ class TokenSearcherNEROutput(NEROutput[ClassifiedEntity]):
     text: str
 
 
-class TokenSearcherNERTask(
+class TokenSearcherNER(
     NERTask[
         TokenSearcherNERInput, 
         TokenSearcherNEROutput

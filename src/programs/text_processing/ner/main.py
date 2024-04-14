@@ -1,11 +1,10 @@
-from core.executable_level_1.schema import Transformable
-from implementation.tasks.text_processing.ner.transformers.transformers_token_classification import (
-    TokenClassifierTask
+from implementation.tasks import (
+    TransformersTokenClassifier
 )
 
-task = TokenClassifierTask()
+task = TransformersTokenClassifier()
 
 if __name__ == "__main__":
-    print(task(Transformable({
+    print(task.run({
         "inputs": "My name is Sarah and I live in London"
-    })).extract())
+    }))
