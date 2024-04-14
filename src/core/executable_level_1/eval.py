@@ -86,18 +86,18 @@ class ConditionProtocol(Protocol):
 
 class Condition:
     validator: Callable[[Transformable], bool]
-    schema: ExecutionSchema
+    schema: Component
     state: Optional[List[Union[str, Tuple[str, str]]]]
 
     def __init__(
         self, 
         validator: Callable[[Transformable], bool],
-        statement: ExecutionSchema,
+        schema: Component,
         state: Optional[List[Union[str, Tuple[str, str]]]]=None,
         name: Optional[str]=None
     ) -> None:
         self.validator = validator
-        self.schema = statement
+        self.schema = schema
         self.state = state
         self.name = name or self.__class__.__name__
     
@@ -180,11 +180,11 @@ class SwitchStatement(Component):
 
 
 class ForEach(Component):
-    schema: ExecutionSchema
+    schema: Component
 
     def __init__(
         self, 
-        statement: ExecutionSchema,
+        schema: Component,
         get_key: str,
         set_key: Optional[str]=None,
         name: Optional[str]=None
@@ -192,7 +192,7 @@ class ForEach(Component):
         super().__init__(name)
         self.get_key = get_key
         self.set_key = set_key or get_key
-        self.schema = statement
+        self.schema = schema
 
 
     def __call__(
@@ -260,14 +260,14 @@ class Filter(Component):
 
 
 class While(Component):
-    schema: ExecutionSchema
+    schema: Component
     condition:  Condition
     max_iterations: int
 
     def __init__(
         self, 
         condition: Condition,
-        schema: ExecutionSchema,
+        schema: Component,
         max_iterations: int=-1,
         name: Optional[str]=None
     ) -> None:
