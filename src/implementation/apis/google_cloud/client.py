@@ -2,6 +2,7 @@ from typing import (
     Any, Dict, List, Optional, Union, cast
 ) 
 import os.path
+import os
 
 import google.auth # type: ignore
 from google.auth.transport.requests import Request # type: ignore
@@ -9,6 +10,7 @@ from google.oauth2.credentials import Credentials # type: ignore
 from google_auth_oauthlib.flow import InstalledAppFlow # type: ignore
 from googleapiclient.discovery import build # type: ignore
 
+from core.constants import DEFAULT_TOKENS_DIRECTORY
 from implementation.apis.google_cloud.schema import (
     GoogleCloudClientConfig
 )
@@ -45,7 +47,8 @@ class GoogleCloudClient: # TODO: issue with missmatched scopes
             creds, _ = google.auth.default() # type: ignore
             return creds # type: ignore
         
-        if os.path.exists("token.json"):
+        src = os.getenv('UTCA_TOKENS_DIRECTORY', DEFAULT_TOKENS_DIRECTORY)
+        if os.path.exists(f"{src}/google/token.json"):
             creds = Credentials.from_authorized_user_file( # type: ignore
                 "token.json", scopes
             )
