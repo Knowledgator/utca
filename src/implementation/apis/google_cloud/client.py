@@ -49,17 +49,20 @@ class GoogleCloudClient:
         
         src = (
             os.getenv('UTCA_TOKENS_DIRECTORY', DEFAULT_TOKENS_DIRECTORY)
-            + f"/google/token.json"
+            + f"/google/"
         )
-        if os.path.exists(src):
+        token_src = src + "token.json"
+        if os.path.exists(token_src):
             creds = Credentials.from_authorized_user_file( # type: ignore
-                src, scopes
+                token_src
             )
+        else:
+            os.makedirs(src, exist_ok=True)
 
         if not creds:
             creds = cls.verify_creds(scopes, credentials)
-        elif not all(s in scopes for s in creds.scopes): # type: ignore
-            scopes = cast(List[str], [*creds.scopes, *scopes]) # type: ignore
+        elif not all(s in creds.scopes for s in scopes): # type: ignore
+            scopes = cast(List[str], list(set(*creds.scopes, *scopes))) # type: ignore
             creds = cls.verify_creds(scopes, credentials)
         elif not creds.valid:
             try:
@@ -68,7 +71,7 @@ class GoogleCloudClient:
                 creds = cls.verify_creds(scopes, credentials) # type: ignore
             
         # Save the credentials for the next run
-        with open(src, "w") as token:
+        with open(token_src, "w") as token:
             token.write(creds.to_json()) # type: ignore
         return creds
     
