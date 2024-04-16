@@ -47,7 +47,7 @@ class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
             evaluator = self.set_up_default_evaluator()
 
         data = getattr(input_data, self.get_key)
-        if isinstance(input_data, Dict):
+        if isinstance(data, Dict):
             result = self.component.execute(
                 cast(Dict[str, Any], data), evaluator
             )
