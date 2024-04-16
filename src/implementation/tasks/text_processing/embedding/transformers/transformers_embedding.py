@@ -28,7 +28,7 @@ class TextEmbeddingOutput(Output):
     embeddings: Any
 
 
-class TextEmbeddingTask(
+class TextEmbedding(
     Task[
         TextEmbeddingInput, 
         TextEmbeddingOutput,

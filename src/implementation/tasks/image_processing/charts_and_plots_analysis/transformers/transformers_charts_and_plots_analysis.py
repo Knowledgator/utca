@@ -32,14 +32,10 @@ class ChartsAndPlotsAnalysisInput(Input):
     text: str
 
 
-class ChartsAndPlotsAnalysisOutput(Output):
-    output: Any
-
-
 class TransformersChartsAndPlotsAnalysis(
     Task[
         ChartsAndPlotsAnalysisInput, 
-        ChartsAndPlotsAnalysisOutput
+        TransformersBasicOutput
     ]
 ):
     default_model: str = "google/deplot"
@@ -51,7 +47,7 @@ class TransformersChartsAndPlotsAnalysis(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[ChartsAndPlotsAnalysisInput]=ChartsAndPlotsAnalysisInput,
-        output_class: Type[ChartsAndPlotsAnalysisOutput]=ChartsAndPlotsAnalysisOutput,
+        output_class: Type[TransformersBasicOutput]=TransformersBasicOutput,
         name: Optional[str]=None,
     ) -> None:
         if not predictor:

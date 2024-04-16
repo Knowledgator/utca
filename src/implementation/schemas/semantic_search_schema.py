@@ -9,7 +9,7 @@ from core.executable_level_1.schema import (
     Input, Output, Transformable
 )
 from implementation.tasks.text_processing.embedding.transformers.transformers_embedding import (
-    TextEmbeddingTask
+    TextEmbedding
 )
 from implementation.datasources.index.actions import (
     CreateIndex, IndexData, SearchIndex, GetTextsByIndexes,
@@ -33,7 +33,7 @@ class SemanticSearchSchema(
     def __init__(
         self, 
         dataset: Optional[List[str]]=None, 
-        encoder: Optional[TextEmbeddingTask]=None,
+        encoder: Optional[TextEmbedding]=None,
         input_class: Type[SemanticSearchSchemaInput]=SemanticSearchSchemaInput,
         output_class: Type[SemanticSearchSchemaOutput]=SemanticSearchSchemaOutput,
         name: Optional[str]=None,
@@ -44,7 +44,7 @@ class SemanticSearchSchema(
             name=name,
         )
         if encoder is None:
-            encoder = TextEmbeddingTask()
+            encoder = TextEmbedding()
         self.encoder = encoder
 
         self.index = self.build_index()

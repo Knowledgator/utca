@@ -24,10 +24,14 @@ from implementation.tasks.text_processing.ner.transformers.actions import (
     TokenClassifierPostprocessor
 )
 
+class TransformersTokenClassifierOutput(NEROutput[ClassifiedEntity]):
+    ...
+
+
 class TransformersTokenClassifier(
     NERTask[
         TransformersBasicInput, 
-        NEROutput[ClassifiedEntity],
+        TransformersTokenClassifierOutput,
     ]
 ):
     default_model = "dbmdz/bert-large-cased-finetuned-conll03-english"
@@ -39,7 +43,7 @@ class TransformersTokenClassifier(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TransformersBasicInput]=TransformersBasicInput,
-        output_class: Type[NEROutput[ClassifiedEntity]]=NEROutput[ClassifiedEntity],
+        output_class: Type[TransformersTokenClassifierOutput]=TransformersTokenClassifierOutput,
         name: Optional[str]=None,
     ) -> None:
         if not predictor:
