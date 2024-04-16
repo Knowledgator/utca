@@ -77,8 +77,10 @@ Text:
 class TokenSearcherNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
-        threshold: float=0.
+        threshold: float=0.,
+        name: Optional[str]=None,
     ) -> None:
+        super().__init__(name)
         self.threshold = threshold
     
     

@@ -41,10 +41,14 @@ class TokenSearcherQandATask(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TokenSearcherQandAInput]=TokenSearcherQandAInput,
-        output_class: Type[TokenSearcherQandAOutput]=TokenSearcherQandAOutput
+        output_class: Type[TokenSearcherQandAOutput]=TokenSearcherQandAOutput,
+        name: Optional[str]=None,
     ) -> None:
-        self.predictor = predictor or TokenSearcherPredictor()
-        self._preprocess = preprocess or [TokenSearcherQandAPreprocessor()]
-        self._postprocess = postprocess or [TokenSearcherQandAPostprocessor()]
-        self.input_class = input_class
-        self.output_class = output_class
+        super().__init__(
+            predictor=predictor or TokenSearcherPredictor(),
+            preprocess=preprocess or [TokenSearcherQandAPreprocessor()],
+            postprocess=postprocess or [TokenSearcherQandAPostprocessor()],
+            input_class=input_class,
+            output_class=output_class,
+            name=name,
+        )
