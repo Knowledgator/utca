@@ -3,6 +3,7 @@ token.*
 credentials.*
 poetry.lock
 .vscode
+.utca_tokens
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
