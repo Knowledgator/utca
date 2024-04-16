@@ -285,7 +285,7 @@ class ExecuteFunction(Action[ActionInput, ActionOutput]):
         f: Callable[[ActionInput], ActionOutput],
         name: Optional[str]=None
     ) -> None:
-        super().__init__(name)
+        super().__init__(name or f"{self.__class__.__name__}.{f.__name__}")
         self.f = f
 
 
