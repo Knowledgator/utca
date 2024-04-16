@@ -8,12 +8,12 @@ from implementation.datasources.audio import (
     AudioWrite
 )
 
-if __name__ == "__main__":
-    pipeline = (
-        TransformersTextToSpeech()
-        | AudioWrite()
-    )
+pipeline = (
+    TransformersTextToSpeech()
+    | AudioWrite()
+)
 
+if __name__ == "__main__":
     pipeline.run({
         "text_inputs": "Hello world!",
         "path_to_file": f"{PATH}/test.wav"
