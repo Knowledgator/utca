@@ -1,4 +1,4 @@
-from typing import Any, List,  Optional, Tuple, Type, cast
+from typing import Any, Dict, List, Optional, Tuple, Type, cast
 
 from transformers import ( # type: ignore
     ViltProcessor, ViltForQuestionAnswering, AutoConfig
@@ -24,6 +24,10 @@ from implementation.tasks.image_processing.visual_q_and_a.transformers.actions i
 
 class TransformersVisualQandAOutput(Output):
     answer: Tuple[str, float]
+
+
+class TransformersVisualQandAMultianswerOutput(Output):
+    answers: Dict[str, float]
 
 
 class TransformersVisualQandA(
