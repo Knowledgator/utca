@@ -66,7 +66,7 @@ class TransformersEntityLinkingOutput(Output):
         arbitrary_types_allowed = True
 
     sequences: Any
-    sequences_scores: Any
+    sequences_scores: Optional[Any]=None
 
 
 class TransformersTextualQandAInput(Input):

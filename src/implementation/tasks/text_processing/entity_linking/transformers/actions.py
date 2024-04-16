@@ -44,7 +44,7 @@ class EntityLinkingPostprocess(Action[Dict[str, Any], Dict[str, Any]]):
         )
 
         num_beams = input_data["num_beams"]
-        if num_beams <= 1:
+        if num_beams > 1:
             scores = input_data["sequences_scores"] # type: ignore
         else:
             scores = torch.ones(len(decodes))
