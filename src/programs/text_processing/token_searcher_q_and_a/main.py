@@ -42,7 +42,7 @@ def create_table(input: Dict[str, Any]) -> Dict[str, Any]:
 if __name__ == "__main__":
     # Google Spreadsheet client
     client = GoogleCloudClient(GoogleSpreadsheetClientConfig(
-        credentials=f"{PATH}/credentials.json",
+        credentials="credentials.json",
         # path to your credentials. 
         # Can be not provided if you are using 
         # environment credentials for Google cloud.
