@@ -1,10 +1,10 @@
-import logging
 import pathlib
 PATH = pathlib.Path(__file__).parent.resolve()
 
 from implementation.datasources.pdf.actions import (
     PDFRead,
-    PDFWrite
+    PDFWrite,
+    PDFExtractTexts
 )
 
 def test_pdf():
@@ -14,8 +14,8 @@ def test_pdf():
         "y_pending": 1
     })
 
-    texts = PDFRead().execute({
+    pdf = PDFRead().execute({
         "path_to_file": f"{PATH}/test.pdf"
     })
-    
-    logging.error(texts)
+
+    assert PDFExtractTexts().execute(pdf)[1]
