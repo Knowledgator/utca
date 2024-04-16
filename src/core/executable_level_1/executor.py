@@ -16,12 +16,14 @@ class BasicExecutor(Component, Generic[ExecutorComponent]):
         self, 
         component: ExecutorComponent, 
         get_key: Optional[str]=None,
-        set_key: Optional[str]=None
+        set_key: Optional[str]=None,
+        default_key: str="output",
     ) -> None:
         self.component = component
         self.get_key = get_key or "__dict__"
         self.set_key = set_key
-    
+        self.default_key = default_key
+
 
     @property
     def name(self) -> str:
@@ -70,7 +72,7 @@ class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
             ]
             setattr(
                 input_data,
-                self.set_key or self.component.default_key,
+                self.set_key or self.default_key,
                 result
             )
             return input_data

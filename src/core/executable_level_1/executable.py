@@ -26,7 +26,6 @@ class Executable(
     Component, 
     ABC
 ):
-    default_key: str
     input_class: Type[InputType]
     output_class: Type[OutputType]
 
@@ -34,13 +33,11 @@ class Executable(
         self, 
         input_class: Type[InputType]=Input,
         output_class: Type[OutputType]=Output, 
-        default_key: str="output",
         name: Optional[str]=None,
     ):
         super().__init__(name)
         self.input_class = input_class
         self.output_class = output_class
-        self.default_key = default_key
 
 
     @abstractmethod
