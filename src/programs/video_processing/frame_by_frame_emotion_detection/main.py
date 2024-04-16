@@ -18,9 +18,9 @@ from implementation.predictors import (
 )
 from implementation.tasks import (
     TransformersImageClassification,
-    TransformersImageClassificationMultilabelOutput,
+    TransformersImageClassificationOutput,
     ImageClassificationPreprocessor,
-    ImageClassificationMultilabelPostprocessor,
+    ImageClassificationSingleLabelPostprocessor,
 )
 from implementation.datasources.video import (
     VideoRead,
@@ -48,11 +48,11 @@ task = TransformersImageClassification(
         )
     ],
     postprocess=[
-        ImageClassificationMultilabelPostprocessor(
+        ImageClassificationSingleLabelPostprocessor(
             labels=labels # type: ignore
         )
     ],
-    output_class=TransformersImageClassificationMultilabelOutput
+    output_class=TransformersImageClassificationOutput
 )
 
 def prepare_batch_image_classification_input(state: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -70,7 +70,7 @@ def prepare_batch_image_classification_input(state: Dict[str, Any]) -> List[Dict
 
 def group_labels(state: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return [
-        output["labels"] for output in state
+        output["label"] for output in state
     ]
 
 
@@ -81,10 +81,9 @@ def prepare_sample(state: Dict[str, Any]) -> Dict[str, Any]:
 
     video_frames = []
     for idx, frame in enumerate(state["frames"]):
-        candidates = state["labels"][idx]
-        highest = sorted(candidates.items(), key=(lambda a: a[1]), reverse=True)[0]
+        label = state["labels"][idx]
         draw = ImageDraw.Draw(frame["image"])
-        draw.text(position, f"{highest[0]}: {highest[1]:.2}", fill=text_color) # font=font # type: ignore
+        draw.text(position, f"{label[0]}: {label[1]:.2}", fill=text_color) # type: ignore
         video_frames.append(np.array(frame["image"])) # type: ignore
     
     width, height = state["frames"][0]["image"].size
