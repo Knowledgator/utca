@@ -1,4 +1,4 @@
-from typing import TypeVar, Any, Type, Dict, Optional
+from typing import Any, Dict, Type, TypeVar, Optional
 
 from transformers import PreTrainedModel # type: ignore
 
@@ -7,6 +7,7 @@ from core.executable_level_1.schema import (
     Config, InputType, OutputType
 )
 from core.predictor_level_2.predictor import Predictor
+from implementation.predictors.transformers.utils import ensure_dict
 
 class TransformersModelConfig(Config):
     class Config:
@@ -35,10 +36,15 @@ class TransformersModel(
         self, 
         cfg: TransformersModelConfig,
         input_class: Type[InputType],
-        output_class: Type[OutputType]
+        output_class: Type[OutputType],
+        name: Optional[str]=None,
     ) -> None:
+        super().__init__(
+            input_class=input_class,
+            output_class=output_class,
+            name=name,
+        )
         self.cfg = cfg
-        super().__init__(input_class, output_class)
 
 
     def invoke(self, input_data: InputType, evaluator: Evaluator) -> Dict[str, Any]:
@@ -47,7 +53,7 @@ class TransformersModel(
             res = self.cfg.model(**inputs, **self.cfg.get_kwargs())
         else:
             res = self.cfg.model(**inputs.pop("encodings"), **inputs, **self.cfg.get_kwargs())
-        return self.ensure_dict(res)
+        return ensure_dict(res)
 
 
     @property
@@ -67,4 +73,4 @@ class TransformersGenerativeModel(
             res = self.cfg.model.generate(**inputs, **self.cfg.get_kwargs()) # type: ignore
         else:
             res = self.cfg.model.generate(**inputs.pop("encodings"), **inputs, **self.cfg.get_kwargs()) # type: ignore
-        return self.ensure_dict(res)
+        return ensure_dict(res)

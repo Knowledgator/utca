@@ -18,6 +18,7 @@ from core.executable_level_1.schema import (
     Config, Input, InputType, OutputType
 )
 from core.predictor_level_2.predictor import Predictor
+from implementation.predictors.transformers.utils import ensure_dict
 
 class TransformersPipelineConfig(Config):
     class Config:
@@ -82,16 +83,21 @@ class TransformersPipeline(
         cfg: TransformersPipelineConfig,
         input_class: Type[InputType],
         output_class: Type[OutputType],
+        name: Optional[str]=None,
     ) -> None:
         self.pipeline: Pipeline = pipeline(
             **cfg.pipeline_config
         )
-        super().__init__(input_class, output_class)
+        super().__init__(
+            input_class=input_class, 
+            output_class=output_class, 
+            name=name,
+        )
 
 
-    def invoke(self, input_data: InputType, evaluator: Evaluator) -> Any:
+    def invoke(self, input_data: InputType, evaluator: Evaluator) -> Dict[str, Any]:
         inputs = input_data.model_dump()
-        return self.ensure_dict(self.pipeline(**inputs)) # type: ignore
+        return ensure_dict(self.pipeline(**inputs)) # type: ignore
     
 
     @property
@@ -113,10 +119,8 @@ class TransformersSummarizationPipeline(
         OutputType
     ]
 ):
-    def invoke(self, input_data: SummarizationInputType, evaluator: Evaluator) -> Any:
+    def invoke(self, input_data: SummarizationInputType, evaluator: Evaluator) -> Dict[str, Any]:
         inputs = input_data.model_dump()
-        return self.ensure_dict(
-            self.pipeline( # type: ignore
-                inputs.pop("inputs"), **inputs
-            )
-        )
+        return ensure_dict(self.pipeline( # type: ignore
+            inputs.pop("inputs"), **inputs
+        ))
