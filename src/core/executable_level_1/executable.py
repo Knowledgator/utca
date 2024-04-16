@@ -1,9 +1,8 @@
 from __future__ import annotations
 from typing import (
-    Any, List, Dict, Type, Generic, Optional, 
-    TypeVar, TYPE_CHECKING, cast
+    Any, Dict, Type, Generic, Optional, TypeVar, TYPE_CHECKING
 )
-from abc import ABC,  abstractmethod
+from abc import ABC, abstractmethod
 
 from pydantic import ValidationError
 
@@ -16,6 +15,7 @@ from core.executable_level_1.schema import (
     Input,
     Output
 )
+from core.executable_level_1.exceptions import ExecutableError
 if TYPE_CHECKING:
     from core.executable_level_1.executor import ExecutableExecutor
 
@@ -34,21 +34,13 @@ class Executable(
         self, 
         input_class: Type[InputType]=Input,
         output_class: Type[OutputType]=Output, 
-        default_key: str="output"
+        default_key: str="output",
+        name: Optional[str]=None,
     ):
+        super().__init__(name)
         self.input_class = input_class
         self.output_class = output_class
         self.default_key = default_key
-
-
-    def ensure_dict(self, input_data: Any) -> Dict[str, Any]:
-        return (
-            {
-                self.default_key: input_data
-            } 
-            if not isinstance(input_data, Dict) 
-            else cast(Dict[str, Any], input_data)
-        )
 
 
     @abstractmethod
@@ -70,48 +62,33 @@ class Executable(
                 f"Expected schema: {validation_class.model_json_schema()}"
             )
         
+    
+    def validate_input(self, data: Dict[str, Any]) -> InputType:
+        return self.validate(
+            data, self.input_class
+        )
+        
+    
+    def validate_output(self, data: Dict[str, Any]) -> OutputType:
+        return self.validate(
+            data, self.output_class
+        )
+
 
     def execute(
         self, 
         input_data: Dict[str, Any],
         evaluator: Evaluator
     ) -> Dict[str, Any]:
-        validated_input = self.validate(
-            input_data,
-            self.input_class
-        )
-        
         try:
-            result: Dict[str, Any] = self.invoke(validated_input, evaluator)
-        except Exception as e:
-            raise Exception(f"Error durring execution: {self.__class__}: {e}")
-        
-        return self.validate(
-            result, self.output_class
-        ).model_dump()
-
-
-    def execute_batch(
-        self, 
-        input_data: List[Dict[str, Any]],
-        evaluator: Evaluator
-    ) -> List[Dict[str, Any]]:
-        result: List[Dict[str, Any]] = []
-
-        for i in input_data:
-            validated_input = self.validate(i, self.input_class)
-            try:
-                tmp = self.invoke(validated_input, evaluator)
-            except Exception as e:
-                raise Exception(
-                    f"Error durring execution: {self.__class__}: {e}"
+            return self.validate_output(
+                self.invoke(
+                    self.validate_input(input_data),
+                    evaluator
                 )
-            self.validate(tmp, self.output_class)
-            result.append({
-                **i,
-                **tmp,
-            })
-        return result
+            ).model_dump()
+        except Exception as e:
+            raise ExecutableError(self.name, e)
     
     
     def __call__(
@@ -121,9 +98,7 @@ class Executable(
     ) -> Transformable:
         if not evaluator:
             evaluator = self.set_up_default_evaluator()
-            
-        data = input_data.__dict__
-        result = self.execute(data, evaluator)
+        result = self.execute(input_data.__dict__, evaluator)
         input_data.update(result)
         return input_data
 
