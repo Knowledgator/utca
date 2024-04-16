@@ -3,6 +3,11 @@ class ActionError(Exception):
         super().__init__(f"Action error: {action_class}: {e}")
 
 
+class ExecutableError(Exception):
+    def __init__(self, executable_class: str, e: Exception):
+        super().__init__(f"Executable error: {executable_class}: {e}")
+
+
 class InputSchemaNotFound(Exception):
     def __init__(self, message: str="InputSchemaNotFound"):
         self.message = message
