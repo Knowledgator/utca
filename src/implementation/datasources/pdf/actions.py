@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Iterator
+from typing import Dict, Any, List, Iterator, Optional
 
 from PIL import Image
 from reportlab.pdfgen.canvas import Canvas # type: ignore
@@ -21,7 +21,8 @@ class PDFRead(Action[Dict[str, Any], Dict[int, Page]]):
 
 
 class PDFExtractTexts(Action[Dict[int, Page], Dict[int, str]]):
-    def __init__(self, tables: bool=True) -> None:
+    def __init__(self, tables: bool=True, name: Optional[str]=None) -> None:
+        super().__init__(name)
         self.tables = tables
     
 
@@ -50,9 +51,11 @@ class PDFExtractTables(Action[Dict[int, Page], Dict[int, Any]]):
 
 class PDFExtractImages(Action[Dict[int, Page], Dict[int, Any]]):
     resolution: int 
-    def __init__(self, resolution: int=72) -> None:
+    def __init__(self, resolution: int=72, name: Optional[str]=None) -> None:
+        super().__init__(name)
         self.resolution = resolution
-    
+
+
     def extract_images_from_page(self, page: Page, resolution: int) -> Iterator[Image.Image]:
         page_height = page.height
 

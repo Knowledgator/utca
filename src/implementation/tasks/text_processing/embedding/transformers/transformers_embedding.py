@@ -43,7 +43,8 @@ class TextEmbeddingTask(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TextEmbeddingInput]=TextEmbeddingInput,
-        output_class: Type[TextEmbeddingOutput]=TextEmbeddingOutput
+        output_class: Type[TextEmbeddingOutput]=TextEmbeddingOutput,
+        name: Optional[str]=None,
     ) -> None:
         
 
@@ -72,4 +73,5 @@ class TextEmbeddingTask(
             ],
             input_class=input_class, 
             output_class=output_class,
+            name=name,
         )

@@ -1,5 +1,5 @@
 from typing import (
-    Any, Dict, List, Tuple, Union, cast
+    Any, Dict, List, Optional, Tuple, Union, cast
 )
 
 import torch
@@ -30,7 +30,9 @@ class EntityLinkingPostprocess(Action[Dict[str, Any], Dict[str, Any]]):
         self, 
         tokenizer: Union[PreTrainedTokenizer, PreTrainedTokenizerFast],
         encoder_decoder: bool,
+        name: Optional[str]=None,
     ) -> None:
+        super().__init__(name)
         self.tokenizer = tokenizer
         self.encoder_decoder = encoder_decoder
 

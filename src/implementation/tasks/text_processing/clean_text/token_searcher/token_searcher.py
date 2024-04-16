@@ -43,12 +43,14 @@ class TokenSearcherTextCleaner(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TokenSearcherTextCleanerInput]=TokenSearcherTextCleanerInput,
-        output_class: Type[TokenSearcherTextCleanerOutput]=TokenSearcherTextCleanerOutput
+        output_class: Type[TokenSearcherTextCleanerOutput]=TokenSearcherTextCleanerOutput,
+        name: Optional[str]=None,
     ) -> None:
         super().__init__(
             predictor=predictor or TokenSearcherPredictor(),
             preprocess=preprocess or [TokenSeatcherTextCleanerPreprocessor()],
             postprocess=postprocess or [TokenSearcherTextCleanerPostprocessor()],
             input_class=input_class,
-            output_class=output_class
+            output_class=output_class,
+            name=name,
         )

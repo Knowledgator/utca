@@ -4,7 +4,7 @@ import pathlib
 PATH = pathlib.Path(__file__).parent.resolve()
 
 from core import (
-    Evaluator, 
+    Evaluator,
     EvaluatorConfigs,
     ForEach,
     SetMemory, 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     process_visual_data = (
         AddData({"question": "What is described here?"})
         | TransformersDocumentQandA()
-    )
+    ).set_name("Visual data processing")
 
     image_processing = (
         PDFExtractImages(resolution=256).use(
@@ -121,7 +121,7 @@ if __name__ == "__main__":
             get_key="images_description",
             memory_instruction=MemorySetInstruction.MOVE
         )
-    )
+    ).set_name("Image processing")
 
     table_processing = (
         PDFFindTables().use(
@@ -144,7 +144,7 @@ if __name__ == "__main__":
             get_key="tables_description",
             memory_instruction=MemorySetInstruction.MOVE
         ) 
-    )
+    ).set_name("Table processing")
 
     text_summarization = (
         PDFExtractTexts(tables=False).use(
@@ -166,7 +166,7 @@ if __name__ == "__main__":
             get_key="summaries",
             memory_instruction=MemorySetInstruction.MOVE
         ) 
-    )
+    ).set_name("Text summarization")
 
     pipeline = (
         SetMemory(set_key="pages", get_key="pages")
@@ -182,9 +182,12 @@ if __name__ == "__main__":
             ["pages", "tables_description", "images_description", "summaries"], 
             memory_instruction=MemoryGetInstruction.POP
         )
-        | ExecuteFunction(format_results_and_clean_up)
+        | Log(logger, "Raw result:")
+        | ExecuteFunction(format_results_and_clean_up).use(set_key="results")
+        | Flush(["pages", "tables_description", "images_description", "summaries"])
         | Log(logger, "Result:", open="="*40, close="="*40)
-    )
+    ).set_name("Main pipeline")
+    
     inputs = Evaluator(
         pipeline,
         cfg=EvaluatorConfigs()

@@ -39,7 +39,8 @@ class TransformersTokenClassifier(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TransformersBasicInput]=TransformersBasicInput,
-        output_class: Type[NEROutput[ClassifiedEntity]]=NEROutput[ClassifiedEntity]
+        output_class: Type[NEROutput[ClassifiedEntity]]=NEROutput[ClassifiedEntity],
+        name: Optional[str]=None,
     ) -> None:
         if not predictor:
             predictor = TransformersPipeline(
@@ -57,4 +58,5 @@ class TransformersTokenClassifier(
             postprocess=postprocess or [TokenClassifierPostprocessor()],
             input_class=input_class, 
             output_class=output_class,
+            name=name,
         )

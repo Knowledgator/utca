@@ -36,7 +36,8 @@ class TransformersDocumentQandA(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TransformersVisualQandAInput]=TransformersVisualQandAInput,
-        output_class: Type[DocumentQandAOutput]=DocumentQandAOutput
+        output_class: Type[DocumentQandAOutput]=DocumentQandAOutput,
+        name: Optional[str]=None,
     ) -> None:
         if not predictor:
             predictor = TransformersPipeline(
@@ -54,4 +55,5 @@ class TransformersDocumentQandA(
             postprocess=postprocess or [DocumentQandAPostprocess()],
             input_class=input_class, 
             output_class=output_class,
+            name=name,
         )

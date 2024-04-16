@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Optional, Type
 
 from core.executable_level_1.schema import InputType, OutputType
 from implementation.predictors.transformers.transformers_pipeline import (
@@ -17,10 +17,12 @@ class TokenSearcherPredictor(
         self, 
         cfg: TokenSearcherPredictorConfig=TokenSearcherPredictorConfig(),
         input_class: Type[InputType]=TokenSearcherPredictorInput,
-        output_class: Type[OutputType]=TokenSearcherPredictorOutput
+        output_class: Type[OutputType]=TokenSearcherPredictorOutput,
+        name: Optional[str]=None,
     ) -> None:
         super().__init__(
-            cfg,
-            input_class,
-            output_class
+            cfg=cfg,
+            input_class=input_class,
+            output_class=output_class,
+            name=name,
         )

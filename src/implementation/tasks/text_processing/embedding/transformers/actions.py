@@ -1,4 +1,4 @@
-from typing import Any, Dict, Protocol, runtime_checkable
+from typing import Any, Dict, Optional, Protocol, runtime_checkable
 
 import torch
 import numpy as np
@@ -13,7 +13,10 @@ class Tokenizer(Protocol):
 
 
 class EmbeddingPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
-    def __init__(self, tokenizer: Tokenizer) -> None:
+    def __init__(
+        self, tokenizer: Tokenizer, name: Optional[str]=None,
+    ) -> None:
+        super().__init__(name)
         self.tokenizer = tokenizer
 
 

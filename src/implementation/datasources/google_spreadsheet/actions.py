@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, Optional, cast
 
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
@@ -15,7 +15,12 @@ from implementation.datasources.google_spreadsheet.schema import (
 
 
 class GoogleSpreadsheetAction(Action[ActionInput, ActionOutput]):
-    def __init__(self, client: GoogleCloudClient) -> None:
+    def __init__(
+        self, 
+        client: GoogleCloudClient,
+        name: Optional[str]=None,
+    ) -> None:
+        super().__init__(name)
         self.sheet_service = client.service.spreadsheets()
 
 

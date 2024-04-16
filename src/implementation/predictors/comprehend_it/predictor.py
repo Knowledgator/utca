@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any,  Optional, Type
 
 from core.executable_level_1.interpreter import Evaluator
 from implementation.predictors.transformers.transformers_pipeline import (
@@ -22,12 +22,14 @@ class ComprehendItPredictor(
         self, 
         cfg: ComprehendItPredictorConfig=ComprehendItPredictorConfig(),
         input_class: Type[ComprehendItPredictorInputType]=ComprehendItPredictorInput,
-        output_class: Type[ComprehendItPredictorOutputType]=ComprehendItPredictorOutput
+        output_class: Type[ComprehendItPredictorOutputType]=ComprehendItPredictorOutput,
+        name: Optional[str]=None,
     ) -> None:
         super().__init__(
-            cfg,
-            input_class,
-            output_class
+            cfg=cfg,
+            input_class=input_class,
+            output_class=output_class,
+            name=name,
         )
 
     

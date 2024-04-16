@@ -1,6 +1,7 @@
 from __future__ import annotations
+from typing import Any, Dict, List, Iterator, Iterable, Optional, cast
 
-from typing import Any, Dict, List, Iterator, Iterable, cast
+from core.executable_level_1.actions import Action
 from sqlalchemy import (
     ScalarResult, 
     create_engine, 
@@ -18,9 +19,9 @@ class BaseModel(DeclarativeBase):
 class SQLSessionFactory:
     _session_factory: sessionmaker[Session]
 
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, echo: bool=False) -> None:
         self._engine = create_engine(
-            url, echo=True
+            url, echo=echo
         )
         self._session_factory = sessionmaker(self._engine)
     
@@ -37,25 +38,37 @@ class SQLSessionFactory:
         BaseModel.metadata.create_all(self._engine)
 
 
-class SQLAction:
+class SQLAction(Action[Dict[str, Any], None]):
     def __init__(
         self, 
         session: Session,
-        statement: Any
+        statement: Any,
+        name: Optional[str]=None
     ) -> None:
+        super().__init__(name)
         self.session = session
         self.statement = statement
 
 
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, input_data: Dict[str, Any]) -> None:
         self.session.execute(
             self.statement, **input_data.get("kwargs", {})
         )
         self.session.commit()
-        return input_data
 
 
-class SQLActionWithReturns(SQLAction):
+class SQLActionWithReturns(Action[Dict[str, Any], Dict[str, Any]]):
+    def __init__(
+        self, 
+        session: Session,
+        statement: Any,
+        name: Optional[str]=None
+    ) -> None:
+        super().__init__(name)
+        self.session = session
+        self.statement = statement
+
+
     def unpack_model(self, model: DeclarativeBase) -> Dict[str, Any]:
         tmp = model.__dict__
         tmp.pop("_sa_instance_state")

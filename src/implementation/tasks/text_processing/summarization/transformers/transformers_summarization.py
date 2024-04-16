@@ -35,7 +35,8 @@ class TransformersTextSummarization(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TransformersBasicInput]=TransformersBasicInput,
-        output_class: Type[SummarizationOutput]=SummarizationOutput
+        output_class: Type[SummarizationOutput]=SummarizationOutput,
+        name: Optional[str]=None,
     ) -> None:
         if not predictor:
             predictor = TransformersSummarizationPipeline(
@@ -56,4 +57,5 @@ class TransformersTextSummarization(
             postprocess=postprocess or [SummarizationPostprocess()],
             input_class=input_class, 
             output_class=output_class,
+            name=name,
         )

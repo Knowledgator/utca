@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple, cast
+from typing import Any, Dict, Optional, Tuple, cast
 
 from core.executable_level_1.actions import Action
 from core.task_level_3.objects.objects import (
@@ -16,8 +16,10 @@ Text:
  """
     def __init__(
         self, 
-        sents_batch: int=10
+        sents_batch: int=10,
+        name: Optional[str]=None,
     ) -> None:
+        super().__init__(name)
         self.sents_batch = sents_batch
 
     

@@ -9,7 +9,7 @@ from typing import (
 from core.executable_level_1.component import Component
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import Transformable
-from exceptions import InavalidMemoryInstruction
+from core.executable_level_1.exceptions import InavalidMemoryInstruction
 
 INPUT: str = 'input'
 

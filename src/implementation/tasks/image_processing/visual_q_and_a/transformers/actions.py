@@ -1,7 +1,8 @@
-from typing import Any, Dict, Protocol, Mapping, runtime_checkable
+from typing import Any, Dict, Mapping, Optional, Protocol, runtime_checkable
+
+import torch
 
 from core.executable_level_1.actions import Action
-from core.executable_level_1.schema import Config
 
 @runtime_checkable
 class Processor(Protocol):
@@ -10,48 +11,63 @@ class Processor(Protocol):
         ...
 
 
-class VisualQandAPreprocessorConfig(Config):
-    class Config:
-        arbitrary_types_allowed = True
-
-    processor: Processor
-
-
 class VisualQandAPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
-        cfg: VisualQandAPreprocessorConfig
+        processor: Processor,
+        name: Optional[str]=None,
     ) -> None:
-        self.cfg = cfg
+        super().__init__(name)
+        self.processor = processor
 
 
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        return self.cfg.processor(
+        return self.processor(
             images=input_data["image"],
             text=input_data["question"],
             return_tensors="pt"
         ).data
 
 
-class VisualQandAPostprocessorConfig(Config):
-    labels: Mapping[Any, str]
-    threshold: float = 0.
-
-
-class VisualQandAPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+class VisualQandAMultianswerPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
-        cfg: VisualQandAPostprocessorConfig
+        labels: Mapping[Any, str],
+        threshold: float = 0.,
+        name: Optional[str]=None,
     ) -> None:
-        self.cfg = cfg
+        super().__init__(name)
+        self.labels = labels
+        self.threshold = threshold
 
 
     def execute(
         self, input_data: Dict[str, Any], 
     ) -> Dict[str, Any]:
-        predicted_class_idx = input_data["logits"].argmax(-1).item()
+        probabilities = torch.nn.functional.softmax(
+            input_data["logits"], dim=-1
+        )
+        probabilities = probabilities.detach().numpy().tolist()[0]
+
         return {
-            "answer": self.cfg.labels[predicted_class_idx]
+            "answers": {
+                self.labels[i]: prob 
+                for i, prob in enumerate(probabilities)
+                if prob >= self.threshold
+            }
+        }
+
+
+class VisualQandASingleAnswerPostprocessor(
+    VisualQandAMultianswerPostprocessor
+):
+    def execute(
+        self, input_data: Dict[str, Any], 
+    ) -> Dict[str, Any]:
+        answers = super().execute(input_data)['answers']
+        sorted_answers = sorted(answers.items(), key=(lambda a: a[1]), reverse=True)
+        return {
+            "answer": sorted_answers[0] if sorted_answers else None
         }

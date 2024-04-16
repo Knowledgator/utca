@@ -1,4 +1,4 @@
-from typing import Any, List, Type, Optional, cast
+from typing import Any, List,  Optional, Tuple, Type, cast
 
 from transformers import ( # type: ignore
     ViltProcessor, ViltForQuestionAnswering, AutoConfig
@@ -19,13 +19,11 @@ from implementation.predictors.transformers.schema import (
 )
 from implementation.tasks.image_processing.visual_q_and_a.transformers.actions import (
     VisualQandAPreprocessor,
-    VisualQandAPreprocessorConfig,
-    VisualQandAPostprocessor,
-    VisualQandAPostprocessorConfig
+    VisualQandASingleAnswerPostprocessor,
 )
 
 class TransformersVisualQandAOutput(Output):
-    answer: str
+    answer: Tuple[str, float]
 
 
 class TransformersVisualQandA(
@@ -43,7 +41,8 @@ class TransformersVisualQandA(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TransformersVisualQandAInput]=TransformersVisualQandAInput,
-        output_class: Type[TransformersVisualQandAOutput]=TransformersVisualQandAOutput
+        output_class: Type[TransformersVisualQandAOutput]=TransformersVisualQandAOutput,
+        name: Optional[str]=None,
     ) -> None:
         if not predictor:
             model = ViltForQuestionAnswering.from_pretrained(self.default_model) # type: ignore
@@ -59,19 +58,15 @@ class TransformersVisualQandA(
             processor = ViltProcessor.from_pretrained(self.default_model) # type: ignore
             preprocess=[
                 VisualQandAPreprocessor(
-                    VisualQandAPreprocessorConfig(
-                        processor=processor # type: ignore
-                    )
+                    processor=processor # type: ignore
                 )
             ]
         
         if not postprocess:
             labels = AutoConfig.from_pretrained(self.default_model).id2label # type: ignore
             postprocess=[ # type: ignore
-                VisualQandAPostprocessor(
-                    VisualQandAPostprocessorConfig(
-                        labels=labels # type: ignore
-                    )
+                VisualQandASingleAnswerPostprocessor(
+                    labels=labels # type: ignore
                 )
             ]
 
@@ -83,5 +78,6 @@ class TransformersVisualQandA(
             preprocess=preprocess,
             postprocess=postprocess,
             input_class=input_class, 
-            output_class=output_class
+            output_class=output_class,
+            name=name,
         )

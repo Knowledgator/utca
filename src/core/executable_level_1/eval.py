@@ -9,7 +9,7 @@ from core.executable_level_1.component import Component
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.interpreter import Evaluator, EvaluatorConfigs
 from core.executable_level_1.memory import GetMemory, MemoryGetInstruction
-from exceptions import EvaluatorExecutionFailed
+from core.executable_level_1.exceptions import EvaluatorExecutionFailed
 
 T = TypeVar('T', bound='Serializable')
 
@@ -67,7 +67,7 @@ class ExecutionSchema(Component):
             try:
                 input_data = component(input_data, evaluator)
                 evaluator.cfg.logger.info(
-                    f"{self.name}: Step {i} executed successfully."
+                    f"{self.name}: Step {i}({component.name}) executed successfully."
                 )
             except Exception as e:
                 evaluator.cfg.logger.error(f"{self.name}: Error at step {i}")

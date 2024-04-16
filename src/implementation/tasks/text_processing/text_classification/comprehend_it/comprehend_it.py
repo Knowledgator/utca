@@ -25,7 +25,8 @@ class ComprehendIt(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[InputType]=ComprehendItPredictorInput,
-        output_class: Type[OutputType]=ComprehendItPredictorOutput
+        output_class: Type[OutputType]=ComprehendItPredictorOutput,
+        name: Optional[str]=None,
     ) -> None:
         if not predictor:
             predictor = ComprehendItPredictor()
@@ -36,5 +37,6 @@ class ComprehendIt(
             postprocess=postprocess or [],
             input_class=input_class, 
             output_class=output_class,
+            name=name,
         )
 

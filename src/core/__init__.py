@@ -3,6 +3,7 @@ from core.executable_level_1.interpreter import (
     EvaluatorConfigs,
 )
 from core.executable_level_1.eval import (
+    ExecutionSchema,
     BranchStatement, 
     Condition,
     Filter,
@@ -34,6 +35,7 @@ __all__ = [
     "Evaluator",
     "EvaluatorConfigs",
     
+    "ExecutionSchema",
     "BranchStatement", 
     "Condition",
     "Filter",

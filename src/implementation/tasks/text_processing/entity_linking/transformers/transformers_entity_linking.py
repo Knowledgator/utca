@@ -141,7 +141,8 @@ class TransformersEntityLinking(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[EntityLinkingInput]=EntityLinkingInput,
-        output_class: Type[EntityLinkingOutput]=EntityLinkingOutput
+        output_class: Type[EntityLinkingOutput]=EntityLinkingOutput,
+        name: Optional[str]=None,
     ) -> None:
         if not tokenizer:
             self.tokenizer = AutoTokenizer.from_pretrained(self.default_model) # type: ignore
@@ -188,6 +189,7 @@ class TransformersEntityLinking(
             ],
             input_class=input_class, 
             output_class=output_class,
+            name=name,
         )
 
 

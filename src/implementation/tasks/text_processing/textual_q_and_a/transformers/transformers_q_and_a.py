@@ -7,7 +7,7 @@ from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline,
     TransformersPipelineConfig
 )
-from predictors.transformers.schema import (
+from implementation.predictors.transformers.schema import (
     TransformersTextualQandAInput,
     TransformersTextualQandAOutput
 )
@@ -30,7 +30,8 @@ class TransformersTextualQandA(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TransformersTextualQandAInput]=TransformersTextualQandAInput,
-        output_class: Type[TransformersTextualQandAOutput]=TransformersTextualQandAOutput
+        output_class: Type[TransformersTextualQandAOutput]=TransformersTextualQandAOutput,
+        name: Optional[str]=None,
     ) -> None:
         if not predictor:
             predictor = TransformersPipeline(
@@ -48,4 +49,5 @@ class TransformersTextualQandA(
             postprocess=postprocess or [QandAPostprocess()],
             input_class=input_class, 
             output_class=output_class,
+            name=name,
         )

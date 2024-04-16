@@ -1,12 +1,13 @@
 from __future__ import annotations
 from typing import (
-    Dict, Any, List, Optional, Tuple, Union
+    Dict, Any, List, Optional, Tuple, Union, TYPE_CHECKING
 )
 import logging
 
 from core.executable_level_1.component import Component
-from core.executable_level_1.memory import MemoryManager
 from core.executable_level_1.schema import Transformable
+if TYPE_CHECKING:
+    from core.executable_level_1.memory import MemoryManager
 
 INPUT = "input"
 
@@ -44,6 +45,7 @@ class Evaluator:
         schema: Component, 
         cfg: Optional[EvaluatorConfigs]=None,
     ) -> None:
+        from core.executable_level_1.memory import MemoryManager
         self.cfg = cfg or EvaluatorConfigs()
         self.memory_manager = MemoryManager(None)
         self.schema = schema

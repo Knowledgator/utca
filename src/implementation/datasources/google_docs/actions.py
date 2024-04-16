@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from core.executable_level_1.actions import (
     Action, ActionInput, ActionOutput
@@ -28,7 +28,12 @@ from implementation.apis.google_cloud.client import (
 # ]
 
 class GoogleDocsAction(Action[ActionInput, ActionOutput]):
-    def __init__(self, client: GoogleCloudClient) -> None:
+    def __init__(
+        self, 
+        client: GoogleCloudClient,
+        name: Optional[str]=None,
+    ) -> None:
+        super().__init__(name)
         self.docs_service = client.service.documents()
 
 

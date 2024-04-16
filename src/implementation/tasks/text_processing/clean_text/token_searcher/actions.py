@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from core.executable_level_1.actions import Action
 from implementation.predictors.token_searcher.utils import (
@@ -26,8 +26,10 @@ class TokenSearcherTextCleanerPostprocessor(Action[Dict[str, Any], Dict[str, Any
     def __init__(
         self, 
         clean: bool=False,
-        threshold: float=0.
+        threshold: float=0.,
+        name: Optional[str]=None,
     ) -> None:
+        super().__init__(name)
         self.clean = clean
         self.threshold = threshold
 

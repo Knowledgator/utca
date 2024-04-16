@@ -27,7 +27,8 @@ class TransformersTextToSpeech(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[TransformersTextToSpeechInput]=TransformersTextToSpeechInput,
-        output_class: Type[TransformersTextToSpeechOutput]=TransformersTextToSpeechOutput
+        output_class: Type[TransformersTextToSpeechOutput]=TransformersTextToSpeechOutput,
+        name: Optional[str]=None,
     ) -> None:
         super().__init__(
             predictor=(predictor or TransformersPipeline(
@@ -44,5 +45,6 @@ class TransformersTextToSpeech(
             preprocess=preprocess or [],
             postprocess=postprocess or [],
             input_class=input_class, 
-            output_class=output_class
+            output_class=output_class,
+            name=name,
         )

@@ -21,9 +21,14 @@ class Task(
         preprocess: Optional[List[Action[Any, Any]]],
         postprocess: Optional[List[Action[Any, Any]]],
         input_class: Type[InputType],
-        output_class: Type[OutputType]
+        output_class: Type[OutputType],
+        name: Optional[str]=None,
     ) -> None:
-        super().__init__(input_class, output_class)
+        super().__init__(
+            input_class=input_class, 
+            output_class=output_class, 
+            name=name,
+        )
         self.predictor = predictor
         self._preprocess = preprocess or []
         self._postprocess = postprocess or []

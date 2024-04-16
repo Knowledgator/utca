@@ -2,10 +2,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, TYPE_CHECKING
 
+from core.executable_level_1.schema import Transformable
 if TYPE_CHECKING:
     from core.executable_level_1.eval import ExecutionSchema
     from core.executable_level_1.interpreter import Evaluator
-    from core.executable_level_1.schema import Transformable
 
 class Component(ABC):
     def __init__(self, name: Optional[str]=None):
@@ -47,6 +47,11 @@ class Component(ABC):
     @property
     def name(self) -> str:
         return self._name
+    
+
+    def set_name(self, name: str) -> Component:
+        self._name = name
+        return self
     
 
     def __repr__(self) -> str:

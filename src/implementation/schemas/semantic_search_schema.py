@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Optional, Dict, Any
+from typing import  Any, Dict, List, Optional, Type
 
 import numpy.typing as npt
 
@@ -30,23 +30,26 @@ class SemanticSearchSchema(
         SemanticSearchSchemaOutput
     ]
 ):
-    input_class = SemanticSearchSchemaInput
-    output_class = SemanticSearchSchemaOutput
-    default_encoder = TextEmbeddingTask
-    dataset: List[str]
-
     def __init__(
         self, 
-        dataset: Optional[List[str]] = None, 
-        encoder: Optional[TextEmbeddingTask]=None#Optional[Executable[Config, Input, Output]] = None,
+        dataset: Optional[List[str]]=None, 
+        encoder: Optional[TextEmbeddingTask]=None,
+        input_class: Type[SemanticSearchSchemaInput]=SemanticSearchSchemaInput,
+        output_class: Type[SemanticSearchSchemaOutput]=SemanticSearchSchemaOutput,
+        name: Optional[str]=None,
     ) -> None:
+        super().__init__(
+            input_class=input_class,
+            output_class=output_class,
+            name=name,
+        )
         if encoder is None:
-            encoder = self.default_encoder()
+            encoder = TextEmbeddingTask()
         self.encoder = encoder
 
         self.index = self.build_index()
 
-        self.dataset = []
+        self.dataset: List[str] = []
         if dataset:
             self.add(dataset)
     

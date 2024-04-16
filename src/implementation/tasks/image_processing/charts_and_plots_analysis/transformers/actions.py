@@ -1,7 +1,6 @@
-from typing import Any, Dict, Protocol, runtime_checkable
+from typing import Any, Dict, Optional, Protocol, runtime_checkable
 
 from core.executable_level_1.actions import Action
-from core.executable_level_1.schema import Config
 
 @runtime_checkable
 class Processor(Protocol):
@@ -14,47 +13,37 @@ class Processor(Protocol):
         ...
 
 
-class ChartsAndPlotsAnalysisPreprocessorConfig(Config):
-    class Config:
-        arbitrary_types_allowed = True
-
-    processor: Processor
-
-
 class ChartsAndPlotsAnalysisPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
-        cfg: ChartsAndPlotsAnalysisPreprocessorConfig
+        processor: Processor,
+        name: Optional[str]=None
     ) -> None:
-        self.cfg = cfg
+        super().__init__(name)
+        self.processor = processor
 
 
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        return self.cfg.processor(
+        return self.processor(
             images=input_data["image"],
             text=input_data["text"],
             return_tensors="pt"
         ).data
 
 
-class ChartsAndPlotsAnalysisPostprocessorConfig(Config):
-    class Config:
-        arbitrary_types_allowed = True
-
-    processor: Processor
-
-
 class ChartsAndPlotsAnalysisPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def __init__(
         self, 
-        cfg: ChartsAndPlotsAnalysisPostprocessorConfig
+        processor: Processor,
+        name: Optional[str]=None
     ) -> None:
-        self.cfg = cfg
+        super().__init__(name)
+        self.processor = processor
 
 
     def execute(
         self, input_data: Dict[str, Any], 
     ) -> Dict[str, Any]:
-        return self.cfg.processor.decode(input_data["output"][0], skip_special_tokens=True).replace("<0x0A>", "<br/>")
+        return self.processor.decode(input_data["output"][0], skip_special_tokens=True).replace("<0x0A>", "<br/>")

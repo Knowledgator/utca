@@ -1,10 +1,15 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from core.executable_level_1.actions import Action
 
 import faiss # type: ignore
 
 class CreateIndex(Action[Dict[str, Any], Dict[str, Any]]):
-    def __init__(self, dataset_dimensions: int=1024):
+    def __init__(
+        self, 
+        dataset_dimensions: int=1024,
+        name: Optional[str]=None,
+    ) -> None:
+        super().__init__(name)
         self.dataset_dimensions = dataset_dimensions
 
 
@@ -20,7 +25,8 @@ class IndexData(Action[Dict[str, Any], Dict[str, Any]]):
 
 
 class SearchIndex(Action[Dict[str, Any], Dict[str, Any]]):
-    def __init__(self, results_count: int=1):
+    def __init__(self, results_count: int=1, name: Optional[str]=None) -> None:
+        super().__init__(name)
         self.results_count = results_count
     
 

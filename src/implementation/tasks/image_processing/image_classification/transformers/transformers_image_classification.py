@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Type, Optional 
+from typing import Any, Dict, List, Tuple, Type, Optional 
 
 from PIL import Image
 from transformers import ( # type: ignore
@@ -35,7 +35,7 @@ class TransformersImageClassificationInput(Input):
 
 
 class TransformersImageClassificationOutput(Output):
-    label: str
+    label: Tuple[str, float]
 
 
 class TransformersImageClassificationMultilabelOutput(Output):
@@ -57,7 +57,8 @@ class TransformersImageClassification(
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
         input_class: Type[InputType]=TransformersImageClassificationInput,
-        output_class: Type[OutputType]=TransformersImageClassificationOutput
+        output_class: Type[OutputType]=TransformersImageClassificationOutput,
+        name: Optional[str]=None,
     ) -> None:
         if not predictor:
             model = AutoModelForImageClassification.from_pretrained(self.default_model) # type: ignore
@@ -91,5 +92,6 @@ class TransformersImageClassification(
             preprocess=preprocess,
             postprocess=postprocess,
             input_class=input_class, 
-            output_class=output_class
+            output_class=output_class,
+            name=name,
         )

@@ -17,7 +17,10 @@ class ImageWrite(Action[Dict[str, Any], Dict[str, Any]]):
 
 
 class ImageRotate(Action[Dict[str, Any], Dict[str, Any]]):
-    def __init__(self, rotation: float) -> None:
+    def __init__(
+        self, rotation: float, name: Optional[str]=None,
+    ) -> None:
+        super().__init__(name)
         self.rotation = rotation
 
 
@@ -29,7 +32,10 @@ class ImageRotate(Action[Dict[str, Any], Dict[str, Any]]):
     
 
 class ImageResize(Action[Dict[str, Any], Dict[str, Any]]):
-    def __init__(self, width: int, height: int) -> None:
+    def __init__(
+        self, width: int, height: int, name: Optional[str]=None,
+    ) -> None:
+        super().__init__(name)
         self.height = height
         self.width = width
 
@@ -42,7 +48,14 @@ class ImageResize(Action[Dict[str, Any], Dict[str, Any]]):
     
 
 class ImagePad(Action[Dict[str, Any], Dict[str, Any]]):
-    def __init__(self, width: int, height: int, color: Optional[str]=None) -> None:
+    def __init__(
+        self, 
+        width: int, 
+        height: int, 
+        color: Optional[str]=None,
+        name: Optional[str]=None,
+    ) -> None:
+        super().__init__(name)
         self.height = height
         self.width = width
         self.color = color
@@ -58,7 +71,12 @@ class ImagePad(Action[Dict[str, Any], Dict[str, Any]]):
     
 
 class ImageCrop(Action[Dict[str, Any], Dict[str, Any]]):
-    def __init__(self, box: Tuple[int, int, int, int]) -> None:
+    def __init__(
+        self, 
+        box: Tuple[int, int, int, int],
+        name: Optional[str]=None,
+    ) -> None:
+        super().__init__(name)
         self.box = box
 
 
