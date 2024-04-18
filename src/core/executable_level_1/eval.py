@@ -1,13 +1,13 @@
 from __future__ import annotations
 import json
 from typing import (
-    List, Callable, Optional, Tuple, Type,  TypeVar, Union, Protocol
+    List, Callable, Optional, Tuple, Type,  TypeVar, Union
 )
 import copy
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.schema import Transformable
-from core.executable_level_1.interpreter import Evaluator, EvaluatorConfigs
+from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.memory import GetMemory, MemoryGetInstruction
 from core.executable_level_1.exceptions import EvaluatorExecutionFailed
 
@@ -77,21 +77,16 @@ class ExecutionSchema(Component):
         return input_data
 
 
-class ConditionProtocol(Protocol):
-    def __call__(
-        self, input_data: Transformable, evaluator: Evaluator
-    ) -> bool:
-        ...
-
+ConditionProtocol = Callable[[Transformable, Evaluator], bool]
 
 class Condition:
-    validator: Callable[[Transformable], bool]
+    validator: ConditionProtocol
     schema: Component
     state: Optional[List[Union[str, Tuple[str, str]]]]
 
     def __init__(
         self, 
-        validator: Callable[[Transformable], bool],
+        validator: ConditionProtocol,
         schema: Component,
         state: Optional[List[Union[str, Tuple[str, str]]]]=None,
         name: Optional[str]=None
@@ -114,7 +109,8 @@ class Condition:
         return self.validator(
             evaluator
             .create_child(self.schema, self.name)
-            .eval(copy.deepcopy(input_data))
+            .eval(copy.deepcopy(input_data)),
+            evaluator
         )
     
 
@@ -208,15 +204,7 @@ class ForEach(Component):
             input_data,
             self.set_key,
             [
-                Evaluator(
-                    self.schema,
-                    cfg=EvaluatorConfigs(
-                        name=f"{evaluator.cfg.name}.{self.name}",
-                        logging_level=evaluator.cfg.logging_level,
-                        logging_handler=evaluator.cfg.logging_handler,
-                        fast_exit=evaluator.cfg.fast_exit
-                    )
-                ).run(t)
+                evaluator.create_child(self.schema, self.name).run(copy.deepcopy(t))
                 for t in data
             ]
         )
