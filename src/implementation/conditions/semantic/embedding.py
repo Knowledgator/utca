@@ -25,7 +25,7 @@ class SemanticCondition(Condition):
             semantic_schema = SemanticSearchSchema()
         self.semantic_schema = semantic_schema
         super().__init__(
-            self.validator_wrapper(distance), 
+            self.validator_wrapper(distance),
             self.build_schema(subject_key, targets, self.semantic_schema),
             None,
             name
@@ -54,7 +54,7 @@ class SemanticCondition(Condition):
     
     @classmethod
     def validator_wrapper(cls, distance: float):
-        def validator(input_data: Transformable) -> bool:
+        def validator(input_data: Transformable, evaluator: Evaluator) -> bool:
             return any(
                 res_distance[0] <= distance
                 for res_distance in
