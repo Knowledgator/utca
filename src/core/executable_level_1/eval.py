@@ -261,12 +261,12 @@ class Filter(Component):
 
 class While(Component):
     schema: Component
-    condition:  Condition
+    condition:  ConditionProtocol
     max_iterations: int
 
     def __init__(
         self, 
-        condition: Condition,
+        condition: ConditionProtocol,
         schema: Component,
         max_iterations: int=-1,
         name: Optional[str]=None
