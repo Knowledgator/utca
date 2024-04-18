@@ -4,11 +4,11 @@ from core.executable_level_1.interpreter import (
 )
 from core.executable_level_1.eval import (
     ExecutionSchema,
-    BranchStatement, 
+    Branch, 
     Condition,
     Filter,
     ForEach, 
-    SwitchStatement,
+    Switch,
     While,
 )
 from core.executable_level_1.memory import (
@@ -44,11 +44,11 @@ __all__ = [
     "EvaluatorConfigs",
     
     "ExecutionSchema",
-    "BranchStatement", 
+    "Branch", 
     "Condition",
     "Filter",
     "ForEach", 
-    "SwitchStatement",
+    "Switch",
     "While",
 
     "SetMemory", 

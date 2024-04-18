@@ -118,7 +118,7 @@ class Condition:
         return f"{self.__class__.__name__}: {self.name} ({self.__dict__})"
 
 
-class BranchStatement:
+class Branch:
     condition: Optional[ConditionProtocol]
     schema: Component
     exit_branch: bool
@@ -149,12 +149,12 @@ class BranchStatement:
         return f"{self.__class__.__name__}: {self.name} ({self.__dict__})"
 
 
-class SwitchStatement(Component):
-    branches: Tuple[BranchStatement, ...]
+class Switch(Component):
+    branches: Tuple[Branch, ...]
 
     def __init__(
         self, 
-        *branches: BranchStatement,
+        *branches: Branch,
         name: Optional[str]=None
     ) -> None:
         super().__init__(name)
