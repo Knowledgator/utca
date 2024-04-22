@@ -1,5 +1,6 @@
 from typing import Any, List, Type, Optional, cast
 
+from pydantic import ConfigDict
 from PIL import Image
 from transformers import ( # type: ignore
     Pix2StructProcessor, Pix2StructForConditionalGeneration
@@ -25,8 +26,7 @@ from implementation.tasks.image_processing.charts_and_plots_analysis.transformer
 )
 
 class ChartsAndPlotsAnalysisInput(Input):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     image: Image.Image
     text: str

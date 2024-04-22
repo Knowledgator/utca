@@ -1,5 +1,6 @@
 from typing import TypeVar, Any, Type, Union, Optional, Dict
 
+from pydantic import ConfigDict
 import torch
 from transformers import ( # type: ignore
     pipeline, # type: ignore
@@ -21,9 +22,10 @@ from core.predictor_level_2.predictor import Predictor
 from implementation.predictors.transformers.utils import ensure_dict
 
 class TransformersPipelineConfig(Config):
-    class Config:
-        arbitrary_types_allowed = True
-        protected_namespaces = ()
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True, 
+        protected_namespaces=()
+    )
 
     task: Optional[str]=None
     model: Optional[Union[

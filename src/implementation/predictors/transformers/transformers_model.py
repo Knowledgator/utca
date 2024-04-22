@@ -1,5 +1,6 @@
 from typing import Any, Dict, Type, TypeVar, Optional
 
+from pydantic import ConfigDict
 from transformers import PreTrainedModel # type: ignore
 
 from core.executable_level_1.interpreter import Evaluator
@@ -10,8 +11,7 @@ from core.predictor_level_2.predictor import Predictor
 from implementation.predictors.transformers.utils import ensure_dict
 
 class TransformersModelConfig(Config):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     model: PreTrainedModel
     kwargs: Optional[Dict[str, Any]]=None

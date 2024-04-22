@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Tuple, Type, Optional 
 
+from pydantic import ConfigDict
 from PIL import Image
 from transformers import ( # type: ignore
     AutoImageProcessor,
@@ -28,8 +29,7 @@ from implementation.tasks.image_processing.image_classification.transformers.act
 from implementation.datasources.image.actions import ImagePad
 
 class TransformersImageClassificationInput(Input):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     image: Image.Image
 

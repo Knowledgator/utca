@@ -1,5 +1,6 @@
 from typing import Any, List, Callable, Optional
 
+from pydantic import ConfigDict
 from PIL import Image
 import torch
 
@@ -26,8 +27,7 @@ class TransformersChartsAndPlotsModelInput(Input):
 
 
 class TransformersVisualQandAInput(Input):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
         
     image: Image.Image
     question: str
@@ -50,8 +50,7 @@ class TransformersEmbeddingOutput(Output):
 
 
 class TransformersEntityLinkingInput(Input):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     encodings: Any
     num_beams: int
@@ -62,8 +61,7 @@ class TransformersEntityLinkingInput(Input):
 
 
 class TransformersEntityLinkingOutput(Output):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     sequences: Any
     sequences_scores: Optional[Any]=None
