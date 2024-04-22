@@ -15,7 +15,7 @@ from core.executable_level_1.schema import (
     Input,
     Output
 )
-from core.executable_level_1.exceptions import ExecutableError
+from core.exceptions import ExecutableError
 if TYPE_CHECKING:
     from core.executable_level_1.executor import ExecutableExecutor
 
