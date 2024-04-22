@@ -83,12 +83,12 @@ class Action(Generic[ActionInput, ActionOutput], Component):
             return input_data
 
         if isinstance(result, Dict):
-            if self.replace:
+            if self.replace in (ReplacingScope.GLOBAL, ReplacingScope.LOCAL):
                 return Transformable(cast(Dict[str, Any], result))
             input_data.update(cast(Dict[str, Any], result))
             return input_data
 
-        if self.replace:
+        if self.replace == ReplacingScope.GLOBAL:
             return Transformable({
                 self.default_key: result
             })
@@ -494,7 +494,7 @@ class NestToKey(Action[Dict[str, Any], Dict[str, Any]]):
             name (Optional[str], optional): name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
         """
-        super().__init__(name)
+        super().__init__(name, replace=ReplacingScope.LOCAL)
         self.key = key
 
 
