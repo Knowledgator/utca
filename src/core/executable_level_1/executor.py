@@ -1,12 +1,13 @@
 from typing import (
     Any, Dict, List, Generic, Optional, TypeVar, cast
 )
+import copy
 
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.actions import Action
 from core.executable_level_1.component import Component
-from core.executable_level_1.schema import Transformable
-from core.executable_level_1.exceptions import IvalidInputDataValue, ActionError
+from core.executable_level_1.schema import Transformable, ReplacingScope
+from core.exceptions import IvalidInputDataValue, ActionError
 from core.executable_level_1.interpreter import Evaluator
 
 ExecutorComponent = TypeVar("ExecutorComponent", Executable[Any, Any], Action[Any, Any])
@@ -18,11 +19,13 @@ class BasicExecutor(Component, Generic[ExecutorComponent]):
         get_key: Optional[str]=None,
         set_key: Optional[str]=None,
         default_key: str="output",
+        replace: ReplacingScope=ReplacingScope.INPLACE,
     ) -> None:
         self.component = component
         self.get_key = get_key or "__dict__"
         self.set_key = set_key
         self.default_key = default_key
+        self.replace = replace
 
 
     @property
@@ -49,17 +52,11 @@ class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
         data = getattr(input_data, self.get_key)
         if isinstance(data, Dict):
             result = self.component.execute(
-                cast(Dict[str, Any], data), evaluator
+                copy.copy(cast(Dict[str, Any], data)), evaluator
             )
             if not self.set_key:
                 input_data.update(result)
-            else:
-                setattr(
-                    input_data, 
-                    self.set_key,
-                    result
-                )
-            return input_data
+                return input_data
         elif isinstance(data, List):
             result = [
                 {
@@ -70,14 +67,15 @@ class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
                 }
                 for i in cast(List[Dict[str, Any]], data)
             ]
-            setattr(
-                input_data,
-                self.set_key or self.default_key,
-                result
-            )
-            return input_data
         else:
             raise IvalidInputDataValue()
+
+        setattr(
+            input_data,
+            self.set_key or self.default_key,
+            result
+        )
+        return input_data
         
 
 class ActionExecutor(BasicExecutor[Action[Any, Any]]):
@@ -92,7 +90,7 @@ class ActionExecutor(BasicExecutor[Action[Any, Any]]):
         data = getattr(input_data, self.get_key)
         
         try:
-            result = self.component.execute(data)
+            result = self.component.execute(copy.copy(data))
         except Exception as e:
             raise ActionError(self.name, e)
         
@@ -100,9 +98,16 @@ class ActionExecutor(BasicExecutor[Action[Any, Any]]):
             return input_data
         
         if not self.set_key and isinstance(result, Dict):
+            if self.replace in (ReplacingScope.GLOBAL, ReplacingScope.LOCAL):
+                return Transformable(cast(Dict[str, Any], result))
             input_data.update(cast(Dict[str, Any], result))
             return input_data
 
+        if self.replace == ReplacingScope.GLOBAL:
+            return Transformable({
+                self.set_key or self.component.default_key: result
+            })
+        
         setattr(
             input_data,
             self.set_key or self.component.default_key,
