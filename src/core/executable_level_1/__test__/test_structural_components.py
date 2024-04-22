@@ -75,7 +75,6 @@ def test_loop_iterations():
     example = MyExecutable()
     
     loop = While(
-        condition=lambda x, e: True, # while True equivalent
         schema=example,
         max_iterations=10
     )
