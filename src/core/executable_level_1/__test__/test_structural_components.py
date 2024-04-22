@@ -1,9 +1,11 @@
 from typing import Any, Dict, List
 import copy
+import logging
 
 from core.executable_level_1.__test__.utils import MyExecutable
 from core import (
-    Evaluator, 
+    Evaluator,
+    EvaluatorConfigs,
     While, 
     Transformable, 
     Condition, 
@@ -177,19 +179,23 @@ def test_switch_conditions():
         schema=condition_schema,
     )
 
-    s = Switch(
-        Branch( # if f % 2 == 0
-            example | example | example, # +3
-            condition=obj_condition,
+    s = Evaluator(Switch(
+            Branch( # if f % 2 == 0
+                example | example | example, # +3
+                condition=obj_condition,
+            ),
+            Branch( # elif f > 3
+                example | example, # +2
+                condition=function_condition,
+            ),
+            Branch( # else
+                example, # +1 
+            ),
+            name="MySwitch"
         ),
-        Branch( # elif f > 3
-            example | example, # +2
-            condition=function_condition,
-        ),
-        Branch( # else
-            example, # +1 
-        ),
-        name="MySwitch"
+        EvaluatorConfigs(
+            logging_level=logging.WARNING
+        )
     )
 
     for i in range(10000):
