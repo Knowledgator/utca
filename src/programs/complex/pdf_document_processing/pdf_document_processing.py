@@ -108,14 +108,14 @@ if __name__ == "__main__":
         | ExecuteFunction(prepare_image_classification_input).use(
             set_key="images"
         )
-        | Log(logger, "Images:")
+        | Log(logging.INFO, logger, "Images:")
         | ForEach(
             process_visual_data, 
             get_key="images",
             set_key="images_description"
         )
         | Flush(["images"])
-        | Log(logger, "Images descriptions:")
+        | Log(logging.INFO, logger, "Images descriptions:")
         | SetMemory(
             set_key="images_description", 
             get_key="images_description",
@@ -131,14 +131,14 @@ if __name__ == "__main__":
         | ExecuteFunction(crop_tables_from_pages).use(
             set_key="tables"
         )
-        | Log(logger, "Tables:")
+        | Log(logging.INFO, logger, "Tables:")
         | ForEach(
             process_visual_data, 
             get_key="tables",
             set_key="tables_description"
         )
         | Flush(["tables"])
-        | Log(logger, "Tables descriptions:")
+        | Log(logging.INFO, logger, "Tables descriptions:")
         | SetMemory(
             set_key="tables_description", 
             get_key="tables_description",
@@ -154,13 +154,13 @@ if __name__ == "__main__":
         | ExecuteFunction(
             prepare_text_summarization_input
         ).use(set_key="texts")
-        | Log(logger, "Texts:")
+        | Log(logging.INFO, logger, "Texts:")
         | TransformersTextSummarization().use(
             get_key="texts",
             set_key="summaries"
         )
         | Flush(["texts"])
-        | Log(logger, "Summaries:")
+        | Log(logging.INFO, logger, "Summaries:")
         | SetMemory(
             set_key="summaries", 
             get_key="summaries",
@@ -173,7 +173,7 @@ if __name__ == "__main__":
         | PDFRead().use(
             set_key="pdf"
         )
-        | Log(logger, "Read:")
+        | Log(logging.INFO, logger, "Read:")
         | image_processing
         | table_processing
         | text_summarization
@@ -182,10 +182,10 @@ if __name__ == "__main__":
             ["pages", "tables_description", "images_description", "summaries"], 
             memory_instruction=MemoryGetInstruction.POP
         )
-        | Log(logger, "Raw result:")
+        | Log(logging.INFO, logger, "Raw result:")
         | ExecuteFunction(format_results_and_clean_up).use(set_key="results")
         | Flush(["pages", "tables_description", "images_description", "summaries"])
-        | Log(logger, "Result:", open="="*40, close="="*40)
+        | Log(logging.INFO, logger, "Result:", open="="*40, close="="*40)
     ).set_name("Main pipeline")
     
     inputs = Evaluator(
