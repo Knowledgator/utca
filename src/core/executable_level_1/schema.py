@@ -3,6 +3,7 @@ from abc import ABC
 from typing import (
     Optional, TypeVar, Any, Dict
 )
+from enum import Enum
 
 from pydantic import BaseModel
 
@@ -50,3 +51,9 @@ class Config(BaseModel, ABC):
 
 InputType = TypeVar('InputType', bound=Input)
 OutputType = TypeVar('OutputType', bound=Output)
+
+
+class ReplacingScope(Enum):
+    INPLACE = 0
+    GLOBAL = 1
+    LOCAL = 2
