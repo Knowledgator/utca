@@ -1,6 +1,6 @@
 from typing import Any, List, Optional, Type
 
-from core.executable_level_1.schema import Input
+from core.executable_level_1.schema import IOModel
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
@@ -18,7 +18,7 @@ from implementation.tasks.text_processing.ner.token_searcher.actions import (
     TokenSearcherNERPostprocessor
 )
 
-class TokenSearcherNERInput(Input):
+class TokenSearcherNERInput(IOModel):
     text: str
     labels: list[str]
 

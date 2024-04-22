@@ -1,6 +1,6 @@
 from typing import Optional, Type
 
-from core.executable_level_1.schema import InputType, OutputType
+from core.executable_level_1.schema import Input, Output
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline
 )
@@ -11,13 +11,13 @@ from implementation.predictors.token_searcher.schema import (
 )   
 
 class TokenSearcherPredictor(
-    TransformersPipeline[InputType, OutputType]
+    TransformersPipeline[Input, Output]
 ):
     def __init__(
         self, 
         cfg: TokenSearcherPredictorConfig=TokenSearcherPredictorConfig(),
-        input_class: Type[InputType]=TokenSearcherPredictorInput,
-        output_class: Type[OutputType]=TokenSearcherPredictorOutput,
+        input_class: Type[Input]=TokenSearcherPredictorInput,
+        output_class: Type[Output]=TokenSearcherPredictorOutput,
         name: Optional[str]=None,
     ) -> None:
         super().__init__(

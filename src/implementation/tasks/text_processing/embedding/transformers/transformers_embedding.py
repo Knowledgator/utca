@@ -2,7 +2,7 @@ from typing import Type, Optional, List, Any
 
 from transformers import AutoModel, AutoTokenizer # type: ignore
 
-from core.executable_level_1.schema import Input, Output
+from core.executable_level_1.schema import IOModel
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
@@ -20,11 +20,11 @@ from implementation.tasks.text_processing.embedding.transformers.actions import 
     ConvertEmbeddingsToNumpyArrays,
 )
 
-class TextEmbeddingInput(Input):
+class TextEmbeddingInput(IOModel):
     texts: List[str]
 
 
-class TextEmbeddingOutput(Output):
+class TextEmbeddingOutput(IOModel):
     embeddings: Any
 
 

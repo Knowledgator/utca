@@ -34,7 +34,7 @@ class ComprehendItPredictor(
 
     
     def invoke(self, input_data: ComprehendItPredictorInputType, evaluator: Evaluator) -> Dict[str, Any]:
-        inputs = input_data.model_dump()
+        inputs = input_data.extract()
         return self.pipeline( # type: ignore
             inputs.pop("text"), inputs.pop("labels"), **inputs
         )

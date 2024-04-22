@@ -1,6 +1,6 @@
 from typing import Any, List, Optional, Type
 
-from core.executable_level_1.schema import Input
+from core.executable_level_1.schema import IOModel
 from core.executable_level_1.actions import (
     Action
 )
@@ -20,7 +20,7 @@ from implementation.tasks.text_processing.clean_text.token_searcher.actions impo
     TokenSearcherTextCleanerPostprocessor
 )
 
-class TokenSearcherTextCleanerInput(Input):
+class TokenSearcherTextCleanerInput(IOModel):
     text: str
     clean: Optional[bool] = None
 

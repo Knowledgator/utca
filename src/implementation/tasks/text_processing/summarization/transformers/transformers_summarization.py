@@ -1,6 +1,6 @@
 from typing import Any, Type, Optional, List
 
-from core.executable_level_1.schema import Output
+from core.executable_level_1.schema import IOModel
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
@@ -16,7 +16,7 @@ from implementation.tasks.text_processing.summarization.transformers.actions imp
     SummarizationPostprocess
 )
 
-class SummarizationOutput(Output):
+class SummarizationOutput(IOModel):
     summary_text: str
 
 

@@ -5,9 +5,7 @@ from transformers import ( # type: ignore
     TFPreTrainedModel,
 )
 
-from core.executable_level_1.schema import (
-    Input, Output
-)
+from core.executable_level_1.schema import IOModel
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipelineConfig
 )
@@ -24,12 +22,12 @@ class ComprehendItPredictorConfig(TransformersPipelineConfig):
     }
 
 
-class ComprehendItPredictorInput(Input):
+class ComprehendItPredictorInput(IOModel):
     text: str
     labels: List[str]
 
 
-class ComprehendItPredictorOutput(Output):
+class ComprehendItPredictorOutput(IOModel):
     sequence: str
     labels: List[str]
     scores: List[float]

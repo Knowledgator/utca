@@ -6,9 +6,7 @@ from transformers import ( # type: ignore
     PreTrainedTokenizer,
 )
 
-from core.executable_level_1.schema import (
-    Input, Output
-)
+from core.executable_level_1.schema import IOModel
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipelineConfig
 )
@@ -30,9 +28,9 @@ class TokenSearcherPredictorConfig(TransformersPipelineConfig):
     }
 
 
-class TokenSearcherPredictorInput(Input):
+class TokenSearcherPredictorInput(IOModel):
     inputs: List[str]
 
 
-class TokenSearcherPredictorOutput(Output):
+class TokenSearcherPredictorOutput(IOModel):
     output: List[List[Dict[str, Any]]]

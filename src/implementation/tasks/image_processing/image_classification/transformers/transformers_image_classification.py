@@ -9,7 +9,7 @@ from transformers import ( # type: ignore
 )
 
 from core.executable_level_1.schema import (
-    Input, Output, InputType, OutputType
+    Input, Output, IOModel
 )
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
@@ -28,24 +28,24 @@ from implementation.tasks.image_processing.image_classification.transformers.act
 )
 from implementation.datasources.image.actions import ImagePad
 
-class TransformersImageClassificationInput(Input):
+class TransformersImageClassificationInput(IOModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     image: Image.Image
 
 
-class TransformersImageClassificationOutput(Output):
+class TransformersImageClassificationOutput(IOModel):
     label: Tuple[str, float]
 
 
-class TransformersImageClassificationMultilabelOutput(Output):
+class TransformersImageClassificationMultilabelOutput(IOModel):
     labels: Dict[str, float]
 
 
 class TransformersImageClassification(
     Task[
-        InputType, 
-        OutputType
+        Input, 
+        Output
     ]
 ):
     default_model = "facebook/deit-base-distilled-patch16-384"
@@ -56,8 +56,8 @@ class TransformersImageClassification(
         predictor: Optional[Predictor[Any, Any]]=None,
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
-        input_class: Type[InputType]=TransformersImageClassificationInput,
-        output_class: Type[OutputType]=TransformersImageClassificationOutput,
+        input_class: Type[Input]=TransformersImageClassificationInput,
+        output_class: Type[Output]=TransformersImageClassificationOutput,
         name: Optional[str]=None,
     ) -> None:
         if not predictor:

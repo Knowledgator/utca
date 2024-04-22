@@ -4,36 +4,34 @@ from pydantic import ConfigDict
 from PIL import Image
 import torch
 
-from core.executable_level_1.schema import (
-    Input, Output
-)
+from core.executable_level_1.schema import IOModel
 
-class TransformersImageClassificationModelInput(Input):
+class TransformersImageClassificationModelInput(IOModel):
     pixel_values: Any
 
 
-class TransformersTextToSpeechInput(Input):
+class TransformersTextToSpeechInput(IOModel):
     text_inputs: str
 
 
-class TransformersTextToSpeechOutput(Output):
+class TransformersTextToSpeechOutput(IOModel):
     audio: Any
     sampling_rate: int
 
 
-class TransformersChartsAndPlotsModelInput(Input):
+class TransformersChartsAndPlotsModelInput(IOModel):
     flattened_patches: Any
     attention_mask: Any
 
 
-class TransformersVisualQandAInput(Input):
+class TransformersVisualQandAInput(IOModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
         
     image: Image.Image
     question: str
 
 
-class TransformersImageModelRawInput(Input):
+class TransformersImageModelRawInput(IOModel):
     input_ids: Any
     token_type_ids: Any
     attention_mask: Any
@@ -41,15 +39,15 @@ class TransformersImageModelRawInput(Input):
     pixel_mask: Any
 
 
-class TransformersEmbeddingInput(Input):
+class TransformersEmbeddingInput(IOModel):
     encodings: Any
 
 
-class TransformersEmbeddingOutput(Output):
+class TransformersEmbeddingOutput(IOModel):
     last_hidden_state: Any
 
 
-class TransformersEntityLinkingInput(Input):
+class TransformersEntityLinkingInput(IOModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     encodings: Any
@@ -60,30 +58,30 @@ class TransformersEntityLinkingInput(Input):
     ]
 
 
-class TransformersEntityLinkingOutput(Output):
+class TransformersEntityLinkingOutput(IOModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     sequences: Any
     sequences_scores: Optional[Any]=None
 
 
-class TransformersTextualQandAInput(Input):
+class TransformersTextualQandAInput(IOModel):
     question: str
     context: str
 
 
-class TransformersTextualQandAOutput(Output):
+class TransformersTextualQandAOutput(IOModel):
     answer: Optional[str]=None
     score: float=0.
 
 
-class TransformersBasicInput(Input):
+class TransformersBasicInput(IOModel):
     inputs: Any
 
 
-class TransformersLogitsOutput(Output):
+class TransformersLogitsOutput(IOModel):
     logits: Any
 
 
-class TransformersBasicOutput(Output):
+class TransformersBasicOutput(IOModel):
     output: Any

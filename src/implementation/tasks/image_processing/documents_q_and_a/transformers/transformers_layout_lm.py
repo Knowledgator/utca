@@ -1,6 +1,6 @@
 from typing import Any, List, Type, Optional
 
-from core.executable_level_1.schema import Output
+from core.executable_level_1.schema import IOModel
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
@@ -17,7 +17,7 @@ from implementation.tasks.image_processing.documents_q_and_a.transformers.action
 )
 
 
-class DocumentQandAOutput(Output):
+class DocumentQandAOutput(IOModel):
     answer: Optional[str]
 
 

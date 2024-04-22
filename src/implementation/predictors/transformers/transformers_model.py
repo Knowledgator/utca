@@ -5,7 +5,7 @@ from transformers import PreTrainedModel # type: ignore
 
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import (
-    Config, InputType, OutputType
+    Config, Input, Output
 )
 from core.predictor_level_2.predictor import Predictor
 from implementation.predictors.transformers.utils import ensure_dict
@@ -27,16 +27,16 @@ TransformersModelConfigType = TypeVar(
 
 class TransformersModel(
     Predictor[
-        InputType, 
-        OutputType
+        Input, 
+        Output
     ]
 ):
    
     def __init__(
         self, 
         cfg: TransformersModelConfig,
-        input_class: Type[InputType],
-        output_class: Type[OutputType],
+        input_class: Type[Input],
+        output_class: Type[Output],
         name: Optional[str]=None,
     ) -> None:
         super().__init__(
@@ -47,8 +47,8 @@ class TransformersModel(
         self.cfg = cfg
 
 
-    def invoke(self, input_data: InputType, evaluator: Evaluator) -> Dict[str, Any]:
-        inputs = input_data.model_dump()
+    def invoke(self, input_data: Input, evaluator: Evaluator) -> Dict[str, Any]:
+        inputs = input_data.extract()
         if not "encodings" in inputs:
             res = self.cfg.model(**inputs, **self.cfg.get_kwargs())
         else:
@@ -63,12 +63,12 @@ class TransformersModel(
 
 class TransformersGenerativeModel(
     TransformersModel[
-        InputType, 
-        OutputType
+        Input, 
+        Output
     ]
 ):
-    def invoke(self, input_data: InputType, evaluator: Evaluator) -> Dict[str, Any]:
-        inputs = input_data.model_dump()
+    def invoke(self, input_data: Input, evaluator: Evaluator) -> Dict[str, Any]:
+        inputs = input_data.extract()
         if not "encodings" in inputs:
             res = self.cfg.model.generate(**inputs, **self.cfg.get_kwargs()) # type: ignore
         else:

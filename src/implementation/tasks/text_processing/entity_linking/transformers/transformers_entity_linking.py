@@ -15,7 +15,7 @@ import torch
 import pyximport # type: ignore
 pyximport.install() # type: ignore
 
-from core.executable_level_1.schema import Input, Output
+from core.executable_level_1.schema import IOModel
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
@@ -34,13 +34,13 @@ from implementation.tasks.text_processing.entity_linking.transformers.actions im
     EntityLinkingPostprocess
 )
 
-class EntityLinkingInput(Input):
+class EntityLinkingInput(IOModel):
     texts: List[str]
     num_beams: int
     num_return_sequences: int
 
 
-class EntityLinkingOutput(Output):
+class EntityLinkingOutput(IOModel):
     classification_output: Any
 
 

@@ -16,7 +16,7 @@ from transformers.image_processing_utils import ( # type: ignore
 
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import (
-    Config, Input, InputType, OutputType
+    Config, IOModel, Input, Output
 )
 from core.predictor_level_2.predictor import Predictor
 from implementation.predictors.transformers.utils import ensure_dict
@@ -76,15 +76,15 @@ TransformersPipelineConfigType = TypeVar(
 )
 
 class TransformersPipeline(
-    Predictor[InputType, OutputType]
+    Predictor[Input, Output]
 ):  
     pipeline: Pipeline
 
     def __init__(
         self,
         cfg: TransformersPipelineConfig,
-        input_class: Type[InputType],
-        output_class: Type[OutputType],
+        input_class: Type[Input],
+        output_class: Type[Output],
         name: Optional[str]=None,
     ) -> None:
         self.pipeline: Pipeline = pipeline(
@@ -97,8 +97,8 @@ class TransformersPipeline(
         )
 
 
-    def invoke(self, input_data: InputType, evaluator: Evaluator) -> Dict[str, Any]:
-        inputs = input_data.model_dump()
+    def invoke(self, input_data: Input, evaluator: Evaluator) -> Dict[str, Any]:
+        inputs = input_data.extract()
         return ensure_dict(self.pipeline(**inputs)) # type: ignore
     
 
@@ -107,7 +107,7 @@ class TransformersPipeline(
         return self.pipeline.model.config # type: ignore
 
 
-class SummarizationInput(Input):
+class SummarizationInput(IOModel):
     inputs: Any
 
 SummarizationInputType = TypeVar(
@@ -118,11 +118,11 @@ SummarizationInputType = TypeVar(
 class TransformersSummarizationPipeline(
     TransformersPipeline[
         SummarizationInputType, 
-        OutputType
+        Output
     ]
 ):
     def invoke(self, input_data: SummarizationInputType, evaluator: Evaluator) -> Dict[str, Any]:
-        inputs = input_data.model_dump()
+        inputs = input_data.extract()
         return ensure_dict(self.pipeline( # type: ignore
             inputs.pop("inputs"), **inputs
         ))

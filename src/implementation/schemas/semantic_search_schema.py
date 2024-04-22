@@ -6,7 +6,7 @@ import numpy.typing as npt
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
-    Input, Output, Transformable
+    IOModel, Transformable
 )
 from implementation.tasks.text_processing.embedding.transformers.transformers_embedding import (
     TextEmbedding
@@ -15,12 +15,12 @@ from implementation.datasources.index.actions import (
     CreateIndex, IndexData, SearchIndex, GetTextsByIndexes,
 )
 
-class SemanticSearchSchemaInput(Input):
+class SemanticSearchSchemaInput(IOModel):
     query: List[str]
     results_count: int
 
 
-class SemanticSearchSchemaOutput(Output):
+class SemanticSearchSchemaOutput(IOModel):
     search_results: Dict[str, Any]
 
 

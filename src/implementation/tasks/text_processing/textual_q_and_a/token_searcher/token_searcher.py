@@ -1,6 +1,6 @@
 from typing import Any, List, Type, Optional
 
-from core.executable_level_1.schema import Input
+from core.executable_level_1.schema import IOModel
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
@@ -18,7 +18,7 @@ from implementation.tasks.text_processing.textual_q_and_a.token_searcher.actions
     TokenSearcherQandAPostprocessor
 )
 
-class TokenSearcherQandAInput(Input):
+class TokenSearcherQandAInput(IOModel):
     question: str
     text: str
 

@@ -1,4 +1,4 @@
-from typing import Any, List, Type, Optional, cast
+from typing import Any, List, Type, Optional
 
 from pydantic import ConfigDict
 from PIL import Image
@@ -7,7 +7,7 @@ from transformers import ( # type: ignore
 )
 
 from core.executable_level_1.schema import (
-    Input, Output
+    IOModel
 )
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
@@ -25,7 +25,7 @@ from implementation.tasks.image_processing.charts_and_plots_analysis.transformer
     ChartsAndPlotsAnalysisPostprocessor,
 )
 
-class ChartsAndPlotsAnalysisInput(Input):
+class ChartsAndPlotsAnalysisInput(IOModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     image: Image.Image
@@ -81,10 +81,7 @@ class TransformersChartsAndPlotsAnalysis(
                 ]
 
         super().__init__(
-            predictor=cast(
-                Predictor[Input, Output], 
-                predictor
-            ),
+            predictor=predictor,
             preprocess=preprocess,
             postprocess=postprocess,
             input_class=input_class, 

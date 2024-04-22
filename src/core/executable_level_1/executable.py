@@ -9,30 +9,29 @@ from pydantic import ValidationError
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.component import Component
 from core.executable_level_1.schema import (
-    InputType, 
-    OutputType, 
+    Input, 
+    Output,
+    IOModel,
     Transformable, 
-    Input,
-    Output
 )
 from core.exceptions import ExecutableError
 if TYPE_CHECKING:
     from core.executable_level_1.executor import ExecutableExecutor
 
-ValidationClass = TypeVar("ValidationClass", Input, Output)
+ValidationClass = TypeVar("ValidationClass", bound=IOModel)
 
 class Executable(
-    Generic[InputType, OutputType], 
+    Generic[Input, Output], 
     Component, 
     ABC
 ):
-    input_class: Type[InputType]
-    output_class: Type[OutputType]
+    input_class: Type[Input]
+    output_class: Type[Output]
 
     def __init__(
         self, 
-        input_class: Type[InputType]=Input,
-        output_class: Type[OutputType]=Output, 
+        input_class: Type[Input],
+        output_class: Type[Output], 
         name: Optional[str]=None,
     ):
         super().__init__(name)
@@ -41,7 +40,7 @@ class Executable(
 
 
     @abstractmethod
-    def invoke(self, input_data: InputType, evaluator: Evaluator) -> Dict[str, Any]:
+    def invoke(self, input_data: Input, evaluator: Evaluator) -> Dict[str, Any]:
         ...
 
 
@@ -60,13 +59,13 @@ class Executable(
             )
         
     
-    def validate_input(self, data: Dict[str, Any]) -> InputType:
+    def validate_input(self, data: Dict[str, Any]) -> Input:
         return self.validate(
             data, self.input_class
         )
         
     
-    def validate_output(self, data: Dict[str, Any]) -> OutputType:
+    def validate_output(self, data: Dict[str, Any]) -> Output:
         return self.validate(
             data, self.output_class
         )
@@ -83,7 +82,7 @@ class Executable(
                     self.validate_input(input_data),
                     evaluator
                 )
-            ).model_dump()
+            ).extract()
         except Exception as e:
             raise ExecutableError(self.name, e)
     

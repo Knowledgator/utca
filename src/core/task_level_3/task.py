@@ -5,14 +5,14 @@ from typing import (
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
-    InputType, OutputType, Transformable
+    Input, Output, Transformable
 )
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.schema import NEROutputType
 
 class Task(
-    Executable[InputType, OutputType]
+    Executable[Input, Output]
 ):
     def __init__(
         self,
@@ -20,8 +20,8 @@ class Task(
         predictor: Predictor[Any, Any],
         preprocess: Optional[List[Action[Any, Any]]],
         postprocess: Optional[List[Action[Any, Any]]],
-        input_class: Type[InputType],
-        output_class: Type[OutputType],
+        input_class: Type[Input],
+        output_class: Type[Output],
         name: Optional[str]=None,
     ) -> None:
         super().__init__(
@@ -46,7 +46,7 @@ class Task(
 
 
     def invoke(
-        self, input_data: InputType, evaluator: Evaluator
+        self, input_data: Input, evaluator: Evaluator
     ) -> Dict[str, Any]:
         processed_input = self.process(
             input_data.generate_transformable(), 
@@ -63,7 +63,7 @@ class Task(
 
 class NERTask(
     Task[
-        InputType, NEROutputType,
+        Input, NEROutputType,
     ]
 ):
     ...

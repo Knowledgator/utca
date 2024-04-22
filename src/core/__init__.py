@@ -35,8 +35,7 @@ from core.executable_level_1.schema import (
     Config, 
     ReplacingScope,
     Transformable,
-    InputType,
-    OutputType,
+    IOModel,
 )
 
 __all__ = [
@@ -72,6 +71,5 @@ __all__ = [
     "Config",
     "ReplacingScope",
     "Transformable",
-    "InputType",
-    "OutputType",
+    "IOModel",
 ]

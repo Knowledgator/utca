@@ -1,10 +1,10 @@
-from typing import Any, Dict, List, Optional, Tuple, Type, cast
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from transformers import ( # type: ignore
     ViltProcessor, ViltForQuestionAnswering, AutoConfig
 )
 
-from core.executable_level_1.schema import Input, Output
+from core.executable_level_1.schema import IOModel
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
@@ -22,11 +22,11 @@ from implementation.tasks.image_processing.visual_q_and_a.transformers.actions i
     VisualQandASingleAnswerPostprocessor,
 )
 
-class TransformersVisualQandAOutput(Output):
+class TransformersVisualQandAOutput(IOModel):
     answer: Tuple[str, float]
 
 
-class TransformersVisualQandAMultianswerOutput(Output):
+class TransformersVisualQandAMultianswerOutput(IOModel):
     answers: Dict[str, float]
 
 
@@ -75,10 +75,7 @@ class TransformersVisualQandA(
             ]
 
         super().__init__(
-            predictor=cast(
-                Predictor[Input, Output], 
-                predictor
-            ),
+            predictor=predictor,
             preprocess=preprocess,
             postprocess=postprocess,
             input_class=input_class, 
