@@ -1,3 +1,4 @@
+from typing import Dict, List
 import copy
 import logging
 import io
@@ -12,6 +13,8 @@ from core import (
     RenameAttributeQuery,
     SetValue,
     UnpackValue,
+    NestToKey,
+    ExecuteFunction,
 )
 
 def test_flush_root_all():
@@ -203,4 +206,52 @@ def test_unpack_value():
             "b": 1,
             "d": 1,
         }
+    }
+
+
+def test_nest_to_key():
+    n = NestToKey("a")
+
+    assert n.run({"b": 1}) == {"a": {"b": 1}}
+    assert n.use("c").run({
+        "c": {"b": 1}
+    }) == {
+        "a": {"b": 1}
+    }
+    assert n.use("c", "c").run({
+        "c": {"b": 1}
+    }) == {
+        "c": {"a": {"b": 1}}
+    }
+
+
+def test_execute_function():
+    def f(a: Dict[str, int]) -> Dict[str, int]:
+        a["a"] += 1
+        return a
+    
+    def fs(a: Dict[str, int]) -> List[Dict[str, int]]:
+        a["a"] += 1
+        return [a] * 2
+    
+    e = ExecuteFunction(f)
+    es = ExecuteFunction(fs)
+
+    assert e.run({"a": 0})["a"] == 1
+    assert es.run({"a": 0})["output"][0]["a"] == 1
+    
+    assert e.use("c").run({"c": {"a": 0}}) == {
+        "c": {"a": 0},
+        "a": 1
+    }
+    assert es.use("c").run({"c": {"a": 0}}) == {
+        "c": {"a": 0},
+        "output": [{"a": 1}]*2
+    }
+
+    assert e.use("c", "c").run({"c": {"a": 0}}) == {
+        "c": {"a": 1}
+    }
+    assert es.use("c", "c").run({"c": {"a": 0}}) == {
+        "c": [{"a": 1}]*2
     }
