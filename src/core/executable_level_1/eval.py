@@ -4,12 +4,13 @@ from typing import (
     List, Callable, Optional, Tuple, Type,  TypeVar, Union
 )
 import copy
+import logging
 
 from core.executable_level_1.component import Component
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.memory import GetMemory, MemoryGetInstruction
-from core.executable_level_1.exceptions import EvaluatorExecutionFailed
+from core.exceptions import EvaluatorExecutionFailed
 
 T = TypeVar('T', bound='Serializable')
 
@@ -66,12 +67,16 @@ class ExecutionSchema(Component):
         for i, component in enumerate(self.program):
             try:
                 input_data = component(input_data, evaluator)
-                evaluator.cfg.logger.info(
+                evaluator.log(
+                    logging.INFO,
                     f"{self.name}: Step {i}({component.name}) executed successfully."
                 )
             except Exception as e:
-                evaluator.cfg.logger.error(f"{self.name}: Error at step {i}")
-                evaluator.cfg.logger.exception(e)
+                evaluator.log(
+                    logging.ERROR,
+                    f"{self.name}: Error at step {i}"
+                )
+                evaluator.log(logging.ERROR, e, exc_info=True)
                 if evaluator.cfg.fast_exit:
                     raise EvaluatorExecutionFailed(e)
         return input_data
