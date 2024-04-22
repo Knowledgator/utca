@@ -8,6 +8,16 @@ class ExecutableError(Exception):
         super().__init__(f"Executable error: {executable_class}: {e}")
 
 
+class InvalidQuery(ValueError):
+    def __init__(self, query: str) -> None:
+        super().__init__(f"Invalid transformation format: '{query}'")
+
+
+class InputDataKeyError(KeyError):
+    def __init__(self, key: str) -> None:
+        super().__init__(f"Attribute '{key}' not found in input_data.")
+
+
 class InputSchemaNotFound(Exception):
     def __init__(self, message: str="InputSchemaNotFound"):
         self.message = message
@@ -43,3 +53,8 @@ class InavalidMemoryInstruction(ValueError):
 
 class IvalidInputDataValue(ValueError):
     ...
+
+
+class UseParameterError(Exception):
+    def __init__(self, keys: str) -> None:
+        super().__init__(f"Use method doesn't ignores: {keys}")
