@@ -7,7 +7,7 @@ from core.executable_level_1.executable import Executable
 from core.executable_level_1.actions import Action
 from core.executable_level_1.component import Component
 from core.executable_level_1.schema import Transformable, ReplacingScope
-from core.exceptions import IvalidInputDataValue, ActionError
+from core.exceptions import IvalidInputDataValue, ActionError, InputDataKeyError
 from core.executable_level_1.interpreter import Evaluator
 
 ExecutorComponent = TypeVar("ExecutorComponent", Executable[Any, Any], Action[Any, Any])
@@ -87,8 +87,13 @@ class ActionExecutor(BasicExecutor[Action[Any, Any]]):
         if not evaluator:
             evaluator = self.set_up_default_evaluator()
         
-        data = getattr(input_data, self.get_key)
-        
+        try:
+            data = getattr(input_data, self.get_key)
+        except:
+            raise ActionError(
+                self.name, InputDataKeyError(self.get_key)
+            )
+
         try:
             result = self.component.execute(copy.copy(data))
         except Exception as e:
