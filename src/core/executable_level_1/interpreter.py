@@ -42,10 +42,11 @@ class Evaluator:
         self, 
         schema: Component, 
         cfg: Optional[EvaluatorConfigs]=None,
+        memory_manager: Optional[MemoryManager]=None,
     ) -> None:
         from core.executable_level_1.memory import MemoryManager
         self.cfg = cfg or EvaluatorConfigs()
-        self.memory_manager = MemoryManager(None)
+        self.memory_manager = memory_manager or MemoryManager()
         self.schema = schema
 
 

@@ -11,20 +11,18 @@ from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import Transformable
 from core.exceptions import InavalidMemoryInstruction
 
-INPUT: str = 'input'
-
 class Memory:
     memory: Dict[str, Any]
 
-    def __init__(self, directory: Optional[str]=None) -> None:
-        self.memory = {}
+    def __init__(
+        self, 
+        directory: Optional[str]=None, 
+        initial_data: Optional[Dict[str, Any]]=None
+    ) -> None:
+        self.memory = initial_data or {}
         self.directory = directory
         if directory:
             os.makedirs(directory, exist_ok=True)
-
-
-    # def add_input(self, input_state: Dict[str, Any]):
-    #     self.add_store(INPUT, input_state)
             
 
     def _get_file_path(self, identifier: str) -> str:
@@ -178,11 +176,12 @@ class DeleteMemory(Component):
 class MemoryManager:
     memory: Memory
 
-    def __init__(self, path: Optional[str]=None) -> None:
-        if path:
-            self.memory = Memory(path)
-        else:
-            self.memory = Memory()
+    def __init__(
+        self, 
+        path: Optional[str]=None, 
+        initial_data: Optional[Dict[str, Any]]=None
+    ) -> None:
+        self.memory = Memory(path, initial_data)
 
         
     def get(
