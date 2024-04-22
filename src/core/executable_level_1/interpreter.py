@@ -20,17 +20,15 @@ class EvaluatorConfigs:
     def __init__(
         self,
         name: str="Evaluator", 
-        logging_level: int=logging.INFO,
+        logging_level: int=logging.NOTSET,
         logging_handler: Optional[logging.Handler]=None,
         fast_exit: bool=True
     ):
         self.name = name
         self.logging_level = logging_level
         self.logging_handler = logging_handler or logging.StreamHandler()
-        self.logger = logging.Logger(
-            self.name, 
-            self.logging_level
-        )
+        self.logger = logging.getLogger(self.name)
+        self.logger.setLevel(self.logging_level)
         self.logger.addHandler(self.logging_handler)
         self.fast_exit = fast_exit
 
@@ -103,20 +101,8 @@ class Evaluator:
         self.memory_manager.flush()
     
 
-    def log_info(self, msg: Any) -> None:
-        self.cfg.logger.info(f"{self.cfg.name}: {msg}")
-
-    
-    def log_error(self, msg: Any) -> None:
-        self.cfg.logger.error(f"{self.cfg.name}: {msg}")
-
-    
-    def log_exception(self, msg: Any) -> None:
-        self.cfg.logger.exception(f"{self.cfg.name}: {msg}")
-
-    
-    def log_debug(self, msg: Any) -> None:
-        self.cfg.logger.debug(f"{self.cfg.name}: {msg}")
+    def log(self, level: int, msg: Any, exc_info: bool=False) -> None:
+        self.cfg.logger.log(level, f"{self.cfg.name}: {msg}", exc_info=exc_info)
 
     
     def create_child(
