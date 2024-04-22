@@ -458,7 +458,7 @@ class UnpackValue(Action[Dict[str, Any], Dict[str, Any]]):
     ) -> None:
         """
         Args:
-            key (str): Key to unpack.
+            key (str): Key to unpack (associated value should be of type Dict[str, Any]).
             
             name (Optional[str], optional): name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
@@ -469,9 +469,12 @@ class UnpackValue(Action[Dict[str, Any], Dict[str, Any]]):
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         try:
-            input_data.update(input_data.pop(self.key))
+            data = input_data.pop(self.key)
         except:
             raise InputDataKeyError(self.key)
+        if not isinstance(data, Dict):
+            raise ValueError(f"Expected: Dict[str, Any]. Recieved value of type: {type(data)}")
+        input_data.update(cast(Dict[str, Any], data))
         return input_data
     
 
