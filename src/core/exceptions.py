@@ -53,8 +53,3 @@ class InavalidMemoryInstruction(ValueError):
 
 class IvalidInputDataValue(ValueError):
     ...
-
-
-class UseParameterError(Exception):
-    def __init__(self, keys: str) -> None:
-        super().__init__(f"Use method doesn't ignores: {keys}")
