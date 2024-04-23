@@ -141,7 +141,7 @@ class Evaluator:
             register (Transformable): Destination.
 
             identifiers (List[Union[str, Tuple[str, str]]]): Key/keys that will be used to
-                access data in memory and for seting to register.
+                access data in memory and for setting to register.
             
             delete (bool, optional): If equals to True, accessed data will be removed from memory.
                 Defaults to False.
@@ -179,7 +179,7 @@ class Evaluator:
         self, identifier: str
     ) -> None:
         """
-        Delets specified key from memory
+        Deletes specified key from memory
 
         Args:
             identifier (str): Key for deletion.
