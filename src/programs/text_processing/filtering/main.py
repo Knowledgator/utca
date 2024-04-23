@@ -23,7 +23,7 @@ keywords = [
 if __name__ == "__main__":
     re_pattern = RePattern(
         pattern=re.compile("|".join(keywords), re.IGNORECASE),
-        key="text"
+        get_key="text"
     )
     pipeline = (
         Filter(re_pattern.search, get_key="texts") 
