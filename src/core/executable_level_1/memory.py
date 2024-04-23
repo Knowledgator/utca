@@ -12,6 +12,9 @@ from core.executable_level_1.schema import Transformable
 from core.exceptions import InavalidMemoryInstruction
 
 class Memory:
+    """
+    Manages data
+    """
     memory: Dict[str, Any]
 
     def __init__(
@@ -19,6 +22,13 @@ class Memory:
         directory: Optional[str]=None, 
         initial_data: Optional[Dict[str, Any]]=None
     ) -> None:
+        """
+        Args:
+            directory (Optional[str], optional): Path to directory. Defaults to None.
+            
+            initial_data (Optional[Dict[str, Any]], optional): Data for initialization 
+                of memory. Defaults to None.
+        """
         self.memory = initial_data or {}
         self.directory = directory
         if directory:
@@ -26,14 +36,32 @@ class Memory:
             
 
     def _get_file_path(self, identifier: str) -> str:
-        """Constructs a file path for a given identifier."""
+        """
+        Constructs a file path for a given identifier.
+
+        Args:
+            identifier (str): Indetifier that will be used.
+
+        Raises:
+            ValueError: If directory was not specified.
+
+        Returns:
+            str: Path to file for identifier.
+        """
         if not self.directory:
             raise ValueError("No directory set for file-based storage.")
         return os.path.join(self.directory, f"{identifier}.json")
 
 
     def add_store(self, identifier: str, state: Any) -> None:
-        """Saves a state with the given identifier."""
+        """
+        Saves a state with the given identifier.
+
+        Args:
+            identifier (str): Identifier that will be used.
+
+            state (Any): State that will be associated with provided identifier.
+        """
         self.memory[identifier] = state
         if self.directory:
             file_path = self._get_file_path(identifier)
@@ -42,7 +70,18 @@ class Memory:
 
 
     def retrieve_store(self, identifier: str) -> Any:
-        """Retrieves a state by its identifier, either from memory or disk."""
+        """
+        Retrieves a state by its identifier, either from memory or disk.
+
+        Args:
+            identifier (str): Identifier that will be used.
+
+        Raises:
+            KeyError: If identiifier is invalid.
+
+        Returns:
+            Any: Data associated with identifier.
+        """
         if identifier in self.memory:
             return self.memory[identifier]
         if self.directory:
@@ -54,7 +93,12 @@ class Memory:
 
 
     def delete_store(self, identifier: str) -> None:
-        """Deletes a state by its identifier from both memory and disk."""
+        """
+        Deletes a state by its identifier from both memory and disk.
+
+        Args:
+            identifier (str): Identifier to delete.
+        """
         # Remove from memory
         if identifier in self.memory:
             del self.memory[identifier]
@@ -67,6 +111,9 @@ class Memory:
     
 
     def flush(self) -> None:
+        """
+        Cleans memory
+        """
         self.memory = {}
 
 
@@ -75,12 +122,24 @@ class Memory:
 
 
 class MemorySetInstruction(Enum):
-    SET = "setandgo" # set and continue
-    MOVE = "move" # clean all objects
+    """
+    Set memory instruction
+    """
+    SET = 0
+    """
+    Set data to memory
+    """
+    MOVE = 1
+    """
+    Set data to memory and remove it from current data
+    """
     # FLUSH_AND_RESTORE_INPUT = "restoreinput" # clean all objects + set initial input state
 
 
 class SetMemory(Component):
+    """
+    Sets memory
+    """
     get_key: str
     set_key: str
     memory_instruction: MemorySetInstruction
@@ -91,6 +150,16 @@ class SetMemory(Component):
         get_key: Optional[str]=None,
         memory_instruction: MemorySetInstruction=MemorySetInstruction.SET,
     ) -> None:
+        """
+        Args:
+            set_key (str): Destination key.
+
+            get_key (Optional[str], optional): Key that used to retrieve data from register. 
+                If equals to None, complete register will be added to memory. Defaults to None.
+            
+            memory_instruction (MemorySetInstruction, optional): Strategy for memory setting.
+                Defaults to MemorySetInstruction.SET.
+        """
         super().__init__()
         self.set_key = set_key
         self.get_key = get_key or "__dict__"
@@ -100,6 +169,19 @@ class SetMemory(Component):
     def __call__(
         self, input_data: Transformable, evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        """
+        Args:
+            input_data (Transformable): Current data.
+            
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich executed.
+                If equals to None, default evaluator will be created. Defaults to None.
+
+        Raises:
+            InavalidMemoryInstruction: If provided instruction doesnt exists.
+
+        Returns:
+            Transformable: Result of execution.
+        """
         if not evaluator:
             evaluator = self.set_up_default_evaluator()
         
@@ -113,15 +195,23 @@ class SetMemory(Component):
                 input_data.flush()
             else:
                 delattr(input_data, self.get_key)
+            return input_data
         else:
             raise InavalidMemoryInstruction() 
-        return input_data
 
 
 class MemoryGetInstruction(Enum):
-    GET = "get" # get and merge
-    REPLACE = "replace" # clean all objects and get
-    POP = "pop"
+    """
+    Get memory instruction
+    """
+    GET = 0
+    """
+    Get data from memory
+    """
+    POP = 1
+    """
+    Get data from memory and delete it from memory
+    """
 
 
 class GetMemory(Component):
@@ -133,6 +223,14 @@ class GetMemory(Component):
         identifiers: List[Union[str, Tuple[str, str]]],
         memory_instruction: MemoryGetInstruction=MemoryGetInstruction.GET,
     ):
+        """
+        Args:
+            identifiers (List[Union[str, Tuple[str, str]]]): Key/keys that will be used to
+                access data in memory and for setting to register.
+
+            memory_instruction (MemoryGetInstruction, optional): Strategy for memory access.
+                Defaults to MemoryGetInstruction.GET.
+        """
         super().__init__()
         self.identifiers = identifiers
         self.memory_instruction = memory_instruction
@@ -141,13 +239,24 @@ class GetMemory(Component):
     def __call__(
         self, input_data: Transformable, evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        """
+        Args:
+            input_data (Transformable): Current data.
+
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich executed.
+                If equals to None, default evaluator will be created. Defaults to None.
+
+        Raises:
+            InavalidMemoryInstruction: If provided instruction doesn't exist.
+
+        Returns:
+            Transformable: Result of execution.
+        """
         if not evaluator:
             evaluator = self.set_up_default_evaluator()
 
         if self.memory_instruction == MemoryGetInstruction.GET:
             register = evaluator.get_memory(input_data, self.identifiers)
-        elif self.memory_instruction == MemoryGetInstruction.REPLACE: 
-            register = evaluator.get_memory(Transformable(), self.identifiers)
         elif self.memory_instruction == MemoryGetInstruction.POP:
             register = evaluator.get_memory(input_data, self.identifiers, delete=True)
         else:
@@ -156,24 +265,48 @@ class GetMemory(Component):
 
 
 class DeleteMemory(Component):
+    """
+    Deletes data from memory
+    """
     def __init__(
         self, identifiers: Optional[List[str]]=None,
     ):
+        """
+        Args:
+            identifiers (Optional[List[str]], optional): Keys associated with data.
+                If equals to None, flushes memory. Defaults to None.
+        """
         self.identifiers = identifiers
 
 
-    def execute(
-        self, register: Transformable, memory_manager: MemoryManager
+    def __call__(
+        self, input_data: Transformable, evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        """
+        Args:
+            input_data (Transformable): Current data.
+
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich executed.
+                If equals to None, default evaluator will be created. Defaults to None.
+
+        Returns:
+            Transformable: Input data
+        """
+        if not evaluator:
+            evaluator = self.set_up_default_evaluator()
+
         if not self.identifiers:
-            memory_manager.flush()
+            evaluator.flush_memory()
         else:
             for i in self.identifiers:
-                memory_manager.delete(i)
-        return register
+                evaluator.delete_memory(i)
+        return input_data
 
 
 class MemoryManager:
+    """
+    Manages memory
+    """
     memory: Memory
 
     def __init__(
@@ -181,6 +314,13 @@ class MemoryManager:
         path: Optional[str]=None, 
         initial_data: Optional[Dict[str, Any]]=None
     ) -> None:
+        """
+        Args:
+            directory (Optional[str], optional): Path to directory. Defaults to None.
+            
+            initial_data (Optional[Dict[str, Any]], optional): Data for initialization 
+                of memory. Defaults to None.
+        """
         self.memory = Memory(path, initial_data)
 
         
@@ -190,6 +330,21 @@ class MemoryManager:
         identifiers: List[Union[str, Tuple[str, str]]],
         delete: bool=False
     ) -> Transformable:
+        """
+        Get data from memory
+
+        Args:
+            register (Transformable): Current data.
+
+            identifiers (List[Union[str, Tuple[str, str]]]): Key/keys that will be used to
+                access data in memory and for setting to register.
+            
+            delete (bool, optional): If equals to True, deletes accessed memory identifiers. 
+                Defaults to False.
+
+        Returns:
+            Transformable: Result of execution.
+        """
         for identifier in identifiers:
             if isinstance(identifier, tuple):
                 get_key = identifier[0]
@@ -212,7 +367,17 @@ class MemoryManager:
         register: Transformable, 
         get_key: str,
         set_key: str,
-    ):
+    ) -> None:
+        """
+        Set data to memory
+
+        Args:
+            register (Transformable): Current data.
+
+            get_key (str): Source of data.
+            
+            set_key (str): Destination in memory.
+        """
         self.memory.add_store(
             set_key, getattr(register, get_key)
         )
@@ -221,10 +386,19 @@ class MemoryManager:
     def delete(
         self, identifier: str
     ) -> None:
+        """
+        Delete specified identifier from memory
+
+        Args:
+            identifier (str): Identifier to delete.
+        """
         self.memory.delete_store(identifier)
         
 
     def flush(self) -> None:
+        """
+        Clean memory
+        """
         self.memory.flush()
 
 
