@@ -34,6 +34,11 @@ class Transformable:
     Data manager class
     """
     def __init__(self, state: Optional[Dict[str, Any]]=None) -> None:
+        """
+        Args:
+            state (Optional[Dict[str, Any]], optional): Data to wrapp. 
+                Defaults to None.
+        """
         self.__dict__ = state or {}
     
 
@@ -69,6 +74,9 @@ class Transformable:
 
 
 class Config(BaseModel, ABC):
+    """
+    Base config class
+    """
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.__str__()})"
 
