@@ -13,6 +13,9 @@ from sqlalchemy.orm import (
 )
 
 class BaseModel(DeclarativeBase):
+    """
+    Base table model
+    """
     pass
 
 
@@ -20,6 +23,13 @@ class SQLSessionFactory:
     _session_factory: sessionmaker[Session]
 
     def __init__(self, url: str, echo: bool=False) -> None:
+        """
+        Args:
+            url (str): URL of DB.
+
+            echo (bool, optional): Of equals to True, logs debug info. 
+                Defaults to False.
+        """
         self._engine = create_engine(
             url, echo=echo
         )
@@ -27,55 +37,101 @@ class SQLSessionFactory:
     
     
     def create(self) -> Session:
+        """
+        Create session
+        """
         return self._session_factory()
     
 
     def close_all(self) -> None:
+        """
+        Close all sessions
+        """
         self._session_factory.close_all()
 
     
     def create_tables(self) -> None:
+        """
+        Create all tables
+        """
         BaseModel.metadata.create_all(self._engine)
 
 
 class SQLAction(Action[Dict[str, Any], None]):
+    """
+    SQL action without returns
+    """
     def __init__(
         self, 
-        session: Session,
-        statement: Any,
+        session: SQLSessionFactory,
         name: Optional[str]=None
     ) -> None:
+        """
+        Args:
+            session (SQLSessionFactory): Session to use.
+            
+            name (Optional[str], optional): Name for identification.
+                If equals to None, class name will be used. Defaults to None.
+        """
         super().__init__(name)
         self.session = session
-        self.statement = statement
 
 
     def execute(self, input_data: Dict[str, Any]) -> None:
-        self.session.execute(
-            self.statement, **input_data.get("kwargs", {})
-        )
-        self.session.commit()
+        """
+        Args:
+            input_data (Dict[str, Any]): Data to process. Expected keys:
+                'statement' (Any): SQLAlchemy statement.
+                
+                'kwargs' (Dict[str, Any], optional): Extra arguments.
+
+        """
+        with self.session.create() as session:
+            session.execute(
+                input_data["statement"], **input_data.get("kwargs", {})
+            )
+            session.commit()
 
 
 class SQLActionWithReturns(Action[Dict[str, Any], Dict[str, Any]]):
+    """
+    SQL action with returns
+    """
     def __init__(
         self, 
-        session: Session,
-        statement: Any,
+        session: SQLSessionFactory,
         name: Optional[str]=None
     ) -> None:
+        """
+        Args:
+            session (SQLSessionFactory): Session to use.
+            
+            name (Optional[str], optional): Name for identification.
+                If equals to None, class name will be used. Defaults to None.
+        """
         super().__init__(name)
         self.session = session
-        self.statement = statement
 
 
     def unpack_model(self, model: DeclarativeBase) -> Dict[str, Any]:
+        """
+        Unpack table model
+        """
         tmp = model.__dict__
         tmp.pop("_sa_instance_state")
         return tmp
 
 
     def unpack_returns(self, returns: Iterable[Any]) -> Iterator[Any]:
+        """
+        Process returned data
+
+        Args:
+            returns (Iterable[Any]): Returned data.
+
+        Yields:
+            Iterator[Any]: Processed data.
+        """
         for i in returns:
             if isinstance(i, DeclarativeBase):
                 yield self.unpack_model(i)
@@ -86,12 +142,26 @@ class SQLActionWithReturns(Action[Dict[str, Any], Dict[str, Any]]):
 
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        input_data["query_outputs"] = self.unpack_returns(
-            self.session.scalars(
-                self.statement, **input_data.get("kwargs", {})
+        """
+        Args:
+            input_data (Dict[str, Any]): Data to process. Expected keys:
+                'statement' (Any): SQLAlchemy statement.
+                
+                'kwargs' (Dict[str, Any], optional): Extra arguments.
+        
+        Returns:
+            Dict[str, Any]: Expected keys:
+                'query_outputs' (Iterator[Any]): Result of query.
+        """
+        with self.session.create() as session:
+            res = self.unpack_returns(
+                session.scalars(
+                    input_data["statement"], **input_data.get("kwargs", {})
+                )
             )
-        )
-        self.session.commit()
-        return input_data
+            session.commit()
+            return {
+                "query_outputs": list(res)
+            }
 
 
