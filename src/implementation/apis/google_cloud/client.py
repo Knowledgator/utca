@@ -16,6 +16,9 @@ from implementation.apis.google_cloud.schema import (
 )
 
 class GoogleCloudClient:
+    """
+    Google cloud client
+    """
     creds: Optional[Credentials]
     service: Any
 
@@ -25,6 +28,16 @@ class GoogleCloudClient:
         scopes: List[str],
         credentials: Optional[Union[Dict[str, Any], str]]=None,
     ) -> Credentials:
+        """
+        Args:
+            scopes (List[str]): Access scopes.
+
+            credentials (Optional[Union[Dict[str, Any], str]], optional): Input credentials.
+                Defaults to None.
+
+        Returns:
+            Credentials: Verified credentials.
+        """
         flow = (
             InstalledAppFlow.from_client_secrets_file( # type: ignore
                 credentials, scopes
@@ -40,8 +53,21 @@ class GoogleCloudClient:
     def authorize(
         cls, 
         scopes: list[str],
-        credentials: Union[Dict[str, Any], str, None]=None,
+        credentials: Optional[Union[Dict[str, Any], str]]=None,
     ) -> Credentials:
+        """
+        Authorize google cloud client
+
+        Args:
+            scopes (list[str]): Access scopes.
+
+            credentials (Optional[Union[Dict[str, Any], str]], optional): Input credentials.
+                If equals to None, environment default credentials will be used.
+                Defaults to None.
+
+        Returns:
+            Credentials: Authorized credentials.
+        """
         creds: Optional[Credentials] = None
         if not credentials:
             creds, _ = google.auth.default() # type: ignore
@@ -77,6 +103,10 @@ class GoogleCloudClient:
     
 
     def __init__(self, cfg: GoogleCloudClientConfig) -> None:
+        """
+        Args:
+            cfg (GoogleCloudClientConfig): Client configuration.
+        """
         self.creds = self.authorize(cfg.scopes, cfg.credentials)
         self.service = build(
             cfg.service, 
