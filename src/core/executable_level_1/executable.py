@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import (
     Any, Dict, Type, Generic, Optional, TypeVar, TYPE_CHECKING
 )
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from pydantic import ValidationError
 
@@ -13,8 +13,9 @@ from core.executable_level_1.schema import (
     Output,
     IOModel,
     Transformable, 
+    ReplacingScope,
 )
-from core.exceptions import ExecutableError
+from core.exceptions import ExecutableError, IvalidInputDataValue
 if TYPE_CHECKING:
     from core.executable_level_1.executor import ExecutableExecutor
 
@@ -23,8 +24,10 @@ ValidationClass = TypeVar("ValidationClass", bound=IOModel)
 class Executable(
     Generic[Input, Output], 
     Component, 
-    ABC
 ):
+    """
+    Base class for executables
+    """
     input_class: Type[Input]
     output_class: Type[Output]
 
@@ -33,14 +36,38 @@ class Executable(
         input_class: Type[Input],
         output_class: Type[Output], 
         name: Optional[str]=None,
+        replace: ReplacingScope=ReplacingScope.INPLACE,
     ):
+        """
+        Args:
+            input_class (Type[Input]): Class for input validation.
+
+            output_class (Type[Output]): Class for output validation.
+            
+            name (Optional[str], optional): Name for identification.
+                If equals to None, class name will be used. Defaults to None.
+            
+            replace (ReplacingScope, optional): Replacing strategy. Defaults to ReplacingScope.INPLACE.
+        """
         super().__init__(name)
         self.input_class = input_class
         self.output_class = output_class
+        self.replace = replace
 
 
     @abstractmethod
     def invoke(self, input_data: Input, evaluator: Evaluator) -> Dict[str, Any]:
+        """
+        Main logic
+
+        Args:
+            input_data (Input): Validated input.
+
+            evaluator (Evaluator): Evaluator in context of wich executed.
+
+        Returns:
+            Dict[str, Any]: Result of execution.
+        """
         ...
 
 
@@ -49,10 +76,24 @@ class Executable(
         data: Dict[str, Any],
         validation_class: Type[ValidationClass]
     ) -> ValidationClass:
+        """
+        Validation of input/output
+
+        Args:
+            data (Dict[str, Any]): Input/output data.
+
+            validation_class (Type[ValidationClass]): Class used for validation.
+
+        Raises:
+            IvalidInputDataValue: If data is invalid.
+
+        Returns:
+            ValidationClass: Validated data.
+        """
         try:
             return validation_class(**data)
         except ValidationError as e:
-            raise ValueError(
+            raise IvalidInputDataValue(
                 f"Input validation error: {e.json()}: "
                 f"Expected schema class: {validation_class!r}: "
                 f"Expected schema: {validation_class.model_json_schema()}"
@@ -76,6 +117,20 @@ class Executable(
         input_data: Dict[str, Any],
         evaluator: Evaluator
     ) -> Dict[str, Any]:
+        """
+        Validates input, invokes and validates output
+
+        Args:
+            input_data (Dict[str, Any]): Data for processing
+
+            evaluator (Evaluator): Evaluator in context of wich executed.
+
+        Raises:
+            ExecutableError: If any error occur.
+
+        Returns:
+            Dict[str, Any]: Result of execution.
+        """
         try:
             return self.validate_output(
                 self.invoke(
@@ -92,9 +147,21 @@ class Executable(
         input_data: Transformable,
         evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        """
+        Args:
+            input_data (Transformable): Data that is used in executable.
+
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich action executed.
+                If equals to None, default evaluator will be created. Defaults to None.
+
+        Returns:
+            Transformable: Result of execution.
+        """
         if not evaluator:
             evaluator = self.set_up_default_evaluator()
         result = self.execute(input_data.__dict__, evaluator)
+        if self.replace in (ReplacingScope.GLOBAL, ReplacingScope.LOCAL):
+            return Transformable(result)
         input_data.update(result)
         return input_data
 
@@ -102,11 +169,37 @@ class Executable(
     def use(
         self,
         get_key: Optional[str]=None,
-        set_key: Optional[str]=None
+        set_key: Optional[str]=None,
+        default_key: str="output",
+        replace: Optional[ReplacingScope]=None,
     ) -> ExecutableExecutor:
+        """
+        Creates ExecutableExecutor wich manages get and set keys.
+
+        Args:
+            get_key (Optional[str], optional): Which key value of input_data will be used. 
+                If value equal to None, root dict will be used. Defaults to None.
+
+            set_key (Optional[str], optional): Which key will be used to set value. 
+                If value equal to None:
+                    - if value of type Dict[str, Any], update root dict;
+                    - else: set value to default_key.
+                Defaults to None.
+
+            default_key (str, optional): Default key used for results that is not of type Dict.
+                Defaults to "output".
+
+            replace (Optional[ReplacingScope], optional): Replacing strategy for executor.
+                If equals to None, this action strategy will be used. Defaults to None.
+
+        Returns:
+            ExecutableExecutor: Wrapper of Executable
+        """
         from core.executable_level_1.executor import ExecutableExecutor
         return ExecutableExecutor(
             component=self, 
             get_key=get_key, 
-            set_key=set_key
+            set_key=set_key,
+            default_key=default_key,
+            replace=replace or self.replace,
         )

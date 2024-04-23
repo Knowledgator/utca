@@ -55,6 +55,8 @@ class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
                 copy.copy(cast(Dict[str, Any], data)), evaluator
             )
             if not self.set_key:
+                if self.replace in (ReplacingScope.GLOBAL, ReplacingScope.LOCAL):
+                    return Transformable(result)
                 input_data.update(result)
                 return input_data
         elif isinstance(data, List):
@@ -70,6 +72,10 @@ class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
         else:
             raise IvalidInputDataValue()
 
+        if self.replace in (ReplacingScope.GLOBAL, ReplacingScope.LOCAL):
+            return Transformable({
+                self.set_key or self.default_key: result
+            })
         setattr(
             input_data,
             self.set_key or self.default_key,
