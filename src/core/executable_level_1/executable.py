@@ -151,7 +151,7 @@ class Executable(
         Args:
             input_data (Transformable): Data that is used in executable.
 
-            evaluator (Optional[Evaluator], optional): Evaluator in context of wich action executed.
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich executable executed.
                 If equals to None, default evaluator will be created. Defaults to None.
 
         Returns:

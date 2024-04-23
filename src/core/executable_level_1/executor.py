@@ -7,12 +7,20 @@ from core.executable_level_1.executable import Executable
 from core.executable_level_1.actions import Action
 from core.executable_level_1.component import Component
 from core.executable_level_1.schema import Transformable, ReplacingScope
-from core.exceptions import IvalidInputDataValue, ActionError, InputDataKeyError
 from core.executable_level_1.interpreter import Evaluator
+from core.exceptions import (
+    IvalidInputDataValue, 
+    ActionError, 
+    InputDataKeyError,
+    ExecutableError
+)
 
 ExecutorComponent = TypeVar("ExecutorComponent", Executable[Any, Any], Action[Any, Any])
 
 class BasicExecutor(Component, Generic[ExecutorComponent]):
+    """
+    Base executor
+    """
     def __init__(
         self, 
         component: ExecutorComponent, 
@@ -21,16 +29,31 @@ class BasicExecutor(Component, Generic[ExecutorComponent]):
         default_key: str="output",
         replace: ReplacingScope=ReplacingScope.INPLACE,
     ) -> None:
+        """
+        Args:
+            component (ExecutorComponent): Wrapped component.
+
+            get_key (Optional[str], optional): Which key value of input_data will be used. 
+                If value equal to None, root dict will be used. Defaults to None.
+
+            set_key (Optional[str], optional): Which key will be used to set value. 
+                If value equal to None:
+                    - if value of type Dict[str, Any], update root dict;
+                    - else: set value to default_key.
+                Defaults to None.
+
+            default_key (str, optional): Default key used for results that is not of type Dict.
+                Defaults to "output".
+
+            replace (ReplacingScope, optional): Replacing strategy for executor.
+                Defaults to ReplacingScope.INPLACE.
+        """
         self.component = component
         self.get_key = get_key or "__dict__"
         self.set_key = set_key
         self.default_key = default_key
         self.replace = replace
-
-
-    @property
-    def name(self) -> str:
-        return self.component.name
+        self._name = self.component.name
 
 
     def __repr__(self) -> str:
@@ -46,6 +69,19 @@ class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
         input_data: Transformable,
         evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        """
+        Args:
+            input_data (Transformable): Data that is used in executable.
+
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich executable executed.
+                If equals to None, default evaluator will be created. Defaults to None.
+
+        Raises:
+            ExecutableError: If any error occur.
+
+        Returns:
+            Transformable: Result of execution.
+        """
         if not evaluator:
             evaluator = self.set_up_default_evaluator()
 
@@ -70,7 +106,9 @@ class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
                 for i in cast(List[Dict[str, Any]], data)
             ]
         else:
-            raise IvalidInputDataValue()
+            raise ExecutableError(self.name, IvalidInputDataValue(
+                "Unexpected data type for processing."
+            ))
 
         if self.replace in (ReplacingScope.GLOBAL, ReplacingScope.LOCAL):
             return Transformable({
@@ -90,6 +128,19 @@ class ActionExecutor(BasicExecutor[Action[Any, Any]]):
         input_data: Transformable,
         evaluator: Optional[Evaluator]=None
     ) -> Transformable:
+        """
+        Args:
+            input_data (Transformable): Data that is used in executable.
+
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich action executed.
+                If equals to None, default evaluator will be created. Defaults to None.
+
+        Raises:
+            ActionError: If any error occur.
+
+        Returns:
+            Transformable: Result of execution.
+        """
         if not evaluator:
             evaluator = self.set_up_default_evaluator()
         
