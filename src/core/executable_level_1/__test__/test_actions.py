@@ -15,6 +15,7 @@ from core import (
     UnpackValue,
     NestToKey,
     ExecuteFunction,
+    ReplacingScope,
 )
 
 def test_flush_root_all():
@@ -187,10 +188,6 @@ def test_unpack_value():
             "a": {"d": 1}
         }
     }) == {
-        "c": {
-            "b": 1,
-            "a": {"d": 1},
-        },
         "d": 1,
         "b": 1
     }
@@ -254,4 +251,59 @@ def test_execute_function():
     }
     assert es.use("c", "c").run({"c": {"a": 0}}) == {
         "c": [{"a": 1}]*2
+    }
+
+
+def test_actions_replacing_scopes_and_default_key():
+    def f(a: Dict[str, int]) -> Dict[str, int]:
+        return {
+            "a": a["a"] + 1
+        }
+    
+    def fs(a: Dict[str, int]) -> List[Dict[str, int]]:
+        a["a"] += 1
+        return [a] * 2
+    
+    e = ExecuteFunction(f, replace=ReplacingScope.LOCAL)
+    es = ExecuteFunction(fs, default_key="test", replace=ReplacingScope.LOCAL)
+
+    # test LOCAL
+    assert e.run({"a": 0, "b": 1}) == {"a": 1}
+    assert es.run({"a": 0}) == {"a": 0, "test": [{"a": 1}, {"a": 1}]}
+    
+    assert e.use("c").run({"c": {"a": 0}, "b": 1}) == {
+        "a": 1
+    }
+    assert es.use("c").run({"c": {"a": 0}}) == {
+        "c": {"a": 0},
+        "test": [{"a": 1}]*2
+    }
+
+    assert e.use("c", "c").run({"c": {"a": 0}, "b": 1}) == {
+        "c": {"a": 1},
+        "b": 1
+    }
+    assert es.use("c", "c").run({"c": {"a": 0}, "b": 1}) == {
+        "c": [{"a": 1}]*2,
+        "b": 1
+    }
+
+    # test GLOBAL
+    assert e.use(replace=ReplacingScope.GLOBAL).run({"a": 0, "b": 1}) == {"a": 1}
+    assert es.use(replace=ReplacingScope.GLOBAL).run({"a": 0}) == {
+        "test": [{"a": 1}, {"a": 1}]
+    }
+    
+    assert e.use("c", replace=ReplacingScope.GLOBAL).run({"c": {"a": 0}, "b": 1}) == {
+        "a": 1
+    }
+    assert es.use("c", replace=ReplacingScope.GLOBAL).run({"c": {"a": 0}}) == {
+        "test": [{"a": 1}]*2
+    }
+
+    assert e.use("c", "c", replace=ReplacingScope.GLOBAL).run({"c": {"a": 0}, "b": 1}) == {
+        "c": {"a": 1},
+    }
+    assert es.use("c", "c", replace=ReplacingScope.GLOBAL).run({"c": {"a": 0}, "b": 1}) == {
+        "c": [{"a": 1}]*2,
     }

@@ -5,6 +5,7 @@ from typing import (
     TYPE_CHECKING, cast
 )
 import logging
+import copy
 
 from core.exceptions import InvalidQuery, InputDataKeyError
 from core.executable_level_1.schema import Transformable, ReplacingScope
@@ -36,7 +37,7 @@ class Action(Generic[ActionInput, ActionOutput], Component):
             default_key (str, optional): Default key used for results that is not of type Dict.
                 Defaults to "output".
             
-            replace (bool): If true, result will replace old value. Defaults to False.
+            replace (ReplacingScope, optional): Replacing strategy. Defaults to ReplacingScope.INPLACE.
         """
         super().__init__(name)
         self.default_key = default_key
@@ -73,7 +74,7 @@ class Action(Generic[ActionInput, ActionOutput], Component):
 
         data = input_data.__dict__
         try:
-            result = self.execute(cast(ActionInput, data))
+            result = self.execute(copy.copy(cast(ActionInput, data)))
         except Exception as e:
             raise ActionError(self.name, e)
         
@@ -104,6 +105,8 @@ class Action(Generic[ActionInput, ActionOutput], Component):
         self,
         get_key: Optional[str]=None,
         set_key: Optional[str]=None,
+        default_key: Optional[str]=None,
+        replace: Optional[ReplacingScope]=None,
     ) -> ActionExecutor:
         """
         Creates ActionExecutor wich manages get and set keys.
@@ -118,6 +121,12 @@ class Action(Generic[ActionInput, ActionOutput], Component):
                     - else: set value to default_key.
                 Defaults to None.
 
+            default_key (Optional[str], optional): Default key used for results that is not of type Dict.
+                If equals to None, this action default_key will be used. Defaults to None.
+
+            replace (Optional[ReplacingScope], optional): Replacing strategy for executor. 
+                If equals to None, this action strategy will be used. Defaults to None.
+
         Returns:
             ActionExecutor: Wrapper of Action.
         """
@@ -126,7 +135,8 @@ class Action(Generic[ActionInput, ActionOutput], Component):
             component=self, 
             get_key=get_key, 
             set_key=set_key,
-            replace=self.replace,
+            default_key=default_key or self.default_key,
+            replace=replace or self.replace,
         )
 
 
@@ -339,7 +349,7 @@ class RenameAttribute(Action[Dict[str, Any], Dict[str, Any]]):
             name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
         """
-        super().__init__(name)
+        super().__init__(name, replace=ReplacingScope.LOCAL)
         self.old_name = old_name
         self.new_name = new_name
 
@@ -380,7 +390,7 @@ class RenameAttributeQuery(Action[Dict[str, Any], Dict[str, Any]]):
             name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
         """
-        super().__init__(name)
+        super().__init__(name, replace=ReplacingScope.LOCAL)
         self.query = query
 
 
@@ -463,7 +473,7 @@ class UnpackValue(Action[Dict[str, Any], Dict[str, Any]]):
             name (Optional[str], optional): name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
         """
-        super().__init__(name)
+        super().__init__(name, replace=ReplacingScope.LOCAL)
         self.key = key
 
 
@@ -513,6 +523,7 @@ class ExecuteFunction(Action[ActionInput, ActionOutput]):
         f: Callable[[ActionInput], ActionOutput],
         name: Optional[str]=None,
         default_key: str="output",
+        replace: ReplacingScope=ReplacingScope.INPLACE
     ) -> None:
         """
         Args:
@@ -523,10 +534,13 @@ class ExecuteFunction(Action[ActionInput, ActionOutput]):
             
             default_key (str, optional): Default key used for results that is not of type Dict.
                 Defaults to "output".
+
+            replace (ReplacingScope, optional): Replacing strategy. Defaults to ReplacingScope.INPLACE.
         """
         super().__init__(
             name or f"{self.__class__.__name__}.{f.__name__}",
             default_key=default_key,
+            replace=replace,
         )
         self.f = f
 
