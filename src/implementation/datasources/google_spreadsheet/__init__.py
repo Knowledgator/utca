@@ -10,7 +10,9 @@ from implementation.datasources.google_spreadsheet.actions import (
     GoogleSpreadsheetWriteBatch,
 )
 from implementation.datasources.google_spreadsheet.schema import (
-    Dimension
+    Dimension,
+    InputOption,
+    InsertDataOption,
 )
 
 __all__ = [
@@ -21,5 +23,7 @@ __all__ = [
     "GoogleSpreadsheetCreate",
     "GoogleSpreadsheetReadBatch",
     "GoogleSpreadsheetWriteBatch",
-    "Dimension"
+    "Dimension",
+    "InputOption",
+    "InsertDataOption"
 ]
