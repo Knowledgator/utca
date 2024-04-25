@@ -15,17 +15,50 @@ from implementation.datasources.google_spreadsheet.schema import (
 
 
 class GoogleSpreadsheetAction(Action[ActionInput, ActionOutput]):
+    """
+    Base Google Spreadsheet action
+    """
     def __init__(
         self, 
         client: GoogleCloudClient,
         name: Optional[str]=None,
     ) -> None:
+        """
+        Args:
+            client (GoogleCloudClient): Google client that will be used for acess.
+
+            name (Optional[str], optional): name (Optional[str], optional): Name for identification.
+                If equals to None, class name will be used. Defaults to None.
+        """
         super().__init__(name)
         self.sheet_service = client.service.spreadsheets()
 
 
 class GoogleSpreadsheetRead(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+    """
+    Read spreadsheet
+    """
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Args:
+            input_data (Dict[str, Any]): Expected keys:
+                'spreadsheet_id' (str): Spreadsheet ID (can be found
+                    in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0);
+
+                'cells_range' (str): Range of cells provided in A1 notation.
+                    Examples: B2:C2, A1, Sheet1, Sheet1!A1:B1, etc..
+
+                'dimension' (Dimension, optional): Reading dimension. May be 
+                    Dimension.ROWS or Dimension.COLUMNS. Defaults to Dimension.ROWS.
+
+        Raises:
+            Exception: If unable to read spreadsheet.
+
+        Returns:
+            Dict[str, Any]: Expected keys:
+                'table' (List[List[Any]]): Table that represents sheet or part of
+                    it specified by 'cells_range';
+        """
         try:
             result = cast(Dict[str, Any], (
                 self.sheet_service.values() # type: ignore
@@ -36,14 +69,38 @@ class GoogleSpreadsheetRead(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, An
                 )
                 .execute() 
             ))
-            input_data["table"] = result.get("values", [])
-            return input_data
+            return {
+                "table": result.get("values", [])
+            }
         except Exception as e:
-            raise ValueError(f"Unable to read specified sheet: {e}")
+            raise Exception(f"Unable to read spreadsheet: {e}")
 
 
 class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction[Dict[str, Any], List[Dict[str, Any]]]):
+    """
+    Read spreadsheet batch
+    """
     def execute(self, input_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Args:
+            input_data (Dict[str, Any]): Expected keys:
+                'spreadsheet_id' (str): Spreadsheet ID (can be found
+                    in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0);
+
+                'cells_range' (str): Range of cells provided in A1 notation.
+                    Examples: B2:C2, A1, Sheet1, Sheet1!A1:B1, etc..
+
+                'dimension' (Dimension, optional): Reading dimension. May be 
+                    Dimension.ROWS or Dimension.COLUMNS. Defaults to Dimension.ROWS.
+
+        Raises:
+            Exception: If unable to read spreadsheet.
+
+        Returns:
+            List[Dict[str, Any]]: Each object in list expected to contain:
+                'table' (List[List[Any]]): Table that represents sheet or part of
+                    it specified by corresponding range in 'cells_ranges';
+        """
         try:
             result = cast(Dict[str, Any], (
                 self.sheet_service.values() # type: ignore
@@ -59,103 +116,227 @@ class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction[Dict[str, Any], List[Di
                 for i in cast(List[Dict[str, List[Any]]], result.get("valueRanges", []))
             ]
         except Exception as e:
-            raise ValueError(f"Unable to read specified sheet: {e}")
+            raise Exception(f"Unable to read spreadsheet: {e}")
 
 
 class GoogleSpreadsheetWrite(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+   """
+   Write to spreadsheet
+   """
    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Args:
+            input_data (Dict[str, Any]): Expected keys:
+                'spreadsheet_id' (str): Spreadsheet ID (can be found
+                    in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0);
+
+                'cells_range' (str): Range of cells provided in A1 notation.
+                    Examples: B2:C2, A1, Sheet1, Sheet1!A1:B1, etc..
+
+                'value_input_option' (InputOption, optional): Input option can be:
+                    InputOption.USER_ENTERED - All inputs treated as input from 
+                    the user (enabling formatting and formulas), or InputOption.RAW - all
+                    inputs as is. Defaults to InputOption.USER_ENTERED.
+
+                'dimension' (Dimension, optional): Reading dimension. May be 
+                    Dimension.ROWS or Dimension.COLUMNS. Defaults to Dimension.ROWS.
+
+                'table' (List[List[Any]]): Values to add to spreadsheet.
+
+        Raises:
+            Exception: If unable to update spreadsheet.
+
+        Returns:
+            Dict[str, Any]: Expected keys:
+                'spreadsheet' (Dict[str, Any]): Updated spreadsheet;
+        """
         try:
-            input_data["spreadsheet"] = (
-                self.sheet_service # type: ignore
-                .values()
-                .update(
-                    spreadsheetId=input_data["spreadsheet_id"],
-                    valueInputOption=input_data.get(
-                        "value_input_option", InputOption.USER_ENTERED
-                    ).value,
-                    body={
-                        "values": input_data["table"],
-                        "majorDimension": input_data.get(
-                            "dimension", Dimension.ROWS
+            return {
+                "spreadsheet": (
+                    self.sheet_service # type: ignore
+                    .values()
+                    .update(
+                        spreadsheetId=input_data["spreadsheet_id"],
+                        valueInputOption=input_data.get(
+                            "value_input_option", InputOption.USER_ENTERED
                         ).value,
-                    },
-                    range=input_data["cells_range"]
+                        body={
+                            "values": input_data["table"],
+                            "majorDimension": input_data.get(
+                                "dimension", Dimension.ROWS
+                            ).value,
+                        },
+                        range=input_data["cells_range"]
+                    )
+                    .execute()
                 )
-                .execute()
-            )
-            return input_data
+            }
         except Exception as e:
-            raise ValueError(f"An error occurred: {e}")
+            raise Exception(f"Unable to update spreadsheet: {e}")
 
 
 class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+    """
+    Write to spreadsheet
+    """
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Args:
+            input_data (Dict[str, Any]): Expected keys:
+                'spreadsheet_id' (str): Spreadsheet ID (can be found
+                    in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0);
+
+                'value_input_option' (InputOption, optional): Input option can be:
+                    InputOption.USER_ENTERED - All inputs treated as input from 
+                    the user (enabling formatting and formulas), or InputOption.RAW - all
+                    inputs as is. Defaults to InputOption.USER_ENTERED.
+                
+                    
+                'inputs' (List[Dict[str, Any]]): List of write actions. Each action contain:
+                    'cells_range' (str): Range of cells provided in A1 notation.
+                        Examples: B2:C2, A1, Sheet1, Sheet1!A1:B1, etc..
+
+                    'dimension' (Dimension, optional): Reading dimension. May be 
+                        Dimension.ROWS or Dimension.COLUMNS. Defaults to Dimension.ROWS.
+
+                    'table' (List[List[Any]]): Values to add to spreadsheet.
+
+        Raises:
+            Exception: If unable to update spreadsheet.
+
+        Returns:
+            Dict[str, Any]: Expected keys:
+                'spreadsheet' (Dict[str, Any]): Updated spreadsheet;
+        """
         try:
-            input_data["spreadsheet"] = (
-                self.sheet_service # type: ignore
-                .values()
-                .batchUpdate(
-                    spreadsheetId=input_data["spreadsheet_id"],
-                    body={
-                        "data": input_data["inputs"],
-                        "valueInputOption": input_data.get(
-                            "value_input_option", InputOption.USER_ENTERED
-                        ).value,
-                    },
+            return {
+                "spreadsheet": (
+                    self.sheet_service # type: ignore
+                    .values()
+                    .batchUpdate(
+                        spreadsheetId=input_data["spreadsheet_id"],
+                        body={
+                            "data": [
+                                {
+                                    "values": i["table"],
+                                    "majorDimension": i.get(
+                                        "dimension", Dimension.ROWS
+                                    ).value,
+                                    "range": i["cells_range"]
+                                } for i in input_data["inputs"]
+                            ],
+                            "valueInputOption": input_data.get(
+                                "value_input_option", InputOption.USER_ENTERED
+                            ).value,
+                        },
+                    )
+                    .execute()
                 )
-                .execute()
-            )
-            return input_data
+            }
         except Exception as e:
-            raise ValueError(f"An error occurred: {e}")
+            raise Exception(f"Unable to update spreadsheet: {e}")
 
 
 class GoogleSpreadsheetAppend(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+    """
+    Append to spreadsheet
+    """
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Args:
+            input_data (Dict[str, Any]): Expected keys:
+                'spreadsheet_id' (str): Spreadsheet ID (can be found
+                    in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0);
+
+                'cells_range' (str): Range of cells provided in A1 notation.
+                    Examples: B2:C2, A1, Sheet1, Sheet1!A1:B1, etc..
+
+                'value_input_option' (InputOption, optional): Input option can be:
+                    InputOption.USER_ENTERED - All inputs treated as input from 
+                    the user (enabling formatting and formulas), or InputOption.RAW - all
+                    inputs as is. Defaults to InputOption.USER_ENTERED.
+
+                'insert_data_option' (InsertDataOption, optional): Isert data option can be 
+                    InsertDataOption.OVERWRITE - will overwrite anything after table, 
+                    or InsertDataOption.INSERT_ROWS - will insert new rows.
+                    Defaults to InsertDataOption.OVERWRITE.
+                    
+                'dimension' (Dimension, optional): Reading dimension. May be 
+                    Dimension.ROWS or Dimension.COLUMNS. Defaults to Dimension.ROWS.
+
+                'table' (List[List[Any]]): Values to add to spreadsheet.
+
+        Raises:
+            Exception: If unable to update spreadsheet.
+
+        Returns:
+            Dict[str, Any]: Expected keys:
+                'spreadsheet' (Dict[str, Any]): Updated spreadsheet;
+        """
         try:
-            (
-                self.sheet_service # type: ignore
-                .values()
-                .append(
-                    spreadsheetId=input_data["spreadsheet_id"],
-                    valueInputOption=input_data.get(
-                        "value_input_option", InputOption.USER_ENTERED
-                    ).value,
-                    insertDataOption=input_data.get(
-                        "insert_data_option", InsertDataOption.OVERWRITE
-                    ).value,
-                    body={
-                        "values": input_data["table"],
-                        "majorDimension": input_data.get(
-                            "dimension", Dimension.ROWS
+            return {
+                "spreadsheet": (
+                    self.sheet_service # type: ignore
+                    .values()
+                    .append(
+                        spreadsheetId=input_data["spreadsheet_id"],
+                        valueInputOption=input_data.get(
+                            "value_input_option", InputOption.USER_ENTERED
                         ).value,
-                    },
-                    range=input_data["cells_range"]
+                        insertDataOption=input_data.get(
+                            "insert_data_option", InsertDataOption.OVERWRITE
+                        ).value,
+                        body={
+                            "values": input_data["table"],
+                            "majorDimension": input_data.get(
+                                "dimension", Dimension.ROWS
+                            ).value,
+                        },
+                        range=input_data["cells_range"]
+                    )
+                    .execute()
                 )
-                .execute()
-            )
-            return {}
+            }
         except Exception as e:
-            raise ValueError(f"An error occurred: {e}")
+            raise Exception(f"Unable to update spreadsheet: {e}")
 
 
 class GoogleSpreadsheetCreate(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+    """
+    Create spreadsheet
+    """
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Args:
+            input_data (Dict[str, Any]): Expected keys:
+                'title' (str): Name of the spreadsheet;
+                
+                'sheets' (List[str], optional): Sheets names to create.
+                    Defaults to ['Sheet1'].
+
+        Raises:
+            Exception: If unable to create spreadsheet.
+
+        Returns:
+            Dict[str, Any]: Expected keys:
+                'spreadsheet_id' (str): spreadsheet ID;
+        """
         try:
-            input_data["spreadsheet_id"] = (
-                self.sheet_service
-                .create( 
-                    body={
-                        "properties": {
-                            "title": input_data["title"]
-                        },
-                        "sheets": input_data.get("sheets", ["Sheet1"])
-                    }, 
-                    fields="spreadsheetId"
+            return {
+                "spreadsheet_id": (
+                    self.sheet_service
+                    .create( 
+                        body={
+                            "properties": {
+                                "title": input_data["title"]
+                            },
+                            "sheets": input_data.get("sheets", ["Sheet1"])
+                        }, 
+                        fields="spreadsheetId"
+                    )
+                    .execute()
+                    .get("spreadsheetId")
                 )
-                .execute()
-                .get("spreadsheetId")
-            )
-            return input_data
+            }
         except Exception as e:
-            raise ValueError(f"Unable to create sheet: {e}")
+            raise Exception(f"Unable to create spreadsheet: {e}")
