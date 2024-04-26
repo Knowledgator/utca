@@ -15,11 +15,14 @@ from core.executable_level_1.schema import (
     Transformable, 
     ReplacingScope,
 )
-from core.exceptions import ExecutableError, IvalidInputDataValue
+from core.exceptions import ExecutableError, IvalidInputData
 if TYPE_CHECKING:
     from core.executable_level_1.executor import ExecutableExecutor
 
 ValidationClass = TypeVar("ValidationClass", bound=IOModel)
+"""
+Type variable for validation classes
+"""
 
 class Executable(
     Generic[Input, Output], 
@@ -93,7 +96,7 @@ class Executable(
         try:
             return validation_class(**data)
         except ValidationError as e:
-            raise IvalidInputDataValue(
+            raise IvalidInputData(
                 f"Input validation error: {e.json()}: "
                 f"Expected schema class: {validation_class!r}: "
                 f"Expected schema: {validation_class.model_json_schema()}"
@@ -101,12 +104,30 @@ class Executable(
         
     
     def validate_input(self, data: Dict[str, Any]) -> Input:
+        """
+        Validation of input
+
+        Args:
+            data (Dict[str, Any]): Input data.
+
+        Returns:
+            Input: Validated input.
+        """
         return self.validate(
             data, self.input_class
         )
         
     
     def validate_output(self, data: Dict[str, Any]) -> Output:
+        """
+        Validation of output
+
+        Args:
+            data (Dict[str, Any]): Output data.
+
+        Returns:
+            Input: Validated output.
+        """
         return self.validate(
             data, self.output_class
         )
@@ -118,10 +139,10 @@ class Executable(
         evaluator: Evaluator
     ) -> Dict[str, Any]:
         """
-        Validates input, invokes and validates output
+        Validate input, invoke and validate output
 
         Args:
-            input_data (Dict[str, Any]): Data for processing
+            input_data (Dict[str, Any]): Data for processing.
 
             evaluator (Evaluator): Evaluator in context of wich executed.
 
@@ -174,23 +195,23 @@ class Executable(
         replace: Optional[ReplacingScope]=None,
     ) -> ExecutableExecutor:
         """
-        Creates ExecutableExecutor wich manages get and set keys.
+        Creates ExecutableExecutor wich manages context
 
         Args:
             get_key (Optional[str], optional): Which key value of input_data will be used. 
                 If value equal to None, root dict will be used. Defaults to None.
 
-            set_key (Optional[str], optional): Which key will be used to set value. 
-                If value equal to None:
-                    - if value of type Dict[str, Any], update root dict;
-                    - else: set value to default_key.
+            set_key (Optional[str], optional): Which key will be used to set result value. 
+                If set_key value equal to None:
+                    - if result of type Dict[str, Any], update root dict;
+                    - else, set result to default_key.
                 Defaults to None.
 
             default_key (str, optional): Default key used for results that is not of type Dict.
                 Defaults to "output".
 
             replace (Optional[ReplacingScope], optional): Replacing strategy for executor.
-                If equals to None, this action strategy will be used. Defaults to None.
+                If equals to None, this executable strategy will be used. Defaults to None.
 
         Returns:
             ExecutableExecutor: Wrapper of Executable
