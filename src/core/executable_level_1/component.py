@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class Component(ABC):
     """
-    Base class for data processing
+    The base class for the main components of UTCA programs
     """
     def __init__(self, name: Optional[str]=None):
         """
@@ -20,12 +20,12 @@ class Component(ABC):
         self._name = name or self.__class__.__name__
 
 
-    def __or__(self, comp: Component) -> ExecutionSchema:
+    def __or__(self, component: Component) -> ExecutionSchema:
         """
-        Creates ExecutionSchema from two components
+        Create ExecutionSchema from two components
 
         Args:
-            comp (Component): Component that will be added 
+            component (Component): Component that will be added 
                 with this component to ExecutionSchema.
 
         Returns:
@@ -33,7 +33,7 @@ class Component(ABC):
                 When schema will be called, this component will be executed first.
         """
         from core.executable_level_1.eval import ExecutionSchema
-        return ExecutionSchema(self).add(comp)
+        return ExecutionSchema(self).add(component)
 
 
     def set_up_default_evaluator(self) -> Evaluator:
@@ -86,7 +86,7 @@ class Component(ABC):
 
 
     def run(
-        self, input_data: Optional[Dict[str, Any]]=None
+        self, input_data: Optional[Dict[str, Any]]=None, evaluator: Optional[Evaluator]=None
     ) -> Dict[str, Any]:
         """
         Run Component
@@ -95,10 +95,13 @@ class Component(ABC):
             input_data (Optional[Dict[str, Any]], optional): Data for processing. 
                 If equals to None, empty dict will be used for input_data. Defaults to None.
 
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich component executed.
+                If equals to None, default evaluator will be created. Defaults to None.
+
         Returns:
             Dict[str, Any]: Result of execution.
         """
-        return self(self.prepare_input(input_data)).extract()
+        return self(self.prepare_input(input_data), evaluator).extract()
 
     
     @property
