@@ -5,7 +5,6 @@ PATH = pathlib.Path(__file__).parent.resolve()
 
 from core import (
     Evaluator,
-    EvaluatorConfigs,
     ForEach,
     SetMemory, 
     MemorySetInstruction,
@@ -190,7 +189,6 @@ if __name__ == "__main__":
     
     inputs = Evaluator(
         pipeline,
-        cfg=EvaluatorConfigs()
     ).run({
         "path_to_file": f"{PATH}/pfizer-report.pdf",
         "pages": [10, 11, 12]

@@ -13,7 +13,7 @@ from implementation.predictors import (
 def get_text(input: Dict[str, Any]) -> Dict[str, Any]:
     text = "".join((
         t.get("textRun", {}).get("content", "")
-        for i in input["body"]["content"]
+        for i in input["document"]["body"]["content"]
         if "paragraph" in i
         for t in i["paragraph"]["elements"]
     ))

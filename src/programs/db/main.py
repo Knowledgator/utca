@@ -45,8 +45,8 @@ class Address(BaseModel):
 if __name__ == "__main__":
     s = SQLSessionFactory("sqlite+pysqlite:///:memory:")
     s.create_tables()
-    session = s.create()
-    SQLAction(session, insert(User)).execute({
+    SQLAction(s).execute({
+        "statement": insert(User),
         "kwargs": {
             "params": [{
                 "name": "Boris",
@@ -54,8 +54,5 @@ if __name__ == "__main__":
             }]
         }
     })
-    res = SQLActionWithReturns(
-        session, select(User).where(User.id==1)
-    ).execute({})
-    print(list(res['query_outputs']))
-    s.close_all()
+    res = SQLActionWithReturns(s).execute({"statement": select(User).where(User.id==1)})
+    print(res['query_outputs'])

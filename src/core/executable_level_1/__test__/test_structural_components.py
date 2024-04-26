@@ -5,7 +5,6 @@ import logging
 from core.executable_level_1.__test__.utils import MyExecutable
 from core import (
     Evaluator,
-    EvaluatorConfigs,
     While, 
     Transformable, 
     Condition, 
@@ -192,9 +191,7 @@ def test_switch_conditions():
             ),
             name="MySwitch"
         ),
-        EvaluatorConfigs(
-            logging_level=logging.WARNING
-        )
+        logging_level=logging.WARNING
     )
 
     for i in range(10000):

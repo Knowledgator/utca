@@ -5,7 +5,6 @@ import io
 
 from core import (
     Evaluator, 
-    EvaluatorConfigs,
     Flush, 
     Log,
     AddData,
@@ -103,11 +102,9 @@ def test_log_inside_evaluator():
             | Log(logging.DEBUG, message="ERROR")
             | Log(logging.ERROR, message="NICE")
         ), 
-        EvaluatorConfigs(
-            "TestEvaluator",
-            logging_level=logging.INFO,
-            logging_handler=logging.StreamHandler(stream)
-        )
+        name="TestEvaluator",
+        logging_level=logging.INFO,
+        logging_handler=logging.StreamHandler(stream)
     )
     e.run({})
 
