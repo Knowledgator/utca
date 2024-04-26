@@ -8,22 +8,25 @@ from enum import Enum
 from pydantic import BaseModel
 
 class IOModel(BaseModel, ABC):
+    """
+    Base class for inout and output validation classes
+    """
     def generate_transformable(self):
         """
         Create Transformable from this class
 
         Returns:
-            Transformable: Transformable representation of the class
+            Transformable: Transformable representation of the class.
         """
         return Transformable(self.extract())
     
 
     def extract(self) -> Dict[str, Any]:
         """
-        Unpack data from this class and return Dict[str, Any]
+        Unpack validated data from this class
 
         Returns:
-            Dict[str, Any]: Data packed in the class
+            Dict[str, Any]: Data packed in the class.
         """
         return self.model_dump()
 
@@ -44,7 +47,7 @@ class Transformable:
 
     def extract(self) -> Dict[str, Any]:
         """
-        Unpack data from this class and return Dict[str, Any]
+        Unpack data from this class
 
         Returns:
             Dict[str, Any]: Data packed in the class
@@ -54,7 +57,7 @@ class Transformable:
 
     def update(self, data: Dict[str, Any]) -> None:
         """
-        Add data to class
+        Add data
 
         Args:
             data (Dict[str, Any]): Data to add
@@ -82,7 +85,13 @@ class Config(BaseModel, ABC):
 
 
 Input = TypeVar('Input', bound=IOModel)
+"""
+Type variable for inputs
+"""
 Output = TypeVar('Output', bound=IOModel)
+"""
+Type variable for outputs
+"""
 
 
 class ReplacingScope(Enum):

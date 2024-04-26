@@ -13,7 +13,7 @@ from core.exceptions import InavalidMemoryInstruction
 
 class Memory:
     """
-    Manages data
+    Manage data
     """
     memory: Dict[str, Any]
 
@@ -37,7 +37,7 @@ class Memory:
 
     def _get_file_path(self, identifier: str) -> str:
         """
-        Constructs a file path for a given identifier.
+        Construct a file path for a given identifier
 
         Args:
             identifier (str): Indetifier that will be used.
@@ -55,7 +55,7 @@ class Memory:
 
     def add_store(self, identifier: str, state: Any) -> None:
         """
-        Saves a state with the given identifier.
+        Save state with the given identifier
 
         Args:
             identifier (str): Identifier that will be used.
@@ -71,7 +71,7 @@ class Memory:
 
     def retrieve_store(self, identifier: str) -> Any:
         """
-        Retrieves a state by its identifier, either from memory or disk.
+        Retrieve state by its identifier, either from memory or disk
 
         Args:
             identifier (str): Identifier that will be used.
@@ -94,7 +94,7 @@ class Memory:
 
     def delete_store(self, identifier: str) -> None:
         """
-        Deletes a state by its identifier from both memory and disk.
+        Delete a state by its identifier from both memory and disk
 
         Args:
             identifier (str): Identifier to delete.
@@ -112,7 +112,7 @@ class Memory:
 
     def flush(self) -> None:
         """
-        Cleans memory
+        Clean memory
         """
         self.memory = {}
 
@@ -137,9 +137,6 @@ class MemorySetInstruction(Enum):
 
 
 class SetMemory(Component):
-    """
-    Sets memory
-    """
     get_key: str
     set_key: str
     memory_instruction: MemorySetInstruction
@@ -266,7 +263,7 @@ class GetMemory(Component):
 
 class DeleteMemory(Component):
     """
-    Deletes data from memory
+    Delete data from memory
     """
     def __init__(
         self, identifiers: Optional[List[str]]=None,
@@ -305,7 +302,7 @@ class DeleteMemory(Component):
 
 class MemoryManager:
     """
-    Manages memory
+    Manage memory
     """
     memory: Memory
 

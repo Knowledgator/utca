@@ -1,29 +1,12 @@
-from typing import Any, Dict, Type, TypeVar, Optional
-
-from pydantic import ConfigDict
-from transformers import PreTrainedModel # type: ignore
+from typing import Any, Dict, Type, Optional
 
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.schema import (
-    Config, Input, Output
+    Input, Output
 )
 from core.predictor_level_2.predictor import Predictor
+from implementation.predictors.transformers.schema import TransformersModelConfig
 from implementation.predictors.transformers.utils import ensure_dict
-
-class TransformersModelConfig(Config):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    model: PreTrainedModel
-    kwargs: Optional[Dict[str, Any]]=None
-
-    def get_kwargs(self) -> Dict[str, Any]:
-        return self.kwargs or {}
-
-
-TransformersModelConfigType = TypeVar(
-    'TransformersModelConfigType', 
-    bound=TransformersModelConfig, 
-)
 
 class TransformersModel(
     Predictor[
@@ -31,7 +14,9 @@ class TransformersModel(
         Output
     ]
 ):
-   
+    """
+    Transformers model predictor
+    """
     def __init__(
         self, 
         cfg: TransformersModelConfig,
@@ -39,6 +24,17 @@ class TransformersModel(
         output_class: Type[Output],
         name: Optional[str]=None,
     ) -> None:
+        """
+        Args:
+            cfg (TransformersModelConfig): Configuration for predictor.
+
+            input_class (Type[Input]): Class for input validation.
+
+            output_class (Type[Output]): Class for output validation.
+            
+            name (Optional[str], optional): Name for identification.
+                If equals to None, class name will be used. Defaults to None.
+        """
         super().__init__(
             input_class=input_class,
             output_class=output_class,
@@ -58,6 +54,9 @@ class TransformersModel(
 
     @property
     def config(self) -> Any:
+        """
+        Model configuration
+        """
         return self.cfg.model.config # type: ignore
 
 
@@ -67,6 +66,9 @@ class TransformersGenerativeModel(
         Output
     ]
 ):
+    """
+    Transformers generative model
+    """
     def invoke(self, input_data: Input, evaluator: Evaluator) -> Dict[str, Any]:
         inputs = input_data.extract()
         if not "encodings" in inputs:

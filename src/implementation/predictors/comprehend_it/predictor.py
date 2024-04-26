@@ -18,15 +18,32 @@ class ComprehendItPredictor(
         ComprehendItPredictorOutputType
     ]
 ):
+    """
+    Predictor for text classifications models
+    """
     def __init__(
         self, 
-        cfg: ComprehendItPredictorConfig=ComprehendItPredictorConfig(),
+        cfg: Optional[ComprehendItPredictorConfig]=None,
         input_class: Type[ComprehendItPredictorInputType]=ComprehendItPredictorInput,
         output_class: Type[ComprehendItPredictorOutputType]=ComprehendItPredictorOutput,
         name: Optional[str]=None,
     ) -> None:
+        """
+        Args:
+            cfg (Optional[ComprehendItPredictorConfig], optional): Configuration for predictor.
+                If value equals to None, default configuration will be used. Defaults to None.
+
+            input_class (Type[ComprehendItPredictorInputType], optional): Class for input validation.
+                Defaults to ComprehendItPredictorInput.
+            
+            output_class (Type[ComprehendItPredictorOutputType], optional): Class for output validation.
+                Defaults to ComprehendItPredictorOutput.
+            
+            name (Optional[str], optional): Name for identification.
+                If equals to None, class name will be used. Defaults to None.
+        """
         super().__init__(
-            cfg=cfg,
+            cfg=cfg or ComprehendItPredictorConfig(),
             input_class=input_class,
             output_class=output_class,
             name=name,

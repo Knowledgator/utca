@@ -30,6 +30,9 @@ class SemanticSearchSchema(
         SemanticSearchSchemaOutput
     ]
 ):
+    """
+    Schema for semantic search
+    """
     def __init__(
         self, 
         dataset: Optional[List[str]]=None, 
@@ -38,6 +41,22 @@ class SemanticSearchSchema(
         output_class: Type[SemanticSearchSchemaOutput]=SemanticSearchSchemaOutput,
         name: Optional[str]=None,
     ) -> None:
+        """
+        Args:
+            dataset (Optional[List[str]], optional): Dataset for search. Defaults to None.
+            
+            encoder (Optional[TextEmbedding], optional): Encoder for embeddings creation.
+                If equals to None, default encoder will be used. Defaults to None.
+            
+            input_class (Type[SemanticSearchSchemaInput], optional): Class for input validation.
+                Defaults to SemanticSearchSchemaInput.
+            
+            output_class (Type[SemanticSearchSchemaOutput], optional): Class for output validation.
+                Defaults to SemanticSearchSchemaOutput.
+           
+            name (Optional[str], optional): Name for identification.
+                If equals to None, class name will be used. Defaults to None.
+        """
         super().__init__(
             input_class=input_class,
             output_class=output_class,
@@ -64,6 +83,9 @@ class SemanticSearchSchema(
 
 
     def add(self, dataset: List[str]) -> SemanticSearchSchema:
+        """
+        Add data to index
+        """
         embeddings = self.get_embeddings(dataset)
         self.dataset.extend(dataset)
         IndexData().execute({
