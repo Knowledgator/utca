@@ -9,15 +9,18 @@ from core.executable_level_1.component import Component
 from core.executable_level_1.schema import Transformable, ReplacingScope
 from core.executable_level_1.interpreter import Evaluator
 from core.exceptions import (
-    IvalidInputDataValue, 
+    IvalidInputData, 
     ActionError, 
     InputDataKeyError,
     ExecutableError
 )
 
-ExecutorComponent = TypeVar("ExecutorComponent", Executable[Any, Any], Action[Any, Any])
+ExecutorComponent = TypeVar("ExecutorComponent", bound=Component)
+"""
+Type variable for executor wrapped component
+"""
 
-class BasicExecutor(Component, Generic[ExecutorComponent]):
+class BaseExecutor(Component, Generic[ExecutorComponent]):
     """
     Base executor
     """
@@ -36,10 +39,10 @@ class BasicExecutor(Component, Generic[ExecutorComponent]):
             get_key (Optional[str], optional): Which key value of input_data will be used. 
                 If value equal to None, root dict will be used. Defaults to None.
 
-            set_key (Optional[str], optional): Which key will be used to set value. 
-                If value equal to None:
-                    - if value of type Dict[str, Any], update root dict;
-                    - else: set value to default_key.
+            set_key (Optional[str], optional): Which key will be used to set result value. 
+                If set_key value equal to None:
+                    - if result of type Dict[str, Any], update root dict;
+                    - else, set result to default_key.
                 Defaults to None.
 
             default_key (str, optional): Default key used for results that is not of type Dict.
@@ -63,7 +66,7 @@ class BasicExecutor(Component, Generic[ExecutorComponent]):
         )
 
 
-class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
+class ExecutableExecutor(BaseExecutor[Executable[Any, Any]]):
     def __call__(
         self, 
         input_data: Transformable,
@@ -77,7 +80,7 @@ class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
                 If equals to None, default evaluator will be created. Defaults to None.
 
         Raises:
-            ExecutableError: If any error occur.
+            ExecutableError: If any error occures.
 
         Returns:
             Transformable: Result of execution.
@@ -106,7 +109,7 @@ class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
                 for i in cast(List[Dict[str, Any]], data)
             ]
         else:
-            raise ExecutableError(self.name, IvalidInputDataValue(
+            raise ExecutableError(self.name, IvalidInputData(
                 "Unexpected data type for processing."
             ))
 
@@ -122,7 +125,7 @@ class ExecutableExecutor(BasicExecutor[Executable[Any, Any]]):
         return input_data
         
 
-class ActionExecutor(BasicExecutor[Action[Any, Any]]):
+class ActionExecutor(BaseExecutor[Action[Any, Any]]):
     def __call__(
         self, 
         input_data: Transformable,
