@@ -17,11 +17,17 @@ if TYPE_CHECKING:
 
 
 ActionInput = TypeVar("ActionInput")
+"""
+Type variable for action input
+"""
 ActionOutput = TypeVar("ActionOutput")
+"""
+Type variable for action output
+"""
 
 class Action(Generic[ActionInput, ActionOutput], Component):
     """
-    Basic Action class
+    Base action class
     """
     def __init__(
         self, 
@@ -109,16 +115,16 @@ class Action(Generic[ActionInput, ActionOutput], Component):
         replace: Optional[ReplacingScope]=None,
     ) -> ActionExecutor:
         """
-        Creates ActionExecutor wich manages get and set keys.
+        Creates ActionExecutor wich manages context
 
         Args:
             get_key (Optional[str], optional): Which key value of input_data will be used. 
                 If value equal to None, root dict will be used. Defaults to None.
 
-            set_key (Optional[str], optional): Which key will be used to set value. 
-                If value equal to None:
-                    - if value of type Dict[str, Any], update root dict;
-                    - else: set value to default_key.
+           set_key (Optional[str], optional): Which key will be used to set result value. 
+                If set_key value equal to None:
+                    - if result of type Dict[str, Any], update root dict;
+                    - else, set result to default_key.
                 Defaults to None.
 
             default_key (Optional[str], optional): Default key used for results that is not of type Dict.
@@ -146,7 +152,7 @@ class Action(Generic[ActionInput, ActionOutput], Component):
         input_data: ActionInput,
     ) -> ActionOutput:
         """
-        Custom logic of an action
+        Main logic of action
 
         Args:
             input_data (ActionInput): Data that will be used.
