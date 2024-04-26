@@ -1,8 +1,9 @@
 from implementation.predictors.transformers.transformers_model import (
     TransformersModel,
-    TransformersModelConfig,
 )
 from implementation.predictors.transformers.schema import (
+    TransformersModelConfig,
+    TransformersPipelineConfig,
     TransformersImageClassificationModelInput,
     TransformersTextToSpeechInput,
     TransformersTextToSpeechOutput,
@@ -21,7 +22,6 @@ from implementation.predictors.transformers.schema import (
 )
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline,
-    TransformersPipelineConfig,
     TransformersSummarizationPipeline,
 )
 from implementation.predictors.comprehend_it.predictor import (
@@ -40,6 +40,7 @@ from implementation.predictors.token_searcher.schema import (
 __all__ = [
     "TransformersModel",
     "TransformersModelConfig",
+    "TransformersPipelineConfig",
     "TransformersImageClassificationModelInput",
     "TransformersTextToSpeechInput",
     "TransformersTextToSpeechOutput",
