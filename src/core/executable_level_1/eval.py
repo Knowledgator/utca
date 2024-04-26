@@ -1,7 +1,6 @@
 from __future__ import annotations
-import json
 from typing import (
-    List, Callable, Optional, Tuple, Type,  TypeVar, Union
+    List, Callable, Optional, Tuple, Union
 )
 import copy
 import logging
@@ -10,29 +9,7 @@ from core.executable_level_1.component import Component
 from core.executable_level_1.schema import Transformable
 from core.executable_level_1.interpreter import Evaluator
 from core.executable_level_1.memory import GetMemory, MemoryGetInstruction
-from core.exceptions import EvaluatorExecutionFailed
-
-T = TypeVar('T', bound='Serializable')
-
-class Serializable:
-    def to_json(self) -> str:
-        """
-        Serialize the object to a JSON string.
-        """
-        return json.dumps(self.__dict__, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-
-    @classmethod
-    def from_json(cls: Type[T], json_str: str) -> T:
-        """
-        Deserialize a JSON string to an object of the class.
-
-        :param json_str: A JSON string representing the object.
-        :return: An instance of the class with attributes set according to the JSON string.
-        """
-        attributes = json.loads(json_str)
-        obj = cls()  
-        obj.__dict__.update(attributes)
-        return obj
+from core.exceptions import ExecutionSchemaFailed
 
 
 class ExecutionSchema(Component):
@@ -73,17 +50,17 @@ class ExecutionSchema(Component):
         return self
     
 
-    def __or__(self, comp: Component) -> ExecutionSchema:
+    def __or__(self, component: Component) -> ExecutionSchema:
         """
         Adds component to ExecutionSchema
 
         Args:
-            comp (Component): New Component
+            component (Component): New Component.
 
         Returns:
             ExecutionSchema: self
         """
-        return self.add(comp)
+        return self.add(component)
     
 
     def __call__(
@@ -117,8 +94,8 @@ class ExecutionSchema(Component):
                     f"{self.name}: Error at step {i}"
                 )
                 evaluator.log(logging.ERROR, e, exc_info=True)
-                if evaluator.cfg.fast_exit:
-                    raise EvaluatorExecutionFailed(e)
+                if evaluator.fast_exit:
+                    raise ExecutionSchemaFailed(self.name, e)
         return input_data
 
 
@@ -178,8 +155,7 @@ class Condition:
             )
         return self.validator(
             evaluator
-            .create_child(self.schema, self.name)
-            .eval(copy.deepcopy(input_data)),
+            .create_child(self.schema, self.name)(copy.copy(input_data), evaluator),
             evaluator
         )
     
@@ -338,13 +314,12 @@ class ForEach(Component):
             evaluator = self.set_up_default_evaluator()
         
         data = getattr(input_data, self.get_key)
-        # need check that this is a sequence of dict
 
         setattr(
             input_data,
             self.set_key,
             [
-                evaluator.create_child(self.schema, self.name).run(copy.deepcopy(t))
+                evaluator.create_child(self.schema, self.name).run(copy.copy(t), evaluator)
                 for t in data
             ]
         )
