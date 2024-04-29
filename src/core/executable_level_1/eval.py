@@ -20,45 +20,45 @@ class ExecutionSchema(Component):
 
     def __init__(
         self, 
-        comp: Optional[Component]=None, 
+        component: Optional[Component]=None, 
         name: Optional[str]=None
     ) -> None:
         """
         Args:
-            comp (Optional[Component], optional): Initial Component. Defaults to None.
+            component (Optional[Component], optional): Initial Component. Defaults to None.
 
             name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
         """
         super().__init__(name)
         self.program = []
-        if comp:
-            self.add(comp)
+        if component:
+            self.add(component)
         
 
-    def add(self, comp: Component) -> ExecutionSchema:
+    def add(self, component: Component) -> ExecutionSchema:
         """
         Add Component to the end
 
         Args:
-            comp (Component): New component
+            component (Component): New component.
 
         Returns:
-            ExecutionSchema: self
+            ExecutionSchema: self.
         """
-        self.program.append(comp)
+        self.program.append(component)
         return self
     
 
     def __or__(self, component: Component) -> ExecutionSchema:
         """
-        Adds component to ExecutionSchema
+        Add Component to ExecutionSchema
 
         Args:
             component (Component): New Component.
 
         Returns:
-            ExecutionSchema: self
+            ExecutionSchema: self.
         """
         return self.add(component)
     
@@ -73,7 +73,7 @@ class ExecutionSchema(Component):
             evaluator (Optional[Evaluator], optional): Evaluator in context of wich ExecutionSchema
                 executed. If equals to None, default evaluator will be created. Defaults to None.
         Raises:
-            EvaluatorExecutionFailed: If any error occurs.
+            ExecutionSchemaFailed: If any error occurs.
 
         Returns:
             Transformable: Result of execution.
@@ -100,10 +100,13 @@ class ExecutionSchema(Component):
 
 
 ConditionProtocol = Callable[[Transformable, Evaluator], bool]
+"""
+Type that describes objects that can be used as conditions and validators in Condition
+"""
 
 class Condition:
     """
-    Condition class used to evaluation of intermediate data
+    Condition class used for evaluation of intermediate data
     """
     validator: ConditionProtocol
     schema: Component
@@ -121,7 +124,7 @@ class Condition:
             validator (ConditionProtocol): Callable that returns bool value that define
                 that condition is fulfilled or not.
 
-            schema (Component): Intermidiate evaluation
+            schema (Component): Intermidiate evaluation.
 
             state (Optional[List[Union[str, Tuple[str, str]]]], optional): Memory keys that will be used. 
                 If equals to None, memory will not be used. Defaults to None.
@@ -166,7 +169,7 @@ class Condition:
 
 class Branch:
     """
-    Combines Condition and associated with it Component
+    Combination of condition and associated with it Component
     """
     condition: Optional[ConditionProtocol]
     schema: Component
@@ -181,12 +184,12 @@ class Branch:
     ) -> None:
         """
         Args:
-            schema (Component): Associated Component
+            schema (Component): Associated Component.
 
-            condition (Optional[ConditionProtocol], optional): Associated Condition.
-                If equals to None, always executed. Defaults to None.
+            condition (Optional[ConditionProtocol], optional): Associated condition.
+                If equals to None, schema always executed. Defaults to None.
 
-            exit_branch (bool, optional): Specifies that this is last branch that 
+            exit_branch (bool, optional): Specifies that this is the last branch that 
                 should be executed. Defaults to True.
             
             name (Optional[str], optional): Name for identification.
@@ -202,7 +205,7 @@ class Branch:
         self, input_data: Transformable, evaluator: Evaluator
     ) -> Optional[Transformable]:
         """
-        Evaluates Condition and if fulfilled executes Component
+        Evaluates condition and, if fulfilled, executes schema
 
         Args:
             input_data (Transformable): Data for processing.
@@ -210,7 +213,7 @@ class Branch:
             evaluator (Evaluator): Evaluator in context of wich Branch executed.
 
         Returns:
-            Optional[Transformable]: Result of executed Component.
+            Optional[Transformable]: Result of executed schema, if executed; otherwise, None.
         """
         if self.condition is None or self.condition(
             input_data, evaluator
@@ -251,7 +254,8 @@ class Switch(Component):
         Args:
             input_data (Transformable): Data for processing.
 
-            evaluator (Evaluator): Evaluator in context of wich Switch executed.
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich Switch
+                executed. If equals to None, default evaluator will be created. Defaults to None.
 
         Returns:
             Transformable: Result of execution.
@@ -286,7 +290,7 @@ class ForEach(Component):
             
             get_key (str): Key associated with series of data items.
             
-            set_key (Optional[str], optional): Data destnation. 
+            set_key (Optional[str], optional): Data destination. 
                 If equals to None, get_key will be used. Defaults to None.
             
             name (Optional[str], optional): Name for identification.
@@ -305,7 +309,8 @@ class ForEach(Component):
         Args:
             input_data (Transformable): Data for processing.
 
-            evaluator (Evaluator): Evaluator in context of wich ForEach executed.
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich ForEach
+                executed. If equals to None, default evaluator will be created. Defaults to None.
 
         Returns:
             Transformable: Result of execution.
@@ -347,7 +352,7 @@ class Filter(Component):
 
             get_key (str): Key associated with series of data items.
             
-            set_key (Optional[str], optional): Data destnation. 
+            set_key (Optional[str], optional): Data destination. 
                 If equals to None, get_key will be used. Defaults to None.
             
             name (Optional[str], optional): Name for identification.
@@ -366,7 +371,8 @@ class Filter(Component):
         Args:
             input_data (Transformable): Data for processing.
 
-            evaluator (Evaluator): Evaluator in context of wich Filter executed.
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich Filter
+                executed. If equals to None, default evaluator will be created. Defaults to None.
 
         Returns:
             Transformable: Result of execution.
@@ -429,7 +435,8 @@ class While(Component):
         Args:
             input_data (Transformable): Data for processing.
 
-            evaluator (Evaluator): Evaluator in context of wich While executed.
+            evaluator (Optional[Evaluator], optional): Evaluator in context of wich While
+                executed. If equals to None, default evaluator will be created. Defaults to None.
 
         Returns:
             Transformable: Result of execution.

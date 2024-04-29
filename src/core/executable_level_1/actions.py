@@ -7,7 +7,7 @@ from typing import (
 import logging
 import copy
 
-from core.exceptions import InvalidQuery, InputDataKeyError
+from core.exceptions import InvalidQuery, InputDataKeyError, IvalidInputData
 from core.executable_level_1.schema import Transformable, ReplacingScope
 from core.executable_level_1.component import Component
 from core.executable_level_1.interpreter import Evaluator
@@ -165,7 +165,7 @@ class Action(Generic[ActionInput, ActionOutput], Component):
 
 class Flush(Action[Dict[str, Any], Dict[str, Any]]):
     """
-    Remove specific keys or all.
+    Remove specific keys or all
     """
     def __init__(
         self, 
@@ -188,11 +188,16 @@ class Flush(Action[Dict[str, Any], Dict[str, Any]]):
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
+        Remove specified keys
+
         Args:
-            input_data (Transformable): Data to process.
+            input_data (Dict[str, Any]): Current data.
+
+        Raises:
+            InputDataKeyError: Key for removing doesn't exist.
 
         Returns:
-            Transformable: Processed data.
+            Dict[str, Any]: Updated data.
         """
         if self.keys is None:
             return {}
@@ -251,7 +256,7 @@ class Log(Action[Any, str]):
 
     def execute(self, input_data: Any) -> str:
         """
-        Create message string.
+        Create message string
 
         Args:
             input_data (Any): Data for representation.
@@ -304,7 +309,7 @@ class Log(Action[Any, str]):
 
 class AddData(Action[Dict[str, Any], Dict[str, Any]]):
     """
-    Adds provided data to input data.
+    Add provided data to input data
     """
     def __init__(
         self, 
@@ -324,7 +329,7 @@ class AddData(Action[Dict[str, Any], Dict[str, Any]]):
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Updates input data with provided data
+        Update input data with provided data
 
         Args:
             input_data (Dict[str, Any]): Current data.
@@ -338,7 +343,7 @@ class AddData(Action[Dict[str, Any], Dict[str, Any]]):
 
 class RenameAttribute(Action[Dict[str, Any], Dict[str, Any]]):
     """
-    Renames specified key in input data.
+    Rename specified key in input data
     """
     def __init__(
         self, 
@@ -348,9 +353,9 @@ class RenameAttribute(Action[Dict[str, Any], Dict[str, Any]]):
     ) -> None:
         """
         Args:
-            old_name (str): Current name of the key.
+            old_name (str): Current name.
 
-            new_name (str): New name of the key.
+            new_name (str): New name.
             
             name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
@@ -362,10 +367,13 @@ class RenameAttribute(Action[Dict[str, Any], Dict[str, Any]]):
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Renames key
+        Rename key
 
         Args:
-            input_data (Dict[str, Any]): Input data.
+            input_data (Dict[str, Any]): Current data.
+
+        Raises:
+            InputDataKeyError: Key for renaming doesn't exist.
 
         Returns:
             Dict[str, Any]: Updated data.
@@ -379,7 +387,7 @@ class RenameAttribute(Action[Dict[str, Any], Dict[str, Any]]):
 
 class RenameAttributeQuery(Action[Dict[str, Any], Dict[str, Any]]):
     """
-    Renames attributes keys using query string.
+    Rename attributes keys using query string
     """
     TRANSFORMATION_DELIMITER = ";"
     TRANSFORMATION_POINTER = "<-"
@@ -402,17 +410,17 @@ class RenameAttributeQuery(Action[Dict[str, Any], Dict[str, Any]]):
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Renames keys using query.
+        Rename keys using query
 
         Args:
-            input_data (Dict[str, Any]): Input data.
+            input_data (Dict[str, Any]): Current data.
 
         Raises:
             InvalidQuery: Provided query is invalid.
             InputDataKeyError: Key for renaming doesn't exist.
 
         Returns:
-            Dict[str, Any]: _description_
+            Dict[str, Any]: Updated data.
         """
         transformation_list = self.query.split(
             self.TRANSFORMATION_DELIMITER
@@ -436,7 +444,7 @@ class RenameAttributeQuery(Action[Dict[str, Any], Dict[str, Any]]):
 
 class SetValue(Action[Dict[str, Any], Dict[str, Any]]):
     """
-    Sets new value
+    Set new value
     """
     def __init__(
         self, 
@@ -459,13 +467,22 @@ class SetValue(Action[Dict[str, Any], Dict[str, Any]]):
 
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Set new value to key
+
+        Args:
+            input_data (Dict[str, Any]): Current data.
+
+        Returns:
+            Dict[str, Any]: Updated data.
+        """
         input_data[self.key] = self.value
         return input_data
 
 
 class UnpackValue(Action[Dict[str, Any], Dict[str, Any]]):
     """
-    Unpacks value from nested level to current.
+    Unpack value from nested level
     """
     def __init__(
         self, 
@@ -484,19 +501,34 @@ class UnpackValue(Action[Dict[str, Any], Dict[str, Any]]):
 
 
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Unpack value of specified key
+
+        Args:
+            input_data (Dict[str, Any]): Current data.
+
+        Raises:
+            InputDataKeyError: If specified key doesn't exist.
+            IvalidInputData: If nested data has invalid type.
+
+        Returns:
+            Dict[str, Any]: Updated data.
+        """
         try:
             data = input_data.pop(self.key)
         except:
             raise InputDataKeyError(self.key)
         if not isinstance(data, Dict):
-            raise ValueError(f"Expected: Dict[str, Any]. Recieved value of type: {type(data)}")
+            raise IvalidInputData(
+                f"Expected: Dict[str, Any]. Recieved value of type: {type(data)}"
+            )
         input_data.update(cast(Dict[str, Any], data))
         return input_data
     
 
-class NestToKey(Action[Dict[str, Any], Dict[str, Any]]):
+class NestToKey(Action[Any, Dict[str, Any]]):
     """
-    Nests input data to specified key
+    Nest input data to specified key
     """
     def __init__(
         self, 
@@ -514,7 +546,16 @@ class NestToKey(Action[Dict[str, Any], Dict[str, Any]]):
         self.key = key
 
 
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, input_data: Any) -> Dict[str, Any]:
+        """
+        Nest input data to specified key
+
+        Args:
+            input_data (Any): Current data.
+
+        Returns:
+            Dict[str, Any]: Updated data.
+        """
         return {
             self.key: input_data
         }
@@ -522,7 +563,7 @@ class NestToKey(Action[Dict[str, Any], Dict[str, Any]]):
 
 class ExecuteFunction(Action[ActionInput, ActionOutput]):
     """
-    Executes provided function
+    Execute provided function
     """
     def __init__(
         self, 
@@ -552,4 +593,13 @@ class ExecuteFunction(Action[ActionInput, ActionOutput]):
 
 
     def execute(self, input_data: ActionInput) -> ActionOutput:
+        """
+        Execute provided function
+
+        Args:
+            input_data (ActionInput): Function input.
+
+        Returns:
+            ActionOutput: Function output.
+        """
         return self.f(input_data)
