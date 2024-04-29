@@ -88,7 +88,12 @@ class ExecutableExecutor(BaseExecutor[Executable[Any, Any]]):
         if not evaluator:
             evaluator = self.set_up_default_evaluator()
 
-        data = getattr(input_data, self.get_key)
+        try:
+            data = getattr(input_data, self.get_key)
+        except:
+            raise ExecutableError(
+                self.name, InputDataKeyError(self.get_key)
+            )
         if isinstance(data, Dict):
             result = self.component.execute(
                 copy.copy(cast(Dict[str, Any], data)), evaluator
