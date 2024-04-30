@@ -18,8 +18,8 @@ sentences = [
 def prepare_to_rescore(input_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     return [
         {
-            "text": sentence,
-            "labels": [l[0] for l in labels]
+            "sequences": sentence,
+            "candidate_labels": [l[0] for l in labels]
         } for sentence, labels in zip(sentences, input_data["classification_output"])
     ]
 

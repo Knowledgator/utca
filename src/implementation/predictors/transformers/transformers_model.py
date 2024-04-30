@@ -44,11 +44,22 @@ class TransformersModel(
 
 
     def invoke(self, input_data: Input, evaluator: Evaluator) -> Dict[str, Any]:
+        """
+        Call model
+
+        Args:
+            input_data (Input): Validated input.
+
+            evaluator (Evaluator): Evaluator in context of wich executed.
+
+        Returns:
+            Dict[str, Any]: Result of execution.
+        """
         inputs = input_data.extract()
         if not "encodings" in inputs:
-            res = self.cfg.model(**inputs, **self.cfg.get_kwargs())
+            res = self.cfg.model(**inputs, **self.cfg.get_kwargs()) # type: ignore
         else:
-            res = self.cfg.model(**inputs.pop("encodings"), **inputs, **self.cfg.get_kwargs())
+            res = self.cfg.model(**inputs.pop("encodings"), **inputs, **self.cfg.get_kwargs()) # type: ignore
         return ensure_dict(res)
 
 
@@ -70,6 +81,17 @@ class TransformersGenerativeModel(
     Transformers generative model
     """
     def invoke(self, input_data: Input, evaluator: Evaluator) -> Dict[str, Any]:
+        """
+        Call generate method of the model
+
+        Args:
+            input_data (Input): Validated input.
+
+            evaluator (Evaluator): Evaluator in context of wich executed.
+
+        Returns:
+            Dict[str, Any]: Result of execution.
+        """
         inputs = input_data.extract()
         if not "encodings" in inputs:
             res = self.cfg.model.generate(**inputs, **self.cfg.get_kwargs()) # type: ignore

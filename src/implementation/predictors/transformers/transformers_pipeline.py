@@ -11,7 +11,7 @@ from core.executable_level_1.schema import (
 )
 from core.predictor_level_2.predictor import Predictor
 from implementation.predictors.transformers.schema import (
-    TransformersPipelineConfig, SummarizationInputType
+    TransformersPipelineConfig, #SummarizationInputType
 )
 from implementation.predictors.transformers.utils import ensure_dict
 
@@ -52,7 +52,22 @@ class TransformersPipeline(
 
 
     def invoke(self, input_data: Input, evaluator: Evaluator) -> Dict[str, Any]:
+        """
+        Call pipeline
+
+        Args:
+            input_data (Input): Validated input.
+
+            evaluator (Evaluator): Evaluator in context of wich executed.
+
+        Returns:
+            Dict[str, Any]: Result of execution.
+        """
         inputs = input_data.extract()
+        if "inputs" in inputs:
+            return ensure_dict(self.pipeline( # type: ignore
+                inputs.pop("inputs"), **inputs
+            ))
         return ensure_dict(self.pipeline(**inputs)) # type: ignore
     
 
@@ -62,19 +77,3 @@ class TransformersPipeline(
         Model configuration
         """
         return self.pipeline.model.config # type: ignore
-
-
-class TransformersSummarizationPipeline(
-    TransformersPipeline[
-        SummarizationInputType, 
-        Output
-    ]
-):
-    """
-    Transformers summarization pipeline
-    """
-    def invoke(self, input_data: SummarizationInputType, evaluator: Evaluator) -> Dict[str, Any]:
-        inputs = input_data.extract()
-        return ensure_dict(self.pipeline( # type: ignore
-            inputs.pop("inputs"), **inputs
-        ))

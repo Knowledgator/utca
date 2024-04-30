@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, TypeVar, Union, Optional
+from typing import Any, Dict, List, Union, Optional
 
 from transformers import ( # type: ignore
     PreTrainedModel,
@@ -12,7 +12,8 @@ from implementation.predictors.transformers.transformers_pipeline import (
 
 class ComprehendItPredictorConfig(TransformersPipelineConfig):
     """
-    Comprehend-it configuration
+    Prebuild configuration that describes default parameters for knowledgator/comprehend_it 
+    models pipeline
     """
     task: Optional[str]="zero-shot-classification"
     """
@@ -23,9 +24,6 @@ class ComprehendItPredictorConfig(TransformersPipelineConfig):
         PreTrainedModel,
         TFPreTrainedModel
     ]]="knowledgator/comprehend_it-base"
-    """
-    Model
-    """
     kwargs: Optional[Dict[str, Any]]={
         "batch_size": 8
     }
@@ -35,31 +33,25 @@ class ComprehendItPredictorConfig(TransformersPipelineConfig):
 
 
 class ComprehendItPredictorInput(IOModel):
-    text: str
     """
-    Text to classify
+    Arguments:
+        sequences (str): Text to classify.
+
+        candidate_labels (List[str]): Classification labels to use.
     """
-    labels: List[str]
-    """
-    Classification labels to use
-    """
+    sequences: str
+    candidate_labels: List[str]
 
 
 class ComprehendItPredictorOutput(IOModel):
+    """
+    Arguments:
+        sequence (str): Text used for classification.
+
+        labels (List[str]): Classified labels.
+
+        scores (List[float]): Classification scores.
+    """
     sequence: str
-    """
-    Text used for classification
-    """
     labels: List[str]
-    """
-    Classified labels
-    """
     scores: List[float]
-    """
-    Classification scores
-    """
-
-
-ComprehendItPredictorConfigType = TypeVar("ComprehendItPredictorConfigType", bound=ComprehendItPredictorConfig)
-ComprehendItPredictorInputType = TypeVar("ComprehendItPredictorInputType", bound=ComprehendItPredictorInput)
-ComprehendItPredictorOutputType = TypeVar("ComprehendItPredictorOutputType", bound=ComprehendItPredictorOutput)

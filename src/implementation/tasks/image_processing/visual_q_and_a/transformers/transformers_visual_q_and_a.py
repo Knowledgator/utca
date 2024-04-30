@@ -14,7 +14,7 @@ from implementation.predictors.transformers.transformers_model import (
 )
 from implementation.predictors.transformers.schema import (
     TransformersVisualQandAInput,
-    TransformersImageModelRawInput,
+    TransformersImageModelInput,
     TransformersLogitsOutput
 )
 from implementation.tasks.image_processing.visual_q_and_a.transformers.actions import (
@@ -54,7 +54,7 @@ class TransformersVisualQandA(
                 TransformersModelConfig(
                     model=model # type: ignore
                 ),
-                input_class=TransformersImageModelRawInput,
+                input_class=TransformersImageModelInput,
                 output_class=TransformersLogitsOutput
             )
 

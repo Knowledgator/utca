@@ -5,7 +5,7 @@ from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_pipeline import (
-    TransformersSummarizationPipeline,
+    TransformersPipeline,
     TransformersPipelineConfig,
 )
 from implementation.predictors.transformers.schema import (
@@ -39,13 +39,10 @@ class TransformersTextSummarization(
         name: Optional[str]=None,
     ) -> None:
         if not predictor:
-            predictor = TransformersSummarizationPipeline(
+            predictor = TransformersPipeline(
                 TransformersPipelineConfig(
                     task="summarization", 
                     model=self.default_model,
-                    kwargs={
-                        "truncation": True
-                    }
                 ),
                 input_class=TransformersBasicInput,
                 output_class=TransformersBasicOutput

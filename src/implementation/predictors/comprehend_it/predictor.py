@@ -1,37 +1,36 @@
-from typing import Any, Dict, Optional, Type
+from typing import Optional, Type
 
-from core.executable_level_1.interpreter import Evaluator
+from core.executable_level_1.schema import Input, Output
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline
+)
+from implementation.predictors.transformers.transformers_pipeline import (
+    TransformersPipelineConfig
 )
 from implementation.predictors.comprehend_it.schema import (
     ComprehendItPredictorConfig,
     ComprehendItPredictorInput, 
-    ComprehendItPredictorOutput,
-    ComprehendItPredictorInputType, 
-    ComprehendItPredictorOutputType
+    ComprehendItPredictorOutput
 )   
 
 class ComprehendItPredictor(
-    TransformersPipeline[
-        ComprehendItPredictorInputType,
-        ComprehendItPredictorOutputType
-    ]
+    TransformersPipeline[Input, Output]
 ):
     """
     Predictor for text classifications models
     """
     def __init__(
         self, 
-        cfg: Optional[ComprehendItPredictorConfig]=None,
-        input_class: Type[ComprehendItPredictorInputType]=ComprehendItPredictorInput,
-        output_class: Type[ComprehendItPredictorOutputType]=ComprehendItPredictorOutput,
+        cfg: Optional[TransformersPipelineConfig]=None,
+        input_class: Type[Input]=ComprehendItPredictorInput,
+        output_class: Type[Output]=ComprehendItPredictorOutput,
         name: Optional[str]=None,
     ) -> None:
         """
         Args:
-            cfg (Optional[ComprehendItPredictorConfig], optional): Configuration for predictor.
-                If value equals to None, default configuration will be used. Defaults to None.
+            cfg (Optional[TransformersPipelineConfig], optional): Configuration for predictor.
+                If value equals to None, default ComprehendItPredictorConfig configuration will be used.
+                Defaults to None.
 
             input_class (Type[ComprehendItPredictorInputType], optional): Class for input validation.
                 Defaults to ComprehendItPredictorInput.
@@ -47,11 +46,4 @@ class ComprehendItPredictor(
             input_class=input_class,
             output_class=output_class,
             name=name,
-        )
-
-    
-    def invoke(self, input_data: ComprehendItPredictorInputType, evaluator: Evaluator) -> Dict[str, Any]:
-        inputs = input_data.extract()
-        return self.pipeline( # type: ignore
-            inputs.pop("text"), inputs.pop("labels"), **inputs
         )
