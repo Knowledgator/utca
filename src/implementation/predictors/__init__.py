@@ -9,7 +9,7 @@ from implementation.predictors.transformers.schema import (
     TransformersTextToSpeechOutput,
     TransformersChartsAndPlotsModelInput,
     TransformersVisualQandAInput,
-    TransformersImageModelRawInput,
+    TransformersImageModelInput,
     TransformersEmbeddingInput,
     TransformersEmbeddingOutput,
     TransformersEntityLinkingInput,
@@ -22,7 +22,6 @@ from implementation.predictors.transformers.schema import (
 )
 from implementation.predictors.transformers.transformers_pipeline import (
     TransformersPipeline,
-    TransformersSummarizationPipeline,
 )
 from implementation.predictors.comprehend_it.predictor import (
     ComprehendItPredictor,
@@ -46,7 +45,7 @@ __all__ = [
     "TransformersTextToSpeechOutput",
     "TransformersChartsAndPlotsModelInput",
     "TransformersVisualQandAInput",
-    "TransformersImageModelRawInput",
+    "TransformersImageModelInput",
     "TransformersEmbeddingInput",
     "TransformersEmbeddingOutput",
     "TransformersEntityLinkingInput",
@@ -63,5 +62,4 @@ __all__ = [
     "ComprehendItPredictorConfig",
     "TransformersPipeline",
     "TransformersPipelineConfig",
-    "TransformersSummarizationPipeline",
 ]
