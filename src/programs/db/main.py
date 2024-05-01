@@ -55,4 +55,4 @@ if __name__ == "__main__":
         }
     })
     res = SQLActionWithReturns(s).execute({"statement": select(User).where(User.id==1)})
-    print(res['query_outputs'])
+    print(res)

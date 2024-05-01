@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Iterator, Iterable, Optional, cast
-
+from typing import (
+    Any, Dict, List, Iterator, Iterable, Optional, Type, cast
+)
 from core.executable_level_1.actions import Action
 from sqlalchemy import (
     ScalarResult, 
@@ -25,9 +26,9 @@ class SQLSessionFactory:
     def __init__(self, url: str, echo: bool=False) -> None:
         """
         Args:
-            url (str): URL of DB.
+            url (str): connection URL of the DB.
 
-            echo (bool, optional): Of equals to True, logs debug info. 
+            echo (bool, optional): If equals to True, logs debug info. 
                 Defaults to False.
         """
         self._engine = create_engine(
@@ -50,16 +51,26 @@ class SQLSessionFactory:
         self._session_factory.close_all()
 
     
-    def create_tables(self) -> None:
+    def create_tables(self, tables_class: Type[DeclarativeBase]=BaseModel) -> None:
         """
         Create all tables
+
+        Args:
+            tables_class (Type[DeclarativeBase], optional): Base class of tables that
+                will be used to trigger creation. Defaults to BaseModel.
         """
-        BaseModel.metadata.create_all(self._engine)
+        tables_class.metadata.create_all(self._engine)
 
 
 class SQLAction(Action[Dict[str, Any], None]):
     """
     SQL action without returns
+
+    Args:
+        input_data (Dict[str, Any]): Data to process. Expected keys:
+            'statement' (Any): SQLAlchemy statement.
+            
+            'kwargs' (Dict[str, Any], optional): Extra arguments.
     """
     def __init__(
         self, 
@@ -93,7 +104,7 @@ class SQLAction(Action[Dict[str, Any], None]):
             session.commit()
 
 
-class SQLActionWithReturns(Action[Dict[str, Any], Dict[str, Any]]):
+class SQLActionWithReturns(Action[Dict[str, Any], List[Any]]):
     """
     SQL action with returns
     """
@@ -141,7 +152,7 @@ class SQLActionWithReturns(Action[Dict[str, Any], Dict[str, Any]]):
                 yield i
 
 
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, input_data: Dict[str, Any]) -> List[Any]:
         """
         Args:
             input_data (Dict[str, Any]): Data to process. Expected keys:
@@ -150,8 +161,7 @@ class SQLActionWithReturns(Action[Dict[str, Any], Dict[str, Any]]):
                 'kwargs' (Dict[str, Any], optional): Extra arguments.
         
         Returns:
-            Dict[str, Any]: Expected keys:
-                'query_outputs' (Iterator[Any]): Result of query.
+            List[Any]: Result of query.
         """
         with self.session.create() as session:
             res = self.unpack_returns(
@@ -160,8 +170,6 @@ class SQLActionWithReturns(Action[Dict[str, Any], Dict[str, Any]]):
                 )
             )
             session.commit()
-            return {
-                "query_outputs": list(res)
-            }
+            return list(res)
 
 

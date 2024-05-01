@@ -4,11 +4,27 @@ from PIL import Image, ImageOps
 
 from core.executable_level_1.actions import Action
 
-class ImageRead(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageRead(Action[Dict[str, Any], Image.Image]):
     """
     Read image
     """
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def __init__(
+        self,
+        name: Optional[str]=None,
+        default_key: str="image",
+    ) -> None:
+        """
+        Args:
+            name (Optional[str], optional): Name for identification.
+                If equals to None, class name will be used. Defaults to None.
+
+            default_key (str, optional): What key will be used by default. 
+                Defaults to "image".
+        """
+        super().__init__(name=name, default_key=default_key)
+
+
+    def execute(self, input_data: Dict[str, Any]) -> Image.Image:
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
@@ -18,11 +34,10 @@ class ImageRead(Action[Dict[str, Any], Dict[str, Any]]):
             Exception: If unable to read image.
 
         Returns:
-            Dict[str, Any]: Expected keys:
-                'image' (PIL.Image.Image): Image;
+            Image.Image: Image;
         """
         try:
-            return {"image": Image.open(input_data["path_to_file"])}
+            return Image.open(input_data["path_to_file"])
         except Exception as e:
             raise Exception(f"Unable to read image: {e}")
         
@@ -35,7 +50,7 @@ class ImageWrite(Action[Dict[str, Any], None]):
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                'image' (PIL.Image.Image): Image;
+                'image' (Image.Image): Image;
 
                 'path_to_file' (str): Path to image file;
 
@@ -43,100 +58,167 @@ class ImageWrite(Action[Dict[str, Any], None]):
             Exception: If unable to write image.
         """
         try:
-            input_data['image'].save(input_data['path_to_file'])
+            cast(Image.Image, input_data['image']).save(input_data['path_to_file'])
         except Exception as e:
             raise Exception(f"Unable to write image: {e}")
 
 
-class ImageRotate(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageRotate(Action[Image.Image, Image.Image]):
     """
     Rotate image
     """
     def __init__(
-        self, rotation: float, name: Optional[str]=None,
+        self, 
+        angle: float, 
+        resample: Image.Resampling=Image.Resampling.NEAREST,
+        expand: bool=False,
+        center: Optional[Tuple[float, float]]=None,
+        translate: Optional[Tuple[float, float]]=None,
+        fillcolor: Optional[Any]=None,
+        name: Optional[str]=None,
+        default_key: str="image",
     ) -> None:
         """
         Args:
-            rotation (float): Rotation angle in degrees.
+            angle (float): Rotation angle in degrees counter clockwise.
 
-            name (Optional[str], optional): name (Optional[str], optional): Name for identification.
+            resample (Image.Resampling, optional): An optional resampling filter. This can be
+                one of Resampling.NEAREST (use nearest neighbour), Resampling.BILINEAR (linear 
+                interpolation in a 2x2 environment), or Resampling.BICUBIC (cubic spline 
+                interpolation in a 4x4 environment). If the image has
+                mode "1" or "P", it is set to Resampling.NEAREST. Defaults to Resampling.NEAREST.
+
+            expand (bool, optional): Optional expansion flag. If true, expands the output
+                image to make it large enough to hold the entire rotated image. If false,
+                make the output image the same size as the input image. Defaults to False.
+                
+                Note that the expand flag assumes rotation around the center and no translation.
+
+            center (Optional[Tuple[float, float]], optional): Optional center of rotation (a 2-tuple). 
+                Origin is the upper left corner. Default is the center of the image.
+                
+            translate (Optional[Tuple[float, float]], optional): An optional post-rotate 
+                translation (a 2-tuple).
+
+            fillcolor (Optional[Any], optional): An optional color for area outside the rotated image.
+                
+            name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
+
+            default_key (str, optional): What key will be used by default. 
+                Defaults to "image".
         """
-        super().__init__(name)
-        self.rotation = rotation
+        super().__init__(name=name, default_key=default_key)
+        self.angle = angle
+        self.resample = resample
+        self.expand = expand
+        self.center = center
+        self.translate = translate
+        self.fillcolor=fillcolor
 
 
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, input_data: Image.Image) -> Image.Image:
         """
         Args:
-            input_data (Dict[str, Any]): Expected keys:
-                'image' (PIL.Image.Image): Image;
-
-        Raises:
-            Exception: If unable to read image.
+            input_data (Image.Image): Image.
 
         Returns:
-            Dict[str, Any]: Expected keys:
-                'image' (PIL.Image.Image): Rotated image;
+            Image.Image: Rotated image.
         """
-        return {
-            "image": cast(
-                Image.Image, input_data["image"]
-            ).rotate(self.rotation)
-        }
+        return input_data.rotate(
+                angle=self.angle,
+                resample=self.resample,
+                expand=self.expand,
+                center=self.center,
+                translate=self.translate,
+                fillcolor=self.fillcolor,
+            )
     
 
-class ImageResize(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageResize(Action[Image.Image, Image.Image]):
     """
     Resize image
     """
     def __init__(
-        self, width: int, height: int, name: Optional[str]=None,
+        self, 
+        width: int, 
+        height: int,
+        resample: Optional[Image.Resampling]=None,
+        box: Optional[Tuple[float, float, float, float]]=None,
+        reducing_gap: Optional[float]=None,
+        name: Optional[str]=None,
+        default_key: str="image",
     ) -> None:
         """
         Args:
             width (int): New width in pixels.
             
             height (int): New height in pixels.
+
+            resample (Optional[Image.Resampling], optional): An optional resampling filter.
+                This can be one of Resampling.NEAREST, Resampling.BOX,
+                Resampling.BILINEAR, Resampling.HAMMING, Resampling.BICUBIC or Resampling.LANCZOS.
+                If the image has mode "1" or "P", it is always set to Resampling.NEAREST. 
+                If the image mode specifies a number of bits, such as "I;16", then the default filter is
+                Resampling.NEAREST. Otherwise, the default filter is Resampling.BICUBIC.
+                Defaults to None
+
+            box (Optional[Tuple[float, float, float, float]], optional): An optional 4-tuple of floats providing
+                the source image region to be scaled. The values must be within (0, 0, width, height) rectangle.
+                If None, the entire source is used. Defaults to None.
+
+            reducing_gap (Optional[float], optional): Apply optimization by resizing the image
+                in two steps. First, reducing the image by integer times using ~PIL.Image.Image.reduce.
+                Second, resizing using regular resampling. The last step changes size no less than by 
+                reducing_gap times. reducing_gap may be None (no first step is performed) or should be
+                greater than 1.0. The bigger reducing_gap, the closer the result to the fair resampling.
+                The smaller reducing_gap, the faster resizing. With reducing_gap greater or equal to 3.0,
+                the result is indistinguishable from fair resampling in most cases. 
+                Defaults to None (no optimization).
             
-            name (Optional[str], optional): name (Optional[str], optional): Name for identification.
+            name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
+            
+            default_key (str, optional): What key will be used by default. 
+                Defaults to "image".
         """
-        super().__init__(name)
+        super().__init__(name=name, default_key=default_key)
         self.height = height
         self.width = width
+        self.resample = resample
+        self.box = box
+        self.reducing_gap = reducing_gap
 
 
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, input_data: Image.Image) -> Image.Image:
         """
         Args:
-            input_data (Dict[str, Any]): Expected keys:
-                'image' (PIL.Image.Image): Image;
-
-        Raises:
-            Exception: If unable to read image.
+            input_data (Image.Image): Image.
 
         Returns:
-            Dict[str, Any]: Expected keys:
-                'image' (PIL.Image.Image): Resized image;
+            Image.Image: Resized image.
         """
-        return {
-            "image": cast(
-                Image.Image, input_data["image"]
-            ).resize((self.width, self.height))
-        }
+        return input_data.resize(
+            (self.width, self.height),
+            resample=self.resample,
+            box=self.box,
+            reducing_gap=self.reducing_gap,
+        )
     
 
-class ImagePad(Action[Dict[str, Any], Dict[str, Any]]):
+class ImagePad(Action[Image.Image, Image.Image]):
     """
     Pad image
     """
     def __init__(
         self, 
         width: int, 
-        height: int, 
-        color: Optional[str]=None,
+        height: int,
+        method: Image.Resampling=Image.Resampling.BICUBIC,
+        color: Optional[Any]=None,
+        centering: Tuple[float, float]=(0.5, 0.5),
         name: Optional[str]=None,
+        default_key: str="image",
     ) -> None:
         """
         Args:
@@ -144,41 +226,49 @@ class ImagePad(Action[Dict[str, Any], Dict[str, Any]]):
             
             height (int): New height in pixels.
 
-            color (Optional[str], optional): The background color of the padded image.
+            method (Image.Resampling, optional): Resampling method to use. 
+                Default is Resampling.BICUBIC.
+
+            color (Optional[Any], optional): The background color of the padded image.
                 Defaults to None.
 
-            name (Optional[str], optional): name (Optional[str], optional): Name for identification.
+            centering (): Control the position of the original image within the
+                  padded version. (0.5, 0.5) will keep the image centered 
+                  (0, 0) will keep the image aligned to the top left (1, 1)
+                  will keep the image aligned to the bottom right
+
+            name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
+            
+            default_key (str, optional): What key will be used by default. 
+                Defaults to "image".
         """
-        super().__init__(name)
+        super().__init__(name=name, default_key=default_key)
         self.height = height
         self.width = width
+        self.method = method
         self.color = color
+        self.centering = centering
 
 
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, input_data: Image.Image) -> Image.Image:
         """
         Args:
-            input_data (Dict[str, Any]): Expected keys:
-                'image' (PIL.Image.Image): Image;
-
-        Raises:
-            Exception: If unable to read image.
+            input_data (Image.Image): Image.
 
         Returns:
-            Dict[str, Any]: Expected keys:
-                'image' (PIL.Image.Image): Padded image;
+            Image.Image: Padded image;
         """
-        return {
-            "image": ImageOps.pad(
-                cast(Image.Image, input_data['image']),
-                (self.width, self.height),
-                color=self.color
-            )
-        }    
+        return ImageOps.pad(
+            input_data,
+            (self.width, self.height),
+            method=self.method,
+            color=self.color,
+            centering=self.centering,
+        )
 
 
-class ImageCrop(Action[Dict[str, Any], Dict[str, Any]]):
+class ImageCrop(Action[Image.Image, Image.Image]):
     """
     Crop image
     """
@@ -186,34 +276,29 @@ class ImageCrop(Action[Dict[str, Any], Dict[str, Any]]):
         self, 
         box: Tuple[int, int, int, int],
         name: Optional[str]=None,
+        default_key: str="image",
     ) -> None:
         """
         Args:
             box (Tuple[int, int, int, int]): Bbox for crop. x0, y0, x1, y1, where 
                 x0, y0 - left top corner, x1, y1 - right bottom corner (relative in pixels).
 
-            name (Optional[str], optional): name (Optional[str], optional): Name for identification.
+            name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
+
+            default_key (str, optional): What key will be used by default. 
+                Defaults to "image".
         """
-        super().__init__(name)
+        super().__init__(name=name, default_key=default_key)
         self.box = box
 
 
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, input_data: Image.Image) -> Image.Image:
         """
         Args:
-            input_data (Dict[str, Any]): Expected keys:
-                'image' (PIL.Image.Image): Image;
-
-        Raises:
-            Exception: If unable to read image.
+            input_data (Image.Image): Image.
 
         Returns:
-            Dict[str, Any]: Expected keys:
-                'image' (PIL.Image.Image): Croped image;
+            Image.Image: Croped image;
         """
-        return {
-            "image": cast(
-                Image.Image, input_data["image"]
-            ).crop(self.box)
-        }
+        return input_data.crop(self.box)
