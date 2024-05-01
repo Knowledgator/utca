@@ -48,6 +48,18 @@ from core.executable_level_1.executable import (
     ValidationClass,
     Executable,
 )
+from core.predictor_level_2.predictor import (
+    Predictor
+)
+from core.task_level_3.task import (
+    Task, NERTask
+)
+from core.task_level_3.schema import (
+    NEROutput, NEROutputType
+)
+from core.task_level_3.objects.objects import (
+    Entity, ClassifiedEntity, EntityType
+)
 
 __all__ = [
     "Evaluator",
@@ -92,4 +104,15 @@ __all__ = [
 
     "ValidationClass",
     "Executable",
+
+    "Predictor",
+
+    "Task",
+    "NERTask",
+    "NEROutput",
+    "NEROutputType",
+
+    "Entity",
+    "ClassifiedEntity",
+    "EntityType",
 ]
