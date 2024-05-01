@@ -18,7 +18,7 @@ from implementation.predictors import (
     TokenSearcherPredictorConfig
 )
 from implementation.tasks import (
-    TokenSearcherQandATask,
+    TokenSearcherQandA,
     TokenSearcherQandAPostprocessor,
 )
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     )
 
     # Q&A stage
-    q_and_a = TokenSearcherQandATask(
+    q_and_a = TokenSearcherQandA(
         predictor=model,
         postprocess=[TokenSearcherQandAPostprocessor(
             threshold=0.7

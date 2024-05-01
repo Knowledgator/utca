@@ -27,7 +27,7 @@ class TransformersTokenClassifierOutput(NEROutput[ClassifiedEntity]):
 
 class TransformersTokenClassifier(
     NERTask[
-        TransformersBasicInput, 
+        TransformersBasicInput,
         TransformersTokenClassifierOutput,
     ]
 ):

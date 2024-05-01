@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from core.executable_level_1.actions import Action
 from core.task_level_3.objects.objects import (
@@ -9,6 +9,22 @@ from implementation.predictors.token_searcher.utils import (
 )
 
 class TokenSearcherNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+    """
+    Create prompts with providied text
+
+    Arguments:
+        input_data (Dict[str, Any]): Expected keys:
+            "text" (str): Text to process;
+
+    Returns:
+        Dict[str, Any]: Expected keys:
+            "inputs" (List[str]): Model inputs;
+
+            "chunks_starts" (List[int]): Chunks start positions. Used by postprocessor;
+            
+            "prompt_lengths" (List[int]): Prompt lenghts. Used by postprocessor;
+    """
+
     prompt: str = """
 Identify entities in the text having the following classes:
 {label}
@@ -19,6 +35,10 @@ Text:
         sents_batch: int=10,
         name: Optional[str]=None,
     ) -> None:
+        """
+        Args:
+            sents_batch (int): Chunks size in sentences. Defaults to 10.
+        """
         super().__init__(name)
         self.sents_batch = sents_batch
 
@@ -27,11 +47,11 @@ Text:
         return min(i + self.sents_batch, sentences_len) - 1
 
 
-    def chunkanize(self, text: str) -> Tuple[list[str], list[int]]:
-        chunks: list[str] = []
-        starts: list[int] = []
+    def chunkanize(self, text: str) -> Tuple[List[str], List[int]]:
+        chunks: List[str] = []
+        starts: List[int] = []
 
-        sentences: list[Tuple[int, int]] = [*sent_tokenizer(text)]
+        sentences: List[Tuple[int, int]] = [*sent_tokenizer(text)]
 
         for i in range(0, len(sentences), self.sents_batch):
             start = sentences[i][0]
@@ -45,10 +65,10 @@ Text:
 
 
     def get_inputs(
-        self, chunks: list[str], labels: list[str]
-    ) -> Tuple[list[str], list[int]]:
-        inputs: list[str] = []
-        prompts_lens: list[int] = []
+        self, chunks: List[str], labels: List[str]
+    ) -> Tuple[List[str], List[int]]:
+        inputs: List[str] = []
+        prompts_lens: List[int] = []
 
         for label in labels:
             prompt = self.prompt.format(label=label)
@@ -62,24 +82,71 @@ Text:
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        input_data["chunks"], input_data["chunks_starts"] = (
+        """
+        Arguments:
+            input_data (Dict[str, Any]): Expected keys:
+                "text" (str): Text to process;
+
+                "labels" (List[str]): Labels for classification;
+
+        Returns:
+            Dict[str, Any]: Expected keys:
+                "inputs" (List[str]): Model inputs;
+
+                "chunks_starts" (List[int]): Chunks start positions. Used by postprocessor;
+                
+                "prompt_lengths" (List[int]): Prompt lenghts. Used by postprocessor;
+        """
+        chunks, chunks_starts = (
             self.chunkanize(input_data["text"])
         )
-        input_data["inputs"], input_data["prompts_lens"] = (
+        inputs, prompts_lengths = (
             self.get_inputs(
-                input_data["chunks"], 
+                chunks,
                 input_data["labels"]
             )
         )
-        return input_data
+        return {
+            "inputs": inputs,
+            "chunks_starts": chunks_starts,
+            "prompts_lengths": prompts_lengths,
+        }
 
 
 class TokenSearcherNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+    """
+    Format output
+
+    Arguments:
+        input_data (Dict[str, Any]): Expected keys:
+            "output" (List[List[Dict[str, Any]]]): Model output;
+
+            "labels" (List[str]): Labels for classification;
+            
+            "text" (str): Processed text;
+            
+            "chunks_starts" (List[int]): Chunks start positions;
+            
+            "prompt_lengths" (List[int]): Prompt lenghts;
+            
+    Returns:
+        Dict[str, Any]: Expected keys:
+            "text" (str): Processed text;
+            
+            "output" (List[ClassifiedEntity]): Classified entities;
+    """
     def __init__(
         self, 
         threshold: float=0.,
         name: Optional[str]=None,
     ) -> None:
+        """
+        Arguments:
+            threshold (float): Entities threshold score. Defaults to 0.
+            
+            name (Optional[str], optional): Name for identification. If equals to None,
+                class name will be used. Defaults to None.      
+        """
         super().__init__(name)
         self.threshold = threshold
     
@@ -87,7 +154,26 @@ class TokenSearcherNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        outputs: list[ClassifiedEntity] = []
+        """
+        Arguments:
+            input_data (Dict[str, Any]): Expected keys:
+                "output" (List[List[Dict[str, Any]]]): Model output;
+
+                "labels" (List[str]): Labels for classification;
+                
+                "text" (str): Processed text;
+                
+                "chunks_starts" (List[int]): Chunks start positions;
+                
+                "prompt_lengths" (List[int]): Prompt lenghts;
+
+        Returns:
+            Dict[str, Any]: Expected keys:
+                "text" (str): Processed text;
+                
+                "output" (List[ClassifiedEntity]): Classified entities;
+        """
+        outputs: List[ClassifiedEntity] = []
 
         for id, output in enumerate(input_data["output"]):
             label = cast(str,
@@ -96,7 +182,7 @@ class TokenSearcherNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
             )
             shift = (
                 input_data["chunks_starts"][id%len(input_data["chunks_starts"])] 
-                - input_data["prompts_lens"][id//len(input_data["chunks_starts"])]
+                - input_data["prompts_lengths"][id//len(input_data["chunks_starts"])]
             )
             for ent in output:
                 if entity := build_entity(

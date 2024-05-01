@@ -28,7 +28,7 @@ class TextEmbeddingOutput(IOModel):
     embeddings: Any
 
 
-class TextEmbedding(
+class TransformersTextEmbedding(
     Task[
         TextEmbeddingInput, 
         TextEmbeddingOutput,

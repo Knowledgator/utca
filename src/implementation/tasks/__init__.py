@@ -52,12 +52,12 @@ from implementation.tasks.text_processing.clean_text.token_searcher.token_search
     TokenSearcherTextCleanerOutput,
 )
 from implementation.tasks.text_processing.clean_text.token_searcher.actions import (
-    TokenSeatcherTextCleanerPreprocessor,
+    TokenSearcherTextCleanerPreprocessor,
     TokenSearcherTextCleanerPostprocessor,
 )
 
 from implementation.tasks.text_processing.embedding.transformers.transformers_embedding import (
-    TextEmbedding,
+    TransformersTextEmbedding,
     TextEmbeddingInput, 
     TextEmbeddingOutput,
 )
@@ -108,7 +108,7 @@ from implementation.tasks.text_processing.text_classification.comprehend_it.comp
 )
 
 from implementation.tasks.text_processing.textual_q_and_a.token_searcher.token_searcher import (
-    TokenSearcherQandATask,
+    TokenSearcherQandA,
     TokenSearcherQandAInput,
     TokenSearcherQandAOutput,
 )
@@ -158,10 +158,10 @@ __all__ = [
     "TokenSearcherTextCleaner",
     "TokenSearcherTextCleanerInput",
     "TokenSearcherTextCleanerOutput",
-    "TokenSeatcherTextCleanerPreprocessor",
+    "TokenSearcherTextCleanerPreprocessor",
     "TokenSearcherTextCleanerPostprocessor",
     
-    "TextEmbedding",
+    "TransformersTextEmbedding",
     "TextEmbeddingInput", 
     "TextEmbeddingOutput",
     "EmbeddingPreprocessor",
@@ -190,7 +190,7 @@ __all__ = [
 
     "ComprehendIt",
 
-    "TokenSearcherQandATask",
+    "TokenSearcherQandA",
     "TokenSearcherQandAInput",
     "TokenSearcherQandAOutput",
     "TokenSearcherQandAPreprocessor",

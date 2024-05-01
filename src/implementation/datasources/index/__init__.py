@@ -1,13 +1,13 @@
 from implementation.datasources.index.actions import (
-    CreateIndex,
+    IndexCreate,
     IndexData,
-    SearchIndex,
+    IndexSearch,
     GetTextsByIndexes,
 )
 
 __all__ = [
-    "CreateIndex",
+    "IndexCreate",
     "IndexData",
-    "SearchIndex",
+    "IndexSearch",
     "GetTextsByIndexes",
 ]

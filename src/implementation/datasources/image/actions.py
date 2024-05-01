@@ -34,7 +34,7 @@ class ImageRead(Action[Dict[str, Any], Image.Image]):
             Exception: If unable to read image.
 
         Returns:
-            Image.Image: Image;
+            Image.Image: Image.
         """
         try:
             return Image.open(input_data["path_to_file"])
@@ -232,10 +232,10 @@ class ImagePad(Action[Image.Image, Image.Image]):
             color (Optional[Any], optional): The background color of the padded image.
                 Defaults to None.
 
-            centering (): Control the position of the original image within the
+            centering (Tuple[float, float], optional): Control the position of the original image within the
                   padded version. (0.5, 0.5) will keep the image centered 
                   (0, 0) will keep the image aligned to the top left (1, 1)
-                  will keep the image aligned to the bottom right
+                  will keep the image aligned to the bottom right.
 
             name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
@@ -257,7 +257,7 @@ class ImagePad(Action[Image.Image, Image.Image]):
             input_data (Image.Image): Image.
 
         Returns:
-            Image.Image: Padded image;
+            Image.Image: Padded image.
         """
         return ImageOps.pad(
             input_data,
@@ -299,6 +299,6 @@ class ImageCrop(Action[Image.Image, Image.Image]):
             input_data (Image.Image): Image.
 
         Returns:
-            Image.Image: Croped image;
+            Image.Image: Croped image.
         """
         return input_data.crop(self.box)

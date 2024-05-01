@@ -1,27 +1,39 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 import cv2
 
 from core.executable_level_1.actions import Action
 
-class VideoRead(Action[Dict[str, Any], Dict[str, Any]]):
+class VideoRead(Action[Dict[str, Any], cv2.VideoCapture]):
     """
     Read video file
     """
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def __init__(
+        self,
+        name: Optional[str]=None,
+        default_key: str="video",
+    ) -> None:
+        """
+        Args:
+            name (Optional[str], optional): Name for identification.
+                If equals to None, class name will be used. Defaults to None.
+
+            default_key (str, optional): What key will be used by default. 
+                Defaults to "image".
+        """
+        super().__init__(name=name, default_key=default_key)
+    
+
+    def execute(self, input_data: Dict[str, Any]) -> cv2.VideoCapture:
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
                 'path_to_file' (str): Path to video file;
 
         Returns:
-            Dict[str, Any]: Expected keys:
-                'video' (cv2.VideoCapture): Video;
+            cv2.VideoCapture: Video;
         """
-        video = cv2.VideoCapture(input_data["path_to_file"])
-        return {
-            "video": video
-        }
+        return cv2.VideoCapture(input_data["path_to_file"])
 
 
 class VideoWrite(Action[Dict[str, Any], None]):
@@ -32,7 +44,7 @@ class VideoWrite(Action[Dict[str, Any], None]):
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                'path_to_file' (str): Path to plain text file;
+                'path_to_file' (str): Path to video file;
 
                 'fourcc' (str): Codec to use;
 
@@ -60,19 +72,13 @@ class VideoWrite(Action[Dict[str, Any], None]):
             raise Exception(f"Unable to write file: {e}")
 
 
-class VideoReleaseCapture(Action[Dict[str, Any], Dict[str, Any]]):
+class VideoReleaseCapture(Action[cv2.VideoCapture, None]):
     """
     Release video capture
     """
-    def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, input_data: cv2.VideoCapture) -> None:
         """
         Args:
-            input_data (Dict[str, Any]): Expected keys:
-                'video' (cv2.VideoCapture): Video capture to release;
-
-        Returns:
-            Dict[str, Any]: Input data without video key;
+            input_data (cv2.VideoCapture): Video capture to release;
         """
-        video = input_data.pop("video")
-        video.release()
-        return input_data
+        input_data.release()

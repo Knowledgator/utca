@@ -3,9 +3,16 @@ from core.executable_level_1.actions import Action
 
 import faiss # type: ignore
 
-class CreateIndex(Action[Dict[str, Any], Dict[str, Any]]):
+class IndexCreate(Action[Any, Dict[str, Any]]):
     """
     Create FAISS index
+
+    Args:
+        input_data (Any): Ignored.
+
+    Returns:
+        Dict[str, Any]: Expected keys:
+            'index' (faiss.IndexFlatL2): Created index.
     """
     def __init__(
         self, 
@@ -26,7 +33,7 @@ class CreateIndex(Action[Dict[str, Any], Dict[str, Any]]):
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Args:
-            input_data (Dict[str, Any]): Ignored.
+            input_data (Any): Ignored.
 
         Returns:
             Dict[str, Any]: Expected keys:
@@ -52,7 +59,7 @@ class IndexData(Action[Dict[str, Any], None]):
         input_data["index"].add(input_data["dataset"]) # type: ignore
 
 
-class SearchIndex(Action[Dict[str, Any], Dict[str, Any]]):
+class IndexSearch(Action[Dict[str, Any], Dict[str, Any]]):
     """
     Search index
     """

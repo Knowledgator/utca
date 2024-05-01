@@ -9,10 +9,10 @@ from core.executable_level_1.schema import (
     IOModel, Transformable
 )
 from implementation.tasks.text_processing.embedding.transformers.transformers_embedding import (
-    TextEmbedding
+    TransformersTextEmbedding
 )
 from implementation.datasources.index.actions import (
-    CreateIndex, IndexData, SearchIndex, GetTextsByIndexes,
+    IndexCreate, IndexData, IndexSearch, GetTextsByIndexes,
 )
 
 class SemanticSearchSchemaInput(IOModel):
@@ -36,7 +36,7 @@ class SemanticSearchSchema(
     def __init__(
         self, 
         dataset: Optional[List[str]]=None, 
-        encoder: Optional[TextEmbedding]=None,
+        encoder: Optional[TransformersTextEmbedding]=None,
         input_class: Type[SemanticSearchSchemaInput]=SemanticSearchSchemaInput,
         output_class: Type[SemanticSearchSchemaOutput]=SemanticSearchSchemaOutput,
         name: Optional[str]=None,
@@ -63,7 +63,7 @@ class SemanticSearchSchema(
             name=name,
         )
         if encoder is None:
-            encoder = TextEmbedding()
+            encoder = TransformersTextEmbedding()
         self.encoder = encoder
 
         self.index = self.build_index()
@@ -77,7 +77,7 @@ class SemanticSearchSchema(
         return getattr(
             self.encoder(Transformable({
                 "texts": texts
-            })), 
+            })),
             "embeddings"
         )
 
@@ -96,7 +96,7 @@ class SemanticSearchSchema(
 
 
     def build_index(self) -> Any:
-        return CreateIndex(
+        return IndexCreate(
             self.encoder.predictor.config.hidden_size # type: ignore
         ).execute({})["index"]
 
@@ -106,7 +106,7 @@ class SemanticSearchSchema(
 
 
     def invoke(self, input_data: SemanticSearchSchemaInput, evaluator: Evaluator) -> Dict[str, Any]:
-        search_results = SearchIndex(input_data.results_count).execute({
+        search_results = IndexSearch(input_data.results_count).execute({
             "query": self.get_embeddings(input_data.query),
             "index": self.index
         })
