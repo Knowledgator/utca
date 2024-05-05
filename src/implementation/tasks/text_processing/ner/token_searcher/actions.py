@@ -38,6 +38,9 @@ Text:
         """
         Args:
             sents_batch (int): Chunks size in sentences. Defaults to 10.
+
+            name (Optional[str], optional): Name for identification. If equals to None,
+                class name will be used. Defaults to None.
         """
         super().__init__(name)
         self.sents_batch = sents_batch

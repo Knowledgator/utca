@@ -1,5 +1,6 @@
 from typing import Type, Optional, List, Any
 
+from core.executable_level_1.schema import Input, Output
 from core.executable_level_1.actions import Action
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
@@ -14,11 +15,11 @@ from implementation.predictors.transformers.schema import (
 
 
 class TransformersTextToSpeech(
-    Task[
-        TransformersTextToSpeechInput, 
-        TransformersTextToSpeechOutput,
-    ]
+    Task[Input, Output]
 ):
+    """
+    Text to speech task
+    """
     default_model: str = "suno/bark-small"
 
     def __init__(
@@ -26,8 +27,8 @@ class TransformersTextToSpeech(
         predictor: Optional[Predictor[Any, Any]]=None,
         preprocess: Optional[List[Action[Any, Any]]]=None,
         postprocess: Optional[List[Action[Any, Any]]]=None,
-        input_class: Type[TransformersTextToSpeechInput]=TransformersTextToSpeechInput,
-        output_class: Type[TransformersTextToSpeechOutput]=TransformersTextToSpeechOutput,
+        input_class: Type[Input]=TransformersTextToSpeechInput,
+        output_class: Type[Output]=TransformersTextToSpeechOutput,
         name: Optional[str]=None,
     ) -> None:
         super().__init__(

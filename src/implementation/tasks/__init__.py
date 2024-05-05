@@ -15,10 +15,6 @@ from implementation.tasks.image_processing.charts_and_plots_analysis.transformer
 
 from implementation.tasks.image_processing.documents_q_and_a.transformers.transformers_layout_lm import (
     TransformersDocumentQandA,
-    DocumentQandAOutput,
-)
-from implementation.tasks.image_processing.documents_q_and_a.transformers.actions import (
-    DocumentQandAPostprocess,
 )
 
 from implementation.tasks.image_processing.image_classification.transformers.transformers_image_classification import (
@@ -135,8 +131,6 @@ __all__ = [
     "ChartsAndPlotsAnalysisPostprocessor",
 
     "TransformersDocumentQandA",
-    "DocumentQandAOutput",
-    "DocumentQandAPostprocess",
 
     "TransformersImageClassification",
     "TransformersImageClassificationInput",
