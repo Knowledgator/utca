@@ -15,9 +15,9 @@ import torch
 import pyximport # type: ignore
 pyximport.install() # type: ignore
 
-from core.executable_level_1.schema import IOModel
+from core.executable_level_1.schema import IOModel, Input, Output
 from core.executable_level_1.interpreter import Evaluator
-from core.executable_level_1.actions import Action
+from core.executable_level_1.executor import ActionType
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_model import (
@@ -30,11 +30,19 @@ from implementation.predictors.transformers.schema import (
 )
 from implementation.datasources.trie.labels_trie import LabelsTrie # type: ignore
 from implementation.tasks.text_processing.entity_linking.transformers.actions import (
-    EntityLinkingPreprocessing,
-    EntityLinkingPostprocess
+    EntityLinkingPreprocessor,
+    EntityLinkingPostprocessor
 )
 
 class EntityLinkingInput(IOModel):
+    """
+    Args:
+        texts (List[str]): Texts to process.
+
+        num_beams (int)
+        
+        num_return_sequences (int)
+    """
     texts: List[str]
     num_beams: int
     num_return_sequences: int
@@ -45,11 +53,11 @@ class EntityLinkingOutput(IOModel):
 
 
 class TransformersEntityLinking(
-    Task[
-        EntityLinkingInput, 
-        EntityLinkingOutput,
-    ]
+    Task[Input, Output]
 ):
+    """
+    Entity linking task
+    """
     default_model = "openai-community/gpt2"
 
 
@@ -115,6 +123,7 @@ class TransformersEntityLinking(
 
         Args:
             sent (torch.Tensor): Tensor.
+            
             prompt_len (int): Prompt length.
 
         Returns:
@@ -138,14 +147,51 @@ class TransformersEntityLinking(
             str, PreTrainedTokenizer, PreTrainedTokenizerFast
         ]]=None,
         predictor: Optional[Predictor[Any, Any]]=None,
-        preprocess: Optional[List[Action[Any, Any]]]=None,
-        postprocess: Optional[List[Action[Any, Any]]]=None,
-        input_class: Type[EntityLinkingInput]=EntityLinkingInput,
-        output_class: Type[EntityLinkingOutput]=EntityLinkingOutput,
+        preprocess: Optional[List[ActionType]]=None,
+        postprocess: Optional[List[ActionType]]=None,
+        input_class: Type[Input]=EntityLinkingInput,
+        output_class: Type[Output]=EntityLinkingOutput,
         name: Optional[str]=None,
     ) -> None:
+        """
+        Args:
+            labels (List[str]): Labels to link.
+            
+            tokenizer (Optional[Union[str, PreTrainedTokenizer, PreTrainedTokenizerFast]], optional): 
+                Tokenizer to use. Defaults to None.
+            
+            predictor (Predictor[Any, Any], optional): Predictor that will be used in task. 
+                If equals to None, default predictor will be used. Defaults to None.
+            
+            preprocess (Optional[List[Action[Any, Any]]], optional): Chain of actions executed
+                before predictor. If equals to None, default chain will be used. Defaults to None.
+
+                Default chain: 
+                    [EntityLinkingPreprocessor]
+            
+            postprocess (Optional[List[Action[Any, Any]]], optional): Chain of actions executed
+                after predictor. If equals to None, default chain will be used. Defaults to None.
+
+                Default chain: 
+                    [EntityLinkingPostprocessor]
+
+                If default chain is used, EntityLinkingPostprocessor will use provided tokenizer
+                or tokenizer from predictor model.
+            
+            input_class (Type[Input], optional): Class for input validation. 
+                Defaults to EntityLinkingInput.
+            
+            output_class (Type[Output], optional): Class for output validation. 
+                Defaults to EntityLinkingOutput.
+            
+            name (Optional[str], optional): Name for identification. If equals to None, 
+                class name will be used. Defaults to None.
+        """
         if not tokenizer:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.default_model) # type: ignore
+            if not predictor:
+                self.tokenizer = AutoTokenizer.from_pretrained(self.default_model) # type: ignore
+            else:
+                self.tokenizer = AutoTokenizer.from_pretrained(predictor.config._name_or_path) # type: ignore
         elif isinstance(tokenizer, str):
             self.tokenizer = AutoTokenizer.from_pretrained(tokenizer) # type: ignore
         else:
@@ -179,10 +225,10 @@ class TransformersEntityLinking(
         super().__init__(
             predictor=predictor,
             preprocess=preprocess or [
-                EntityLinkingPreprocessing() 
+                EntityLinkingPreprocessor() 
             ],
             postprocess=postprocess or [
-                EntityLinkingPostprocess( 
+                EntityLinkingPostprocessor( 
                     tokenizer=self.tokenizer,
                     encoder_decoder=self.encoder_decoder
                 )  
@@ -193,7 +239,7 @@ class TransformersEntityLinking(
         )
 
 
-    def invoke(self, input_data: EntityLinkingInput, evaluator: Evaluator) -> Dict[str, Any]:
+    def invoke(self, input_data: Input, evaluator: Evaluator) -> Dict[str, Any]:
         processed_input = self.process(
             input_data.generate_transformable(), 
             self._preprocess,

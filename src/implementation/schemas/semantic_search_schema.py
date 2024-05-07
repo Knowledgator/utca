@@ -21,6 +21,15 @@ class SemanticSearchSchemaInput(IOModel):
 
 
 class SemanticSearchSchemaOutput(IOModel):
+    """
+    Args:
+        search_results (Dict[str, Any]): Expected keys:
+            "distances" (List[float]): List of distances;
+
+            "indexes" (List[Any]): Indexes of indexed data;
+            
+            "texts" (List[str]): Texts of results;
+    """
     search_results: Dict[str, Any]
 
 
@@ -36,7 +45,7 @@ class SemanticSearchSchema(
     def __init__(
         self, 
         dataset: Optional[List[str]]=None, 
-        encoder: Optional[TransformersTextEmbedding]=None,
+        encoder: Optional[TransformersTextEmbedding[Any, Any]]=None,
         input_class: Type[SemanticSearchSchemaInput]=SemanticSearchSchemaInput,
         output_class: Type[SemanticSearchSchemaOutput]=SemanticSearchSchemaOutput,
         name: Optional[str]=None,
@@ -45,7 +54,7 @@ class SemanticSearchSchema(
         Args:
             dataset (Optional[List[str]], optional): Dataset for search. Defaults to None.
             
-            encoder (Optional[TextEmbedding], optional): Encoder for embeddings creation.
+            encoder (Optional[TransformersTextEmbedding[Any, Any]], optional): Encoder for embeddings creation.
                 If equals to None, default encoder will be used. Defaults to None.
             
             input_class (Type[SemanticSearchSchemaInput], optional): Class for input validation.

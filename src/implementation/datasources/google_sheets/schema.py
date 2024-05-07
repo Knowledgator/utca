@@ -4,24 +4,24 @@ from implementation.apis.google_cloud.schema import (
     GoogleCloudClientConfig,
 )
 
-class GoogleSpreadsheetClientConfig(GoogleCloudClientConfig):
+class GoogleSheetsClientConfig(GoogleCloudClientConfig):
     """
     Google Spreadsheets default configuration
+
+    Args:
+        scopes (List[str]): Access scopes. Defaults to 
+            ["https://www.googleapis.com/auth/spreadsheets"]
+            (Read and write acess to all spreadsheets).
+        
+        service (str): Service name. Defaults to "sheets" (Google Spreadsheets service).
+        
+        version (str): API version. Defaults to "v4".
     """
     scopes: list[str] = [
         "https://www.googleapis.com/auth/spreadsheets"
     ]
-    """
-    Read and write acess to all spreadsheets
-    """
-    service: str="sheets"
-    """
-    Google Spreadsheets service
-    """
-    version: str="v4"
-    """
-    API version
-    """
+    service: str = "sheets"
+    version: str = "v4"
 
 
 class Dimension(Enum):
@@ -49,11 +49,11 @@ class InsertDataOption(Enum):
     """
     How data should be append to table
     """
-    INSERT_ROWS = 'INSERT_ROWS'
+    OVERWRITE = 'OVERWRITE'
     """
     Overwrite anything after table
     """
-    OVERWRITE = 'OVERWRITE'
+    INSERT_ROWS = 'INSERT_ROWS'
     """
     Insert new rows
     """

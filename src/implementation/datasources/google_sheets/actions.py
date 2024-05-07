@@ -7,16 +7,16 @@ from core.executable_level_1.actions import (
 from implementation.apis.google_cloud.client import (
     GoogleCloudClient
 )
-from implementation.datasources.google_spreadsheet.schema import (
+from implementation.datasources.google_sheets.schema import (
     Dimension,
     InputOption,
     InsertDataOption
 )
 
 
-class GoogleSpreadsheetAction(Action[ActionInput, ActionOutput]):
+class GoogleSheetsAction(Action[ActionInput, ActionOutput]):
     """
-    Base Google Spreadsheet action
+    Base Google Spreadsheets action
     """
     def __init__(
         self, 
@@ -25,7 +25,7 @@ class GoogleSpreadsheetAction(Action[ActionInput, ActionOutput]):
     ) -> None:
         """
         Args:
-            client (GoogleCloudClient): Google client that will be used for acess.
+            client (GoogleCloudClient): Google client that will be used for access.
 
             name (Optional[str], optional): name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
@@ -34,7 +34,7 @@ class GoogleSpreadsheetAction(Action[ActionInput, ActionOutput]):
         self.sheet_service = client.service.spreadsheets()
 
 
-class GoogleSpreadsheetRead(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleSheetsRead(GoogleSheetsAction[Dict[str, Any], Dict[str, Any]]):
     """
     Read spreadsheet
     """
@@ -42,13 +42,13 @@ class GoogleSpreadsheetRead(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, An
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                'spreadsheet_id' (str): Spreadsheet ID (can be found
+                "spreadsheet_id" (str): Spreadsheet ID (can be found
                     in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0);
 
-                'cells_range' (str): Range of cells provided in A1 notation.
-                    Examples: B2:C2, A1, Sheet1, Sheet1!A1:B1, etc..
+                "cells_range" (str): Range of cells provided in A1 notation.
+                    Examples: "B2:C2", "A1", "Sheet1", "Sheet1!A1:B1", etc..
 
-                'dimension' (Dimension, optional): Reading dimension. May be 
+                "dimension" (Dimension, optional): Reading dimension. May be 
                     Dimension.ROWS or Dimension.COLUMNS. Defaults to Dimension.ROWS.
 
         Raises:
@@ -56,8 +56,8 @@ class GoogleSpreadsheetRead(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, An
 
         Returns:
             Dict[str, Any]: Expected keys:
-                'table' (List[List[Any]]): Table that represents sheet or part of
-                    it specified by 'cells_range';
+                "table" (List[List[Any]]): Table that represents sheet or part of
+                    it specified by "cells_range";
         """
         try:
             result = cast(Dict[str, Any], (
@@ -76,7 +76,7 @@ class GoogleSpreadsheetRead(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, An
             raise Exception(f"Unable to read spreadsheet: {e}")
 
 
-class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction[Dict[str, Any], List[Dict[str, Any]]]):
+class GoogleSheetsReadBatch(GoogleSheetsAction[Dict[str, Any], List[Dict[str, Any]]]):
     """
     Read spreadsheet batch
     """
@@ -84,13 +84,13 @@ class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction[Dict[str, Any], List[Di
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                'spreadsheet_id' (str): Spreadsheet ID (can be found
+                "spreadsheet_id" (str): Spreadsheet ID (can be found
                     in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0);
 
-                'cells_range' (str): Range of cells provided in A1 notation.
-                    Examples: B2:C2, A1, Sheet1, Sheet1!A1:B1, etc..
+                "cells_ranges" (List[str]): Ranges of cells provided in A1 notation.
+                    Examples: "B2:C2", "A1", "Sheet1", "Sheet1!A1:B1", etc..
 
-                'dimension' (Dimension, optional): Reading dimension. May be 
+                "dimension" (Dimension, optional): Reading dimension. May be 
                     Dimension.ROWS or Dimension.COLUMNS. Defaults to Dimension.ROWS.
 
         Raises:
@@ -98,8 +98,8 @@ class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction[Dict[str, Any], List[Di
 
         Returns:
             List[Dict[str, Any]]: Each object in list expected to contain:
-                'table' (List[List[Any]]): Table that represents sheet or part of
-                    it specified by corresponding range in 'cells_ranges';
+                "table" (List[List[Any]]): Table that represents sheet or part of
+                    it specified by corresponding range in "cells_ranges";
         """
         try:
             result = cast(Dict[str, Any], (
@@ -119,7 +119,7 @@ class GoogleSpreadsheetReadBatch(GoogleSpreadsheetAction[Dict[str, Any], List[Di
             raise Exception(f"Unable to read spreadsheet: {e}")
 
 
-class GoogleSpreadsheetWrite(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleSheetsWrite(GoogleSheetsAction[Dict[str, Any], Dict[str, Any]]):
    """
    Write to spreadsheet
    """
@@ -127,28 +127,28 @@ class GoogleSpreadsheetWrite(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, A
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                'spreadsheet_id' (str): Spreadsheet ID (can be found
+                "spreadsheet_id" (str): Spreadsheet ID (can be found
                     in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0);
 
-                'cells_range' (str): Range of cells provided in A1 notation.
-                    Examples: B2:C2, A1, Sheet1, Sheet1!A1:B1, etc..
+                "cells_range" (str): Range of cells provided in A1 notation.
+                    Examples: "B2:C2", "A1", "Sheet1", "Sheet1!A1:B1", etc..
 
-                'value_input_option' (InputOption, optional): Input option can be:
+                "value_input_option" (InputOption, optional): Input option can be:
                     InputOption.USER_ENTERED - All inputs treated as input from 
                     the user (enabling formatting and formulas), or InputOption.RAW - all
                     inputs as is. Defaults to InputOption.USER_ENTERED.
 
-                'dimension' (Dimension, optional): Reading dimension. May be 
+                "dimension" (Dimension, optional): Reading dimension. May be 
                     Dimension.ROWS or Dimension.COLUMNS. Defaults to Dimension.ROWS.
 
-                'table' (List[List[Any]]): Values to add to spreadsheet.
+                "table" (List[List[Any]]): Values to add to spreadsheet.
 
         Raises:
             Exception: If unable to update spreadsheet.
 
         Returns:
             Dict[str, Any]: Expected keys:
-                'spreadsheet' (Dict[str, Any]): Updated spreadsheet;
+                "spreadsheet" (Dict[str, Any]): Updated spreadsheet;
         """
         try:
             return {
@@ -175,7 +175,7 @@ class GoogleSpreadsheetWrite(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, A
             raise Exception(f"Unable to update spreadsheet: {e}")
 
 
-class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleSheetsWriteBatch(GoogleSheetsAction[Dict[str, Any], Dict[str, Any]]):
     """
     Write to spreadsheet
     """
@@ -183,30 +183,30 @@ class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction[Dict[str, Any], Dict[s
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                'spreadsheet_id' (str): Spreadsheet ID (can be found
+                "spreadsheet_id" (str): Spreadsheet ID (can be found
                     in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0);
 
-                'value_input_option' (InputOption, optional): Input option can be:
+                "value_input_option" (InputOption, optional): Input option can be:
                     InputOption.USER_ENTERED - All inputs treated as input from 
                     the user (enabling formatting and formulas), or InputOption.RAW - all
                     inputs as is. Defaults to InputOption.USER_ENTERED.
                 
                     
-                'inputs' (List[Dict[str, Any]]): List of write actions. Each action contain:
-                    'cells_range' (str): Range of cells provided in A1 notation.
-                        Examples: B2:C2, A1, Sheet1, Sheet1!A1:B1, etc..
+                "inputs" (List[Dict[str, Any]]): List of write actions. Each action contain:
+                    "cells_range" (str): Range of cells provided in A1 notation.
+                        Examples: "B2:C2", "A1", "Sheet1", "Sheet1!A1:B1", etc..
 
-                    'dimension' (Dimension, optional): Reading dimension. May be 
+                    "dimension" (Dimension, optional): Reading dimension. May be 
                         Dimension.ROWS or Dimension.COLUMNS. Defaults to Dimension.ROWS.
 
-                    'table' (List[List[Any]]): Values to add to spreadsheet.
+                    "table" (List[List[Any]]): Values to add to spreadsheet.
 
         Raises:
             Exception: If unable to update spreadsheet.
 
         Returns:
             Dict[str, Any]: Expected keys:
-                'spreadsheet' (Dict[str, Any]): Updated spreadsheet;
+                "spreadsheet" (Dict[str, Any]): Updated spreadsheet;
         """
         try:
             return {
@@ -237,7 +237,7 @@ class GoogleSpreadsheetWriteBatch(GoogleSpreadsheetAction[Dict[str, Any], Dict[s
             raise Exception(f"Unable to update spreadsheet: {e}")
 
 
-class GoogleSpreadsheetAppend(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleSheetsAppend(GoogleSheetsAction[Dict[str, Any], Dict[str, Any]]):
     """
     Append to spreadsheet
     """
@@ -245,33 +245,33 @@ class GoogleSpreadsheetAppend(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, 
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                'spreadsheet_id' (str): Spreadsheet ID (can be found
+                "spreadsheet_id" (str): Spreadsheet ID (can be found
                     in url: https://docs.google.com/spreadsheets/d/***spreadsheet_id***/edit#gid=0);
 
-                'cells_range' (str): Range of cells provided in A1 notation.
-                    Examples: B2:C2, A1, Sheet1, Sheet1!A1:B1, etc..
+                "cells_range" (str): Range of cells provided in A1 notation.
+                    Examples: "B2:C2", "A1", "Sheet1", "Sheet1!A1:B1", etc..
 
-                'value_input_option' (InputOption, optional): Input option can be:
+                "value_input_option" (InputOption, optional): Input option can be:
                     InputOption.USER_ENTERED - All inputs treated as input from 
                     the user (enabling formatting and formulas), or InputOption.RAW - all
                     inputs as is. Defaults to InputOption.USER_ENTERED.
 
-                'insert_data_option' (InsertDataOption, optional): Isert data option can be 
+                "insert_data_option" (InsertDataOption, optional): Isert data option can be 
                     InsertDataOption.OVERWRITE - will overwrite anything after table, 
                     or InsertDataOption.INSERT_ROWS - will insert new rows.
                     Defaults to InsertDataOption.OVERWRITE.
                     
-                'dimension' (Dimension, optional): Reading dimension. May be 
+                "dimension" (Dimension, optional): Reading dimension. May be 
                     Dimension.ROWS or Dimension.COLUMNS. Defaults to Dimension.ROWS.
 
-                'table' (List[List[Any]]): Values to add to spreadsheet.
+                "table" (List[List[Any]]): Values to add to spreadsheet.
 
         Raises:
             Exception: If unable to update spreadsheet.
 
         Returns:
             Dict[str, Any]: Expected keys:
-                'spreadsheet' (Dict[str, Any]): Updated spreadsheet;
+                "spreadsheet" (Dict[str, Any]): Updated spreadsheet;
         """
         try:
             return {
@@ -301,7 +301,7 @@ class GoogleSpreadsheetAppend(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, 
             raise Exception(f"Unable to update spreadsheet: {e}")
 
 
-class GoogleSpreadsheetCreate(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, Any]]):
+class GoogleSheetsCreate(GoogleSheetsAction[Dict[str, Any], Dict[str, Any]]):
     """
     Create spreadsheet
     """
@@ -309,17 +309,17 @@ class GoogleSpreadsheetCreate(GoogleSpreadsheetAction[Dict[str, Any], Dict[str, 
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                'title' (str): Name of the spreadsheet;
+                "title" (str): Name of the spreadsheet;
                 
-                'sheets' (List[str], optional): Sheets names to create.
-                    Defaults to ['Sheet1'].
+                "sheets" (List[str], optional): Sheets names to create.
+                    Defaults to ["Sheet1"].
 
         Raises:
             Exception: If unable to create spreadsheet.
 
         Returns:
             Dict[str, Any]: Expected keys:
-                'spreadsheet_id' (str): spreadsheet ID;
+                "spreadsheet_id" (str): Spreadsheet ID;
         """
         try:
             return {

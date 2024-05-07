@@ -1,5 +1,5 @@
 from typing import (
-    Any, Dict, List, Generic, Optional, TypeVar, cast
+    Any, Dict, List, Generic, Optional, TypeVar, Union, cast
 )
 import copy
 
@@ -184,3 +184,9 @@ class ActionExecutor(BaseExecutor[Action[Any, Any]]):
             result
         )
         return input_data
+    
+
+ActionType = Union[Action[Any, Any], ActionExecutor]
+"""
+Action or ActionExecutor
+"""

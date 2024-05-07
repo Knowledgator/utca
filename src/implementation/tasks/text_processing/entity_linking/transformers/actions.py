@@ -12,26 +12,72 @@ from core.executable_level_1.actions import (
     Action
 )
 
-class EntityLinkingPreprocessing(Action[Dict[str, Any], Dict[str, Any]]):
+class EntityLinkingPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+    """
+    Prepare prompts for model
+
+    Args:
+        input_data (Dict[str, Any]): Expected keys:
+            "texts" (List[str]): Texts to process;
+
+    Returns:
+        Dict[str, Any]: Expected keys:
+            "texts" (Any): Prompts;
+    """
     prompt: str = "Classifity the following text:\n {}\nLabel:"
 
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        input_data["texts"] = [
-            self.prompt.format(text)
-            for text in input_data["texts"]
-        ]
-        return input_data
-    
+        """
+        Args:
+            input_data (Dict[str, Any]): Expected keys:
+                "texts" (List[str]): Texts to process;
 
-class EntityLinkingPostprocess(Action[Dict[str, Any], Dict[str, Any]]):
+        Returns:
+            Dict[str, Any]: Expected keys:
+                "texts" (Any): Prompts;
+        """
+        return {
+            "texts": [
+                self.prompt.format(text)
+                for text in input_data["texts"]
+            ]
+        }    
+
+
+class EntityLinkingPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+    """
+    Process model output
+
+    Args:
+        input_data (Dict[str, Any]): Expected keys:
+            "sequences" (Any): Model output;
+
+            "sequences_scores" (Optional[Any], optional): Used if num_beams > 1. Defaults to None;
+            
+            "num_beams" (int);
+            
+            "texts" (List[str]): Processed prompts;
+    Returns:
+        Dict[str, Any]: Expected keys:
+            "classification_output" (Any): Formatted output;
+    """
     def __init__(
         self, 
         tokenizer: Union[PreTrainedTokenizer, PreTrainedTokenizerFast],
         encoder_decoder: bool,
         name: Optional[str]=None,
     ) -> None:
+        """
+        Args:
+            tokenizer (Union[PreTrainedTokenizer, PreTrainedTokenizerFast])
+
+            encoder_decoder (bool): Model configuration parameter.
+            
+            name (Optional[str], optional): Name for identification. If equals to None,
+                class name will be used. Defaults to None.
+        """
         super().__init__(name)
         self.tokenizer = tokenizer
         self.encoder_decoder = encoder_decoder

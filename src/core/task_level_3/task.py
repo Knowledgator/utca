@@ -7,7 +7,7 @@ from core.executable_level_1.executable import Executable
 from core.executable_level_1.schema import (
     Input, Output, Transformable
 )
-from core.executable_level_1.actions import Action
+from core.executable_level_1.executor import ActionType
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.schema import NEROutputType
 
@@ -21,8 +21,8 @@ class Task(
         self,
         *,
         predictor: Predictor[Any, Any],
-        preprocess: Optional[List[Action[Any, Any]]]=None,
-        postprocess: Optional[List[Action[Any, Any]]]=None,
+        preprocess: Optional[List[ActionType]]=None,
+        postprocess: Optional[List[ActionType]]=None,
         input_class: Type[Input],
         output_class: Type[Output],
         name: Optional[str]=None,
@@ -57,7 +57,7 @@ class Task(
     def process(
         self, 
         state: Transformable, 
-        actions: List[Action[Any, Any]],
+        actions: List[ActionType],
         evaluator: Evaluator
     ) -> Transformable:
         """

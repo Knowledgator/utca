@@ -1,10 +1,11 @@
 from typing import Type, Optional, List, Any
 
-from core.executable_level_1.actions import Action
+from core.executable_level_1.schema import Input
+from core.executable_level_1.executor import ActionType
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import NERTask
 from core.task_level_3.schema import (
-    NEROutput,
+    NEROutput, NEROutputType
 )
 from core.task_level_3.objects.objects import (
     ClassifiedEntity
@@ -26,10 +27,7 @@ class TransformersTokenClassifierOutput(NEROutput[ClassifiedEntity]):
 
 
 class TransformersTokenClassifier(
-    NERTask[
-        TransformersBasicInput,
-        TransformersTokenClassifierOutput,
-    ]
+    NERTask[Input, NEROutputType]
 ):
     default_model = "dbmdz/bert-large-cased-finetuned-conll03-english"
     
@@ -37,12 +35,36 @@ class TransformersTokenClassifier(
         self,
         *,
         predictor: Optional[Predictor[Any, Any]]=None,
-        preprocess: Optional[List[Action[Any, Any]]]=None,
-        postprocess: Optional[List[Action[Any, Any]]]=None,
-        input_class: Type[TransformersBasicInput]=TransformersBasicInput,
-        output_class: Type[TransformersTokenClassifierOutput]=TransformersTokenClassifierOutput,
+        preprocess: Optional[List[ActionType]]=None,
+        postprocess: Optional[List[ActionType]]=None,
+        input_class: Type[Input]=TransformersBasicInput,
+        output_class: Type[NEROutputType]=TransformersTokenClassifierOutput,
         name: Optional[str]=None,
     ) -> None:
+        """
+        Args:
+            predictor (Predictor[Any, Any], optional): Predictor that will be used in task. 
+                If equals to None, default predictor will be used. Defaults to None.
+
+            preprocess (Optional[List[Action[Any, Any]]], optional): Chain of actions executed
+                before predictor. Defaults to None.
+            
+            postprocess (Optional[List[Action[Any, Any]]], optional): Chain of actions executed
+                after predictor. If equals to None, default chain will be used. 
+                Defaults to None.
+
+                Default chain: 
+                    [TokenClassifierPostprocessor]
+
+            input_class (Type[Input], optional): Class for input validation. 
+                Defaults to TransformersBasicInput.
+            
+            output_class (Type[Output], optional): Class for output validation. 
+                Defaults to TransformersTokenClassifierOutput.
+            
+            name (Optional[str], optional): Name for identification. If equals to None,
+                class name will be used. Defaults to None.
+        """
         if not predictor:
             predictor = TransformersPipeline(
                 TransformersPipelineConfig(

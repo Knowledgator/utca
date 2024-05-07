@@ -9,7 +9,7 @@ from transformers import ( # type: ignore
 from core.executable_level_1.schema import (
     IOModel, Input, Output
 )
-from core.executable_level_1.actions import Action
+from core.executable_level_1.executor import ActionType
 from core.predictor_level_2.predictor import Predictor
 from core.task_level_3.task import Task
 from implementation.predictors.transformers.transformers_model import (
@@ -50,8 +50,8 @@ class TransformersChartsAndPlotsAnalysis(
         self,
         *,
         predictor: Optional[Predictor[Any, Any]]=None,
-        preprocess: Optional[List[Action[Any, Any]]]=None,
-        postprocess: Optional[List[Action[Any, Any]]]=None,
+        preprocess: Optional[List[ActionType]]=None,
+        postprocess: Optional[List[ActionType]]=None,
         input_class: Type[Input]=ChartsAndPlotsAnalysisInput,
         output_class: Type[Output]=TransformersBasicOutput,
         name: Optional[str]=None,
@@ -98,7 +98,7 @@ class TransformersChartsAndPlotsAnalysis(
             )
         
         if not preprocess or not postprocess:
-            processor = Pix2StructProcessor.from_pretrained(self.default_model) # type: ignore
+            processor = Pix2StructProcessor.from_pretrained(predictor.config._name_or_path) # type: ignore
 
             if not preprocess:
                 preprocess=[

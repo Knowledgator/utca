@@ -26,11 +26,13 @@ from implementation.tasks import (
 def prepare_text_summarization_input(
     input_data: Dict[str, Any]
 ) -> List[Dict[str, Any]]:
+    chunk_size: int = 2048
     return [
         {
-            "inputs": text,
+            "inputs": text[j:min(j+chunk_size, len(text))],
             "page": page
         } for page, text in input_data["texts"].items()
+        for j in range(0, len(text), chunk_size)
     ]
 
 
@@ -74,17 +76,17 @@ def format_results_and_clean_up(input_data: Dict[str, Any]) -> Dict[str, Any]:
         } for i in input_data["pages"] 
     }
     for s in input_data["summaries"]:
-        info[s["page"]]["context"] = s["summary_text"]
+        info[s["page"]]["context"] += s["summary_text"] + "\n"
 
     for t in input_data["tables_description"]:
         info[t["page"]]["tables"].append(
-            t["answer"] or "Undefined table"
+            t["output"][0]["answer"] if t["output"] else "Undefined table"
         )
         t["image"].close()
 
     for i in input_data["images_description"]:
         info[i["page"]]["images"].append(
-            i["answer"] or "Undefined image"
+            i["output"][0]["answer"] if i["output"] else "Undefined image"
         )
         i["image"].close()
     return info
@@ -100,7 +102,7 @@ if __name__ == "__main__":
     ).set_name("Visual data processing")
 
     image_processing = (
-        PDFExtractImages(resolution=256).use(
+        PDFExtractImages().use(
             get_key="pdf",
             set_key="images"
         )

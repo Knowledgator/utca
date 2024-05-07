@@ -7,10 +7,10 @@ from core import (
     AddData,
 )
 from implementation.apis.google_cloud import GoogleCloudClient
-from implementation.datasources.google_spreadsheet import (
-    GoogleSpreadsheetClientConfig,
-    GoogleSpreadsheetRead,
-    GoogleSpreadsheetWrite,
+from implementation.datasources.google_sheets import (
+    GoogleSheetsClientConfig,
+    GoogleSheetsRead,
+    GoogleSheetsWrite,
     Dimension,
 )
 from implementation.predictors import (
@@ -41,7 +41,7 @@ def create_table(input: Dict[str, Any]) -> Dict[str, Any]:
 
 if __name__ == "__main__":
     # Google Spreadsheet client
-    client = GoogleCloudClient(GoogleSpreadsheetClientConfig(
+    client = GoogleCloudClient(GoogleSheetsClientConfig(
         credentials="credentials.json",
         # path to your credentials. 
         # Can be not provided if you are using 
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     # create pipeline with described stages
     pipeline = (
-        GoogleSpreadsheetRead(client) 
+        GoogleSheetsRead(client) 
         | ExecuteFunction(get_input_for_q_and_a)
         | q_and_a
         | ExecuteFunction(create_table)
@@ -81,7 +81,7 @@ if __name__ == "__main__":
             "spreadsheet_id": spreadsheet_id,
             "cells_range": "C1"
         }) 
-        | GoogleSpreadsheetWrite(client)
+        | GoogleSheetsWrite(client)
     )
 
     pipeline.run({

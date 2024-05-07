@@ -20,11 +20,15 @@ class ChartsAndPlotsAnalysisPreprocessor(Action[Dict[str, Any], Dict[str, Any]])
     Arguments:
         input_data (Dict[str, Any]): Expected keys:
             "text" (str): Text prompt;
+
             "image" (Image.Image): Image to analyze;
+
     Returns:
         Dict[str, Any]: Expected keys:
             "flattened_patches" (Any);
+
             "attention_mask" (Any);
+
     """
     def __init__(
         self, 
@@ -33,8 +37,7 @@ class ChartsAndPlotsAnalysisPreprocessor(Action[Dict[str, Any], Dict[str, Any]])
     ) -> None:
         """
         Arguments:
-            processor (Processor): Feature extractor. Can be any class that has
-                call and decode methods.
+            processor (Processor): Feature extractor.
 
             name (Optional[str], optional): Name for identification. If equals to None,
                 class name will be used. Defaults to None.
@@ -71,8 +74,7 @@ class ChartsAndPlotsAnalysisPostprocessor(Action[Dict[str, Any], Dict[str, Any]]
     ) -> None:
         """
         Arguments:
-            processor (Processor): Feature extractor. Can be any class that has
-                call and decode methods.
+            processor (Processor): Feature extractor.
 
             name (Optional[str], optional): Name for identification. If equals to None,
                 class name will be used. Defaults to None.

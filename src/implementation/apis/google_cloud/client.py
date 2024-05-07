@@ -52,14 +52,14 @@ class GoogleCloudClient:
     @classmethod
     def authorize(
         cls, 
-        scopes: list[str],
+        scopes: List[str],
         credentials: Optional[Union[Dict[str, Any], str]]=None,
     ) -> Credentials:
         """
         Authorize google cloud client
 
         Args:
-            scopes (list[str]): Access scopes.
+            scopes (List[str]): Access scopes.
 
             credentials (Optional[Union[Dict[str, Any], str]], optional): Input credentials.
                 If equals to None, environment default credentials will be used.

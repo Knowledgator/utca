@@ -22,7 +22,7 @@ class ImageClassificationPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     ) -> None:
         """
         Args:
-            processor (Processor): Feature extractor. Can be any class that has call method.
+            processor (Processor): Feature extractor.
             
             name (Optional[str], optional): Name for identification. If equals to None,
                 class name will be used. Defaults to None.
@@ -42,12 +42,10 @@ class ImageClassificationPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
             Dict[str, Any]: Expected keys:
                 "pixel_values" (Any);
         """
-        return {
-            "pixel_values": self.processor(
-                images=input_data["image"], 
-                return_tensors="pt"
-            )["pixel_values"]
-        }
+        return self.processor(
+            images=input_data["image"], 
+            return_tensors="pt"
+        ).data
 
 
 class ImageClassificationMultilabelPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):

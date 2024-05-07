@@ -69,8 +69,8 @@ from implementation.tasks.text_processing.entity_linking.transformers.transforme
     EntityLinkingOutput,
 )
 from implementation.tasks.text_processing.entity_linking.transformers.actions import (
-    EntityLinkingPreprocessing,
-    EntityLinkingPostprocess,
+    EntityLinkingPreprocessor,
+    EntityLinkingPostprocessor,
 )
 
 from implementation.tasks.text_processing.ner.token_searcher.token_searcher import (
@@ -93,6 +93,7 @@ from implementation.tasks.text_processing.ner.transformers.actions import (
 
 from implementation.tasks.text_processing.summarization.transformers.transformers_summarization import (
     TransformersTextSummarization,
+    SummarizationInput,
     SummarizationOutput,
 )
 from implementation.tasks.text_processing.summarization.transformers.actions import (
@@ -165,8 +166,8 @@ __all__ = [
     "TransformersEntityLinking",
     "EntityLinkingInput", 
     "EntityLinkingOutput",
-    "EntityLinkingPreprocessing",
-    "EntityLinkingPostprocess",
+    "EntityLinkingPreprocessor",
+    "EntityLinkingPostprocessor",
 
     "TokenSearcherNER",
     "TokenSearcherNERPostprocessor",
@@ -179,6 +180,7 @@ __all__ = [
     "TokenClassifierPostprocessor",
 
     "TransformersTextSummarization",
+    "SummarizationInput",
     "SummarizationOutput",
     "SummarizationPostprocess",
 
