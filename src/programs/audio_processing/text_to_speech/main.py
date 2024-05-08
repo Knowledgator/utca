@@ -9,8 +9,7 @@ from implementation.datasources.audio import (
 )
 
 pipeline = (
-    TransformersTextToSpeech()
-    | AudioWrite()
+    TransformersTextToSpeech() | AudioWrite()
 )
 
 if __name__ == "__main__":

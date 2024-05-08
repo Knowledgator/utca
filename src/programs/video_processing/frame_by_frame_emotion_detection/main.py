@@ -1,4 +1,6 @@
 from typing import List, Dict, Any
+import pathlib
+PATH = pathlib.Path(__file__).parent.resolve()
 
 from PIL import Image, ImageDraw
 from transformers import ( # type: ignore
@@ -57,12 +59,12 @@ task = TransformersImageClassification(
 
 def prepare_batch_image_classification_input(state: Dict[str, Any]) -> List[Dict[str, Any]]:
     frames: List[Dict[str, Any]] = []
-    ok, frame = state["video_data"].read()
+    ok, frame = state["video"].read()
     if not ok:
         raise ValueError("No video to read!")
     while ok:
         frames.append({"image": Image.fromarray(frame)}) # type: ignore
-        ok, frame = state["video_data"].read()
+        ok, frame = state["video"].read()
     return [
         frames[i] for i in range(len(frames)//2, len(frames), 5)
     ]
@@ -88,7 +90,7 @@ def prepare_sample(state: Dict[str, Any]) -> Dict[str, Any]:
     
     width, height = state["frames"][0]["image"].size
     return {
-        "path_to_file": "programs/video_processing/frame_by_frame_emotion_detection/sample.avi",
+        "path_to_file": f"{PATH}/sample.avi",
         "frames": video_frames,
         "width": width,
         "height": height,
@@ -113,5 +115,5 @@ if __name__ == "__main__":
     )
 
     pipeline.run({
-        "path_to_file": "programs/video_processing/frame_by_frame_emotion_detection/White Chicks - short.mp4"
+        "path_to_file": f"{PATH}/White Chicks - short.mp4"
     })
