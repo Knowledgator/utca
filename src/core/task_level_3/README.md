@@ -1,56 +1,10 @@
-# Tasks
+# Task
 
-Classes used for tasks abstractions that use models.
+## Use cases
 
----
+* Tasks used for wrapping predictors. 
+* Tasks include chains of actions that can be predefined to be executed before and after predictor execution. That can help with formattting of inputs and outputs of predictors.
 
-## Task
+## Functionality
 
-Abstract subclass of the Executable and base class of the tasks. Use Models
-
----
-
-## NERTask
-
-Subclass of the Task. Abstraction for NER tasks.
-
----
----
-
-# Objects
-
----
-
-## Entity
-
-- span: str
-
-Text of the entity.
-
-- start: int
-
-Start postition in a text.
-
-- end: int
-
-End postition in a text.
-
----
-
-## ClassifiedEntity
-
-- span: str
-
-Text of the entity.
-
-- start: int
-
-Start postition in a text.
-
-- end: int
-
-End postition in a text.
-
-- entity: str
-
-Class of the entity.
+Task based on an Executable and introduces preproccess and postprocess chains of actions that are executed before and after predictor, respectively.

@@ -1,4 +1,5 @@
-# utca
+# core
 
+## Schema of core components
 
-Executable - make possible run any one-time or linear algorithm
+![image](./static/classes.drawio.png)
