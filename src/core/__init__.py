@@ -17,6 +17,7 @@ from core.executable_level_1.memory import (
     GetMemory, 
     MemoryGetInstruction,
     DeleteMemory,
+    MemoryManager
 )
 from core.executable_level_1.actions import (
     Action,
@@ -78,6 +79,7 @@ __all__ = [
     "GetMemory", 
     "MemoryGetInstruction",
     "DeleteMemory",
+    "MemoryManager",
     
     "Action",
     "Log",
