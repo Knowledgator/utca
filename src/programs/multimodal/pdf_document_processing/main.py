@@ -14,6 +14,7 @@ from core import (
     Flush,
     AddData,
     ExecuteFunction,
+    ReplacingScope
 )
 from implementation.datasources.pdf import (
     PDFRead, PDFExtractTexts, PDFExtractImages, PDFFindTables
@@ -93,9 +94,6 @@ def format_results_and_clean_up(input_data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
-    logger = logging.Logger("PipelineLogger")
-    logger.addHandler(logging.StreamHandler())
-
     process_visual_data = (
         AddData({"question": "What is described here?"})
         | TransformersDocumentQandA()
@@ -109,14 +107,14 @@ if __name__ == "__main__":
         | ExecuteFunction(prepare_image_classification_input).use(
             set_key="images"
         )
-        | Log(logging.INFO, logger, "Images:")
+        | Log(logging.INFO, message="Images:")
         | ForEach(
             process_visual_data, 
             get_key="images",
             set_key="images_description"
         )
         | Flush(["images"])
-        | Log(logging.INFO, logger, "Images descriptions:")
+        | Log(logging.INFO, message="Images descriptions:")
         | SetMemory(
             set_key="images_description", 
             get_key="images_description",
@@ -132,14 +130,14 @@ if __name__ == "__main__":
         | ExecuteFunction(crop_tables_from_pages).use(
             set_key="tables"
         )
-        | Log(logging.INFO, logger, "Tables:")
+        | Log(logging.INFO, message="Tables:")
         | ForEach(
             process_visual_data, 
             get_key="tables",
             set_key="tables_description"
         )
         | Flush(["tables"])
-        | Log(logging.INFO, logger, "Tables descriptions:")
+        | Log(logging.INFO, message="Tables descriptions:")
         | SetMemory(
             set_key="tables_description", 
             get_key="tables_description",
@@ -155,13 +153,13 @@ if __name__ == "__main__":
         | ExecuteFunction(
             prepare_text_summarization_input
         ).use(set_key="texts")
-        | Log(logging.INFO, logger, "Texts:")
+        | Log(logging.INFO, message="Texts:")
         | TransformersTextSummarization().use(
             get_key="texts",
             set_key="summaries"
         )
         | Flush(["texts"])
-        | Log(logging.INFO, logger, "Summaries:")
+        | Log(logging.INFO, message="Summaries:")
         | SetMemory(
             set_key="summaries", 
             get_key="summaries",
@@ -174,7 +172,7 @@ if __name__ == "__main__":
         | PDFRead().use(
             set_key="pdf"
         )
-        | Log(logging.INFO, logger, "Read:")
+        | Log(logging.INFO, message="Read:")
         | image_processing
         | table_processing
         | text_summarization
@@ -183,10 +181,12 @@ if __name__ == "__main__":
             ["pages", "tables_description", "images_description", "summaries"], 
             memory_instruction=MemoryGetInstruction.POP
         )
-        | Log(logging.INFO, logger, "Raw result:")
-        | ExecuteFunction(format_results_and_clean_up).use(set_key="results")
-        | Flush(["pages", "tables_description", "images_description", "summaries"])
-        | Log(logging.INFO, logger, "Result:", open="="*40, close="="*40)
+        | Log(logging.INFO, message="Raw result:")
+        | ExecuteFunction(
+            format_results_and_clean_up, 
+            replace=ReplacingScope.GLOBAL
+        ).use(set_key="results")
+        | Log(logging.INFO, message="Result:", open="="*40, close="="*40)
     ).set_name("Main pipeline")
     
     inputs = Evaluator(
