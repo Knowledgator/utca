@@ -189,8 +189,8 @@ if __name__ == "__main__":
         | Log(logging.INFO, message="Result:", open="="*40, close="="*40)
     ).set_name("Main pipeline")
     
-    inputs = Evaluator(
-        pipeline,
+    res = Evaluator(
+        pipeline, logging.INFO
     ).run({
         "path_to_file": f"{PATH}/pfizer-report.pdf",
         "pages": [10, 11, 12]
