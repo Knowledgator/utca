@@ -1,5 +1,7 @@
 from core.executable_level_1.__test__.utils import MyExecutable
 
+from core import ReplacingScope
+
 def test_executable():
     # use default overwrite behaviour
     inputs = {"f": 4}
@@ -22,4 +24,42 @@ def test_executable_executor():
     assert res == {
         "input": {"f": 4},
         "output": {"f": 5}
+    }
+
+
+def test_executable_replacing_scopes_and_default_key():
+    e = MyExecutable()
+
+    # test LOCAL
+    assert e.use(replace=ReplacingScope.LOCAL).run({"f": 0}) == {"f": 1}
+    assert e.use("a", replace=ReplacingScope.LOCAL).run({"a": {"f": 0}, "b": 1}) == {
+        "f": 1
+    }
+    assert e.use("a", replace=ReplacingScope.LOCAL).run({"a": [{"f": 0}]}) == {
+        "a": [{"f": 0}],
+        "output": [{"f": 1}]
+    }
+    assert e.use("a", "a", replace=ReplacingScope.LOCAL).run({"a": {"f": 0, "b": 1}}) == {
+        "a": {"f": 1}
+    }
+    assert e.use("a", "a", replace=ReplacingScope.LOCAL).run({"a": [{"f": 0}], "b": 1}) == {
+        "a": [{"f": 1}],
+        "b": 1
+    }
+
+    # test GLOBAL
+    assert e.use(replace=ReplacingScope.GLOBAL).run({"f": 0}) == {"f": 1}
+    assert e.use("a", replace=ReplacingScope.GLOBAL).run({"a": {"f": 0}, "b": 1}) == {
+        "f": 1
+    }
+    assert e.use("a", replace=ReplacingScope.GLOBAL).run({"a": [{"f": 0}]}) == {
+        "output": [{"f": 1}]
+    }
+    assert e.use("a", "a", replace=ReplacingScope.GLOBAL).run(
+        {"a": {"f": 0, "b": 1}, "b": 1}
+    ) == {
+        "a": {"f": 1}
+    }
+    assert e.use("a", "a", replace=ReplacingScope.GLOBAL).run({"a": [{"f": 0}], "b": 1}) == {
+        "a": [{"f": 1}],
     }

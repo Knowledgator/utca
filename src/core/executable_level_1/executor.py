@@ -118,7 +118,7 @@ class ExecutableExecutor(BaseExecutor[Executable[Any, Any]]):
                 "Unexpected data type for processing."
             ))
 
-        if self.replace in (ReplacingScope.GLOBAL, ReplacingScope.LOCAL):
+        if self.replace == ReplacingScope.GLOBAL:
             return Transformable({
                 self.set_key or self.default_key: result
             })
