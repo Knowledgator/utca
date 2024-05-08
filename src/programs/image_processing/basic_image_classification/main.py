@@ -1,12 +1,8 @@
 import pathlib
 PATH = pathlib.Path(__file__).parent.resolve()
 
-from implementation.tasks import (
-    TransformersImageClassification
-)
-from implementation.datasources.image import (
-    ImageRead,
-)
+from implementation.tasks import TransformersImageClassification
+from implementation.datasources.image import ImageRead
 
 if __name__ == "__main__":
     pipeline = (
