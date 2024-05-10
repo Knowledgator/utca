@@ -6,7 +6,7 @@ authors = ["knowledgator.com"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.9,<4.0"
 pydantic = "^2.6.1"
 nltk = "^3.8.1"
 google-api-python-client = "^2.116.0"
