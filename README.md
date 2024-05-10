@@ -187,3 +187,47 @@ All components manipulate the global scope of input data, which refers to the co
     * otherwise, it sets the result to the default_key. (i.e., the scope where the data is placed)
 * default_key (str, optional): Denotes the default key used for results that are not of type Dict. If the data is not a Dict, a new default scope is created or used.
 * replace (ReplacingScope, optional): Specifies the strategy for replacing data within the executor. It defines how and when data should be placed in the scope. Refer to documentation or source code.
+
+# Contribution
+
+## Ways to contribute​
+There are many ways to contribute to LangChain. Here are some common ways people contribute:
+* Code: Help us write code, fix bugs, or improve our infrastructure.
+* Integrations: Help us integrate with your favorite vendors and tools.
+* Discussions: Help answer usage questions and discuss issues with users.
+
+## GitHub Issues​
+
+Our issues page is kept up to date with bugs, improvements, and feature requests.
+
+A taxonomy of labels exists to facilitate sorting and discovering issues of interest. Please utilize these labels to organize issues effectively.
+When you commence work on an issue, kindly assign it to yourself.
+When adding an issue, strive to keep it focused on a single, modular bug, improvement, or feature. If two issues are related or blocking, please link them rather than combining them.
+
+## Getting Help​
+
+Our goal is to have the simplest developer setup possible. Should you experience any difficulty getting setup, please contact us!
+
+We enforce specific formatting and documentation standards throughout the codebase. If you're finding these guidelines challenging or even just annoying to work with, don't hesitate to reach out to a us. Our goal is to ensure that these standards don't hinder the process of integrating high-quality code into the codebase.
+
+## Code
+
+To contribute to this project, please follow the "fork and pull request" workflow. Please do not try to push directly to this repo unless you are a maintainer.
+
+Please follow the checked-in pull request template when opening pull requests. Note related issues and tag relevant maintainers.
+
+It's essential that we maintain great documentation and testing. If you:
+* Fix a bug
+    * Add a relevant unit or integration test when possible. These live in coressponding __\_\_test\_\___ directory of module where bug occure.
+* Make an improvement
+    * Update docstrings and if necessary add/update README file in module(s) where improvement was made
+    * Update tests when relevant.
+* Add a feature
+    * Add a demo notebook in programs module.
+    * Add tests.
+
+## Extra tips:
+* Try to maintain consistent structure of modules, and code;
+* Use docstrings to describe functions and objects that you add;
+* Use comments to describe fixed issues or complicated parts of code.
+* In future releases, additional tools for formatting, linting, and development needs will be incorporated to simplify contribution flow.
