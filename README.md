@@ -218,7 +218,7 @@ Please follow the checked-in pull request template when opening pull requests. N
 
 It's essential that we maintain great documentation and testing. If you:
 * Fix a bug
-    * Add a relevant unit or integration test when possible. These live in coressponding __\_\_test\_\___ directory of module where bug occure.
+    * Add a relevant unit or integration test when possible. These live in coressponding __\_\_test\_\___ directory of module where bug occured.
 * Make an improvement
     * Update docstrings and if necessary add/update README file in module(s) where improvement was made
     * Update tests when relevant.
