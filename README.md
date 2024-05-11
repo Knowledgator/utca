@@ -174,11 +174,33 @@ When you call the __\_\_or\_\___ method of Component, it binds components in the
 
 The Evaluator manages the execution context of a program. It's either created by default, passed to the run method, or wrapped around a Component.
 
-Evaluator oversees global memory access throughout its context. To learn more about the objects and components used to manipulate memory, refer to documentation or source code.
+#### Simplified schema of context and flow
 
-Additionally, the Evaluator handles logging.
+![image](./static/context.drawio.png)
+
+#### Intermidiate data
+
+Intermidiate data is encapsulated in Transformable object and passed via __call__ method of components. It contains methods for accessing data.
+
+Transformable can be passed between contexts.
+
+#### Memory
+
+Evaluator oversees global memory access throughout its context. Memory used for preserving data that can be accessed in context of Evaluator. Memory acces is provided via special components:
+* GetMemory
+* SetMemory
+* DeleteMemory
+
+Data in memory cannot be manipulated; it can only be stored. If you need to manipulate data, you must retrieve it, which adds it to intermediate data (Transformable).
+The memory state is bound to the context (Evaluator), and you cannot access the memory of other contexts, even if the accessing context is nested within them.
+
+#### Logging
+
+Additionally, the Evaluator handles logging. Refer to documentation or source code to learn more.
 
 ### Scopes
+
+The term "scope" describes how data is organized hierarchically. At the top level is the global scope, which encompasses the entire intermidiate data (i.e. state of Transformable). Nested within this global scope are inner scopes, corresponding to the values associated with specific keys in the dictionary.
 
 All components manipulate the global scope of input data, which refers to the complete Dict passed as input when the run method is called. Additionally, Actions and Executables have the capability to manipulate inner scopes using ActionExecutor and ExecutableExecutor, respectively. These executors are created upon the use method call and retain the context of execution, which includes the following parameters:
 * get_key (Optional[str], optional): Specifies which key value of input_data will be utilized (i.e., the scope to be used).
