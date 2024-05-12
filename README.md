@@ -213,7 +213,7 @@ All components manipulate the global scope of input data, which refers to the co
 # Contribution
 
 ## Ways to contribute​
-There are many ways to contribute to LangChain. Here are some common ways people contribute:
+There are many ways to contribute to UTCA. Here are some common ways people contribute:
 * Code: Help us write code, fix bugs, or improve our infrastructure.
 * Integrations: Help us integrate with your favorite vendors and tools.
 * Discussions: Help answer usage questions and discuss issues with users.
