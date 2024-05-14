@@ -32,10 +32,10 @@ class ComprehendItPredictor(
                 If value equals to None, default ComprehendItPredictorConfig configuration will be used.
                 Defaults to None.
 
-            input_class (Type[ComprehendItPredictorInputType], optional): Class for input validation.
+            input_class (Type[Input], optional): Class for input validation.
                 Defaults to ComprehendItPredictorInput.
             
-            output_class (Type[ComprehendItPredictorOutputType], optional): Class for output validation.
+            output_class (Type[Output], optional): Class for output validation.
                 Defaults to ComprehendItPredictorOutput.
             
             name (Optional[str], optional): Name for identification.
