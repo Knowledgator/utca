@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import (
-    List, Callable, Optional, Tuple, Union
+    Any, List, Callable, Optional, Tuple, Union
 )
 import copy
 import logging
@@ -9,7 +9,7 @@ from utca.core.executable_level_1.component import Component
 from utca.core.executable_level_1.schema import Transformable
 from utca.core.executable_level_1.interpreter import Evaluator
 from utca.core.executable_level_1.memory import GetMemory, MemoryGetInstruction
-from utca.core.exceptions import ExecutionSchemaFailed
+from utca.core.exceptions import ExecutionSchemaFailed, ExitLoop
 
 
 class ExecutionSchema(Component):
@@ -88,6 +88,8 @@ class ExecutionSchema(Component):
                     logging.INFO,
                     f"{self.name}: Step {i}({component.name}) executed successfully."
                 )
+            except ExitLoop as e:
+                raise e
             except Exception as e:
                 evaluator.log(
                     logging.ERROR,
@@ -449,6 +451,119 @@ class While(Component):
             input_data,
             evaluator
         )):
-            input_data = self.schema(input_data, evaluator)
+            try:
+                input_data = self.schema(input_data, evaluator)
+            except ExitLoop:
+                break
             i -= 1
+        return input_data
+    
+
+class Break(Component):
+    """
+    Exit loop
+    """
+    def __call__(
+        self, _: Transformable, __: Optional[Evaluator]=None
+    ) -> Transformable:
+        raise ExitLoop
+    
+BREAK = Break()
+"""Exit loop singleton"""
+
+class Log(Component):
+    """
+    Log message and current data
+    """
+    
+    def __init__(
+        self, 
+        level: int=logging.NOTSET,
+        logger: Optional[logging.Logger]=None, 
+        message: str="",
+        open: str="-"*40,
+        close: str="-"*40,
+        include_input_data: bool=True,
+        name: Optional[str]=None,
+    ) -> None:
+        """
+        Args:
+            level (int, optional): Logging level. Defaults to logging.NOTSET.
+
+            logger (Optional[logging.Logger], optional): Logger object. 
+                If value eqaules to None, evaluator logger will be used. Defaults to None
+
+            message (str, optional): Message that will be logged. Defaults to "".
+            
+            open (str, optional): String that will be inserted before mesage(new line). 
+                Defaults to "-"*40.
+            
+            close (str, optional): String that will be inserted after mesage(new line). 
+                Defaults to "-"*40.
+            
+            include_input_data (bool, optional): Include data representation in log.
+                Defaults to True.
+
+            name (Optional[str], optional): Name for identification.
+                If equals to None, class name will be used. Defaults to None.
+        """
+        super().__init__(name)
+        self.logger = logger
+        self.level = level
+        self.message = message
+        self.open = open
+        self.close = close
+        self.include_input_data = include_input_data
+
+
+    def create_message(self, input_data: Any) -> str:
+        """
+        Create message string
+
+        Args:
+            input_data (Any): Data for representation.
+
+        Returns:
+            str: Message for logging.
+        """
+        if self.include_input_data:
+            return "\n".join((
+                self.open, 
+                self.message, 
+                input_data.__repr__(), 
+                self.close
+            ))
+        else:
+            return "\n".join((
+                self.open, 
+                self.message, 
+                self.close
+            ))
+    
+
+    def __call__(
+        self, 
+        input_data: Transformable,
+        evaluator: Optional[Evaluator]=None,
+    ) -> Transformable:
+        """
+        Log call. Loggs data with provided logger or evaluator logger.
+
+        Args:
+            input_data (Transformable): Current data.
+
+            evaluator (Optional[Evaluator], optional): Evaluator in context of which action executed. 
+                If equals to None, default evaluator will be created. Defaults to None.
+
+        Returns:
+            Transformable: Current data.
+        """
+        if not self.logger:
+            if not evaluator:
+                logger = self.set_up_default_evaluator()
+            else:
+                logger = evaluator
+        else:
+            logger = self.logger
+        logger.log(self.level, self.create_message(input_data))
         return input_data

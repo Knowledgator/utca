@@ -10,6 +10,8 @@ from utca.core.executable_level_1.eval import (
     ForEach,
     Switch,
     While,
+    Log,
+    BREAK,
 )
 from utca.core.executable_level_1.memory import (
     SetMemory, 
@@ -21,7 +23,6 @@ from utca.core.executable_level_1.memory import (
 )
 from utca.core.executable_level_1.actions import (
     Action,
-    Log,
     Flush,
     AddData,
     ExecuteFunction,
@@ -73,6 +74,8 @@ __all__ = [
     "ForEach", 
     "Switch",
     "While",
+    "Log",
+    "BREAK",
 
     "SetMemory", 
     "MemorySetInstruction",
@@ -82,7 +85,6 @@ __all__ = [
     "MemoryManager",
     
     "Action",
-    "Log",
     "Flush",
     "AddData",
     "ExecuteFunction",

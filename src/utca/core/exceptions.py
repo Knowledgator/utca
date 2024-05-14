@@ -58,3 +58,7 @@ class InavalidMemoryInstruction(ValueError):
 
 class IvalidInputData(ValueError):
     ...
+
+
+class ExitLoop(Exception):
+    ...
