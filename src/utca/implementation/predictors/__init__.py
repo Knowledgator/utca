@@ -35,6 +35,23 @@ from utca.implementation.predictors.token_searcher.predictor import (
 from utca.implementation.predictors.token_searcher.schema import (
     TokenSearcherPredictorConfig,
 )
+from utca.implementation.predictors.gliner_predictor.predictor import (
+    GLiNERPredictor,
+)
+from utca.implementation.predictors.gliner_predictor.schema import (
+    GLiNERPredictorConfig,
+    GLiNERPredictorInput,
+    GLiNERPredictorOutput,
+)
+from utca.implementation.predictors.openai_chat_gpt.predictor import (
+    OpenAIChatGPTPredictor,
+)
+from utca.implementation.predictors.openai_chat_gpt.schema import (
+    ChatGPTConfig,
+    ChatGPTInput,
+    ChatCompletionOutput,
+    ChatCompletionStreamOutput,
+)
 
 __all__ = [
     "TransformersModel",
@@ -58,8 +75,21 @@ __all__ = [
 
     "TokenSearcherPredictor", 
     "TokenSearcherPredictorConfig",
+
     "ComprehendItPredictor",
     "ComprehendItPredictorConfig",
+    
     "TransformersPipeline",
     "TransformersPipelineConfig",
+
+    "GLiNERPredictor",
+    "GLiNERPredictorConfig",
+    "GLiNERPredictorInput",
+    "GLiNERPredictorOutput",
+
+    "OpenAIChatGPTPredictor",
+    "ChatGPTConfig",
+    "ChatGPTInput",
+    "ChatCompletionOutput",
+    "ChatCompletionStreamOutput",
 ]
