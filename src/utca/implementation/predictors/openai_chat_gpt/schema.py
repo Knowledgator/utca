@@ -167,7 +167,6 @@ class ChatGPTConfig(Config):
         timeout: Override the client-level default timeout for this request, in seconds
     """
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    model_config['protected_namespaces'] = ()
 
     model: str
     frequency_penalty: Optional[Union[float, NotGiven]] = NOT_GIVEN
