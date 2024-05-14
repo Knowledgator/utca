@@ -121,6 +121,29 @@ from utca.implementation.tasks.text_processing.textual_q_and_a.transformers_task
     QandAPostprocess
 )
 
+from utca.implementation.tasks.text_processing.ner.gliner_task.zero_shot_ner import (
+    GLiNER,
+    GLiNERInput,
+    GLiNEROutput,
+)
+from utca.implementation.tasks.text_processing.ner.gliner_task.actions import (
+    GLiNERPreprocessor,
+    GLiNERPostprocessor,
+)
+
+from utca.implementation.tasks.text_processing.chat.openai.openai_chat import (
+    OpenAIChat,
+    ChatInput,
+    ChatOutput,
+)
+from utca.implementation.tasks.text_processing.chat.openai.actions import (
+    ChatPreprocessor,
+    ChatAddContext,
+    ChatPostprocessor,
+    ChatStreamPostprocessor,
+    ChatSaveContext,
+)
+
 __all__ = [
     # Audio processing
     "TransformersTextToSpeech",
@@ -194,4 +217,19 @@ __all__ = [
 
     "TransformersTextualQandA",
     "QandAPostprocess",
+
+    "GLiNER",
+    "GLiNERInput",
+    "GLiNEROutput",
+    "GLiNERPreprocessor",
+    "GLiNERPostprocessor",
+
+    "OpenAIChat",
+    "ChatInput",
+    "ChatOutput",
+    "ChatPreprocessor",
+    "ChatAddContext",
+    "ChatPostprocessor",
+    "ChatStreamPostprocessor",
+    "ChatSaveContext",
 ]

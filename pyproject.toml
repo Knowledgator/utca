@@ -21,6 +21,7 @@ pdfplumber = "^0.11.0"
 cython = "^3.0.10"
 numpy = "^1.26.4"
 pillow = "^10.3.0"
+openai = "^1.29.0"
 
 
 [build-system]
