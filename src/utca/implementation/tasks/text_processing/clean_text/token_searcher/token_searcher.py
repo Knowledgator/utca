@@ -55,28 +55,28 @@ class TokenSearcherTextCleaner(
     ) -> None:
         """
         Args:
-            predictor (Predictor[Any, Any]): Predictor that will be used in task. 
+            predictor (Optional[Predictor[Any, Any]], optional): Predictor that will be used in task. 
                 If equals to None, default TokenSearcherPredictor will be used. 
                 Defaults to None.
 
-            preprocess (Optional[List[Action[Any, Any]]]): Chain of actions executed 
+            preprocess (Optional[List[ActionType]], optional): Chain of actions executed 
                 before predictor. If equals to None, default chain will be used. 
                 Defaults to None.
 
                 Default chain:
                     [TokenSeatcherTextCleanerPreprocessor]
             
-            postprocess (Optional[List[Action[Any, Any]]]): Chain of actions executed
+            postprocess (Optional[List[ActionType]], optional): Chain of actions executed
                 after predictor. If equals to None, default chain will be used.
                 Defaults to None.
 
                 Default chain:
                     [TokenSearcherTextCleanerPostprocessor]
             
-            input_class (Type[Input]): Class for input validation. 
+            input_class (Type[Input], optional): Class for input validation. 
                 Defaults to TokenSearcherTextCleanerInput.
 
-            output_class (Type[NEROutputType]): Class for output validation. 
+            output_class (Type[NEROutputType], optional): Class for output validation. 
                 Defaults to TokenSearcherTextCleanerOutput.
             
             name (Optional[str], optional): Name for identification.

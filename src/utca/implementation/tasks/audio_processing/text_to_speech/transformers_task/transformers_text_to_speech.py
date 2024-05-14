@@ -31,6 +31,26 @@ class TransformersTextToSpeech(
         output_class: Type[Output]=TransformersTextToSpeechOutput,
         name: Optional[str]=None,
     ) -> None:
+        """
+        Args:
+            predictor (Predictor[Any, Any], optional): Predictor that will be used in task. 
+                If equals to None, default predictor will be used. Defaults to None.
+            
+            preprocess (Optional[List[ActionType]], optional): Chain of actions executed
+                before predictor. Defaults to None.
+            
+            postprocess (Optional[List[ActionType]], optional): Chain of actions executed
+                after predictor. Defaults to None.
+            
+            input_class (Type[Input], optional): Class for input validation. 
+                Defaults to TransformersTextToSpeechInput.
+            
+            output_class (Type[Output], optional): Class for output validation.
+                Defaults to TransformersTextToSpeechOutput.
+            
+            name (Optional[str], optional): Name for identification. If equals to None, 
+                class name will be used. Defaults to None.
+        """
         super().__init__(
             predictor=(predictor or TransformersPipeline(
                 cfg=TransformersPipelineConfig(

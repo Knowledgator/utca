@@ -58,10 +58,10 @@ class TransformersChartsAndPlotsAnalysis(
     ) -> None:
         """
         Arguments:
-            predictor (Predictor[Any, Any], optional): Predictor that will be used in task. If equals to None,
+            predictor (Optional[Predictor[Any, Any]], optional): Predictor that will be used in task. If equals to None,
                 default predictor will be used. Defaults to None.
             
-            preprocess (Optional[List[Action[Any, Any]]], optional): Chain of actions executed before predictor.
+            preprocess (Optional[List[ActionType]], optional): Chain of actions executed before predictor.
                 If equals to None, default chain will be used. Defaults to None.
 
                 Default chain: 
@@ -69,7 +69,7 @@ class TransformersChartsAndPlotsAnalysis(
 
                 If default chain is used, ChartsAndPlotsAnalysisPreprocessor will use Pix2StructProcessor from "google/deplot" model.
             
-            postprocess (Optional[List[Action[Any, Any]]], optional): Chain of actions executed after predictor.
+            postprocess (Optional[List[ActionType]], optional): Chain of actions executed after predictor.
                 If equals to None, default chain will be used. Defaults to None.
 
                 Default chain: 

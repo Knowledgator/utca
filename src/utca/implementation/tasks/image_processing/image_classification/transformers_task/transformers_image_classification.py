@@ -73,10 +73,10 @@ class TransformersImageClassification(
     ) -> None:
         """
         Args:
-            predictor (Predictor[Any, Any], optional): Predictor that will be used in task.
+            predictor (Optional[Predictor[Any, Any]], optional): Predictor that will be used in task.
                 If equals to None, default predictor will be used. Defaults to None.
             
-            preprocess (Optional[List[Action[Any, Any]]], optional): Chain of actions executed 
+            preprocess (Optional[List[ActionType]], optional): Chain of actions executed 
                 before predictor. If equals to None, default chain will be used. Defaults to None.
 
                 Default chain: 
@@ -85,7 +85,7 @@ class TransformersImageClassification(
                 If default chain is used, ImageClassificationPreprocessor will use AutoImageProcessor
                 from "facebook/deit-base-distilled-patch16-384" model.
             
-            postprocess (Optional[List[Action[Any, Any]]], optional): Chain of actions executed
+            postprocess (Optional[List[ActionType]], optional): Chain of actions executed
                 after predictor. If equals to None, default chain will be used. Defaults to None.
 
                 Default chain: 
