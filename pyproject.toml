@@ -13,7 +13,6 @@ google-api-python-client = "^2.116.0"
 google-auth-httplib2 = "^0.2.0"
 google-auth-oauthlib = "^1.2.0"
 torch = "^2.0.0"
-pillow = "^10.2.0"
 transformers = "^4.37.2"
 opencv-python = "^4.9.0.80"
 sqlalchemy = "^2.0.30"
@@ -21,6 +20,7 @@ soundfile = "^0.12.1"
 pdfplumber = "^0.11.0"
 cython = "^3.0.10"
 numpy = "^1.26.4"
+pillow = "^10.3.0"
 
 
 [build-system]
