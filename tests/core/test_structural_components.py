@@ -1,6 +1,8 @@
 from typing import Any, Dict, List
 import copy
 import logging
+import io
+
 
 from .utils import MyExecutable
 from utca.core import (
@@ -13,6 +15,8 @@ from utca.core import (
     Branch,
     Switch,
     Filter,
+    Log,
+    BREAK,
 )
 
 def test_pipeline():
@@ -80,6 +84,18 @@ def test_loop_iterations():
 
     res = loop.run({"f": 0})
     assert res["f"] == 10
+
+
+def test_loop_exit():
+    example = MyExecutable()
+    
+    loop = While(
+        schema=BREAK | example,
+        max_iterations=10
+    )
+
+    res = loop.run({"f": 0})
+    assert res["f"] == 0
 
 
 def test_for_each():
@@ -237,3 +253,47 @@ def test_filter():
     res = filter2.run(res)
     for i in res["fs"]:
         assert i["f"] % 5 == 0
+
+
+def test_log_with_logger():
+    stream = io.StringIO()
+    logging_handler = logging.StreamHandler(stream)
+    logger = logging.getLogger("TEST")
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging_handler)
+
+    log = Log(logging.DEBUG, logger, message="OK", include_input_data=False)
+    log.run({})
+
+    stream.flush()
+    assert "OK" in stream.getvalue()
+    stream.truncate(0)
+    assert "" == stream.getvalue()
+
+    logger.setLevel(logging.ERROR)
+
+    log.run({})
+    stream.flush()
+    assert "" == stream.getvalue()
+    stream.close()
+
+
+def test_log_inside_evaluator():
+    stream = io.StringIO()
+    e = Evaluator(
+        (
+            Log(logging.INFO, message="OK")
+            | Log(logging.DEBUG, message="ERROR")
+            | Log(logging.ERROR, message="NICE")
+        ), 
+        name="TestEvaluator",
+        logging_level=logging.INFO,
+        logging_handler=logging.StreamHandler(stream)
+    )
+    e.run({})
+
+    stream.flush()
+    res = stream.getvalue()
+    assert "OK" in res
+    assert "ERROR" not in res
+    assert "NICE" in res
