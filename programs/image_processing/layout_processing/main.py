@@ -9,15 +9,13 @@ from utca.implementation.tasks import (
 )
 from utca.implementation.datasources.image import ImageRead
 
-task = TransformersDocumentQandA()
-
 if __name__ == "__main__":
     pipeline = (
         ImageRead()
         | AddData({
             "question": "What is the purchase amount?"
         })
-        | task
+        | TransformersDocumentQandA()
     )
 
     print(pipeline.run({
