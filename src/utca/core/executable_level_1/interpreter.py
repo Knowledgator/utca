@@ -110,6 +110,7 @@ class Evaluator(Component):
         self, 
         register: Transformable, 
         identifiers: List[Union[str, Tuple[str, str]]],
+        default: Dict[str, Any],
         delete: bool=False
     ) -> Transformable:
         """
@@ -120,6 +121,9 @@ class Evaluator(Component):
 
             identifiers (List[Union[str, Tuple[str, str]]]): Key/keys that will be used to
                 access data in memory and for setting to register.
+
+            default (Dict[str, Any]): Returned value if keys not found. If equals to None, 
+                an exception will be raised. Defaults to None.
             
             delete (bool, optional): If equals to True, accessed data will be removed from memory.
                 Defaults to False.
@@ -128,7 +132,7 @@ class Evaluator(Component):
             Transformable: Result of execution.
         """
         return self.memory_manager.get(
-            register, identifiers, delete
+            register, identifiers, default, delete
         )
 
         

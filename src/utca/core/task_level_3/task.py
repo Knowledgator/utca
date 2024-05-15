@@ -1,13 +1,13 @@
 from typing import (
-    Any, List, Dict, Type, Optional
+    Any, Dict, Type, Optional
 )
 
+from utca.core.executable_level_1.component import Component
 from utca.core.executable_level_1.interpreter import Evaluator
 from utca.core.executable_level_1.executable import Executable
 from utca.core.executable_level_1.schema import (
     Input, Output, Transformable
 )
-from utca.core.executable_level_1.executor import ActionType
 from utca.core.predictor_level_2.predictor import Predictor
 from utca.core.task_level_3.schema import NEROutputType
 
@@ -21,8 +21,8 @@ class Task(
         self,
         *,
         predictor: Predictor[Any, Any],
-        preprocess: Optional[List[ActionType]]=None,
-        postprocess: Optional[List[ActionType]]=None,
+        preprocess: Optional[Component]=None,
+        postprocess: Optional[Component]=None,
         input_class: Type[Input],
         output_class: Type[Output],
         name: Optional[str]=None,
@@ -31,10 +31,10 @@ class Task(
         Args:
             predictor (Predictor[Any, Any]): Predictor that will be used in task.
 
-            preprocess (Optional[List[Action[Any, Any]]]): Chain of actions executed 
+            preprocess (Optional[Component]): Component executed 
                 before predictor.
             
-            postprocess (Optional[List[Action[Any, Any]]]): Chain of actions executed
+            postprocess (Optional[Component]): Component executed
                 after predictor.
             
             input_class (Type[Input]): Class for input validation.
@@ -50,32 +50,30 @@ class Task(
             name=name,
         )
         self.predictor = predictor
-        self._preprocess = preprocess or []
-        self._postprocess = postprocess or []
+        self._preprocess = preprocess
+        self._postprocess = postprocess
 
     
     def process(
         self, 
         state: Transformable, 
-        actions: List[ActionType],
+        component: Optional[Component],
         evaluator: Evaluator
     ) -> Transformable:
         """
-        Execute chain of actions
+        Execute Component
 
         Args:
             state (Transformable): Current data.
 
-            actions (List[Action[Any, Any]]): Chain of actions.
+            component (Optional[Component]): Component.
             
             evaluator (Evaluator): Evaluator in context of which executed.
 
         Returns:
             Transformable: Result of execution.
         """
-        for action in actions:
-            state = action(state, evaluator)
-        return state
+        return component(state, evaluator) if component else state
 
 
     def invoke(

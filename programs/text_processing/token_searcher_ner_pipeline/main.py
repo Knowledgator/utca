@@ -35,17 +35,17 @@ if __name__ == "__main__":
     # clean text stage
     clean_task = TokenSearcherTextCleaner(
         predictor=model,
-        postprocess=[TokenSearcherTextCleanerPostprocessor(
+        postprocess=TokenSearcherTextCleanerPostprocessor(
             clean=True,
-        )]
+        )
     )
 
     # NER stage
     ner_task = TokenSearcherNER(
         predictor=model,
-        postprocess=[TokenSearcherNERPostprocessor(
+        postprocess=TokenSearcherNERPostprocessor(
             threshold=0.8
-        )]
+        )
     )
 
     # create pipeline with described stages

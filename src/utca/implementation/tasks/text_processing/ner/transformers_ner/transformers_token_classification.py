@@ -1,7 +1,7 @@
-from typing import Type, Optional, List, Any
+from typing import Type, Optional, Any
 
+from utca.core.executable_level_1.component import Component
 from utca.core.executable_level_1.schema import Input
-from utca.core.executable_level_1.executor import ActionType
 from utca.core.predictor_level_2.predictor import Predictor
 from utca.core.task_level_3.task import NERTask
 from utca.core.task_level_3.schema import (
@@ -35,8 +35,8 @@ class TransformersTokenClassifier(
         self,
         *,
         predictor: Optional[Predictor[Any, Any]]=None,
-        preprocess: Optional[List[ActionType]]=None,
-        postprocess: Optional[List[ActionType]]=None,
+        preprocess: Optional[Component]=None,
+        postprocess: Optional[Component]=None,
         input_class: Type[Input]=TransformersBasicInput,
         output_class: Type[NEROutputType]=TransformersTokenClassifierOutput,
         name: Optional[str]=None,
@@ -46,15 +46,15 @@ class TransformersTokenClassifier(
             predictor (Optional[Predictor[Any, Any]], optional): Predictor that will be used in task. 
                 If equals to None, default predictor will be used. Defaults to None.
 
-            preprocess (Optional[List[ActionType]], optional): Chain of actions executed
+            preprocess (Optional[Component], optional): Component executed
                 before predictor. Defaults to None.
             
-            postprocess (Optional[List[ActionType]], optional): Chain of actions executed
-                after predictor. If equals to None, default chain will be used. 
+            postprocess (Optional[Component], optional): Component executed
+                after predictor. If equals to None, default component will be used. 
                 Defaults to None.
 
-                Default chain: 
-                    [TokenClassifierPostprocessor]
+                Default component: 
+                    TokenClassifierPostprocessor
 
             input_class (Type[Input], optional): Class for input validation. 
                 Defaults to TransformersBasicInput.
@@ -77,8 +77,8 @@ class TransformersTokenClassifier(
 
         super().__init__(
             predictor=predictor,
-            preprocess=preprocess or [],
-            postprocess=postprocess or [TokenClassifierPostprocessor()],
+            preprocess=preprocess,
+            postprocess=postprocess or TokenClassifierPostprocessor(),
             input_class=input_class, 
             output_class=output_class,
             name=name,

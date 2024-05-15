@@ -15,9 +15,9 @@ import torch
 import pyximport # type: ignore
 pyximport.install() # type: ignore
 
+from utca.core.executable_level_1.component import Component
 from utca.core.executable_level_1.schema import IOModel, Input, Output
 from utca.core.executable_level_1.interpreter import Evaluator
-from utca.core.executable_level_1.executor import ActionType
 from utca.core.predictor_level_2.predictor import Predictor
 from utca.core.task_level_3.task import Task
 from utca.implementation.predictors.transformers_predictor.transformers_model import (
@@ -147,8 +147,8 @@ class TransformersEntityLinking(
             str, PreTrainedTokenizer, PreTrainedTokenizerFast
         ]]=None,
         predictor: Optional[Predictor[Any, Any]]=None,
-        preprocess: Optional[List[ActionType]]=None,
-        postprocess: Optional[List[ActionType]]=None,
+        preprocess: Optional[Component]=None,
+        postprocess: Optional[Component]=None,
         input_class: Type[Input]=EntityLinkingInput,
         output_class: Type[Output]=EntityLinkingOutput,
         name: Optional[str]=None,
@@ -163,19 +163,19 @@ class TransformersEntityLinking(
             predictor (Optional[Predictor[Any, Any]], optional): Predictor that will be used in task. 
                 If equals to None, default predictor will be used. Defaults to None.
             
-            preprocess (Optional[List[ActionType]], optional): Chain of actions executed
-                before predictor. If equals to None, default chain will be used. Defaults to None.
+            preprocess (Optional[Component], optional): Component executed
+                before predictor. If equals to None, default component will be used. Defaults to None.
 
-                Default chain: 
-                    [EntityLinkingPreprocessor]
+                Default component: 
+                    EntityLinkingPreprocessor
             
-            postprocess (Optional[List[ActionType]], optional): Chain of actions executed
-                after predictor. If equals to None, default chain will be used. Defaults to None.
+            postprocess (Optional[Component], optional): Component executed
+                after predictor. If equals to None, default component will be used. Defaults to None.
 
-                Default chain: 
-                    [EntityLinkingPostprocessor]
+                Default component: 
+                    EntityLinkingPostprocessor
 
-                If default chain is used, EntityLinkingPostprocessor will use provided tokenizer
+                If default component is used, EntityLinkingPostprocessor will use provided tokenizer
                 or tokenizer from predictor model.
             
             input_class (Type[Input], optional): Class for input validation. 
@@ -224,15 +224,11 @@ class TransformersEntityLinking(
 
         super().__init__(
             predictor=predictor,
-            preprocess=preprocess or [
-                EntityLinkingPreprocessor() 
-            ],
-            postprocess=postprocess or [
-                EntityLinkingPostprocessor( 
-                    tokenizer=self.tokenizer,
-                    encoder_decoder=self.encoder_decoder
-                )  
-            ],
+            preprocess=preprocess or EntityLinkingPreprocessor(),
+            postprocess=postprocess or EntityLinkingPostprocessor( 
+                tokenizer=self.tokenizer,
+                encoder_decoder=self.encoder_decoder
+            ),
             input_class=input_class, 
             output_class=output_class,
             name=name,

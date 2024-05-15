@@ -154,7 +154,7 @@ class Condition:
         """
         if self.state != None:
             input_data = GetMemory(
-                self.state, MemoryGetInstruction.GET
+                self.state, memory_instruction=MemoryGetInstruction.GET
             )(
                 input_data, evaluator
             )

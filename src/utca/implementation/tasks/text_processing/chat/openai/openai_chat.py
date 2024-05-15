@@ -1,15 +1,16 @@
-from typing import Any, List, Generator, Type, Optional
+from typing import Any, Generator, Type, Optional
 
-from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
+import uuid
 
+from utca.core.executable_level_1.component import Component
+from utca.core.executable_level_1.memory import GetMemory, SetMemory
 from utca.core.executable_level_1.schema import IOModel, Input, Output
-from utca.core.executable_level_1.executor import ActionType
 from utca.core.task_level_3.task import Task
 from utca.implementation.predictors.openai_chat_gpt.predictor import (
     OpenAIChatGPTPredictor
 )
 from utca.implementation.tasks.text_processing.chat.openai.actions import (
-    ChatPreprocessor, ChatAddContext, ChatPostprocessor, ChatSaveContext
+    ChatPreprocessor, ChatAddContext, ChatPostprocessor, ChatUpdateContext
 )
 
 class ChatInput(IOModel):
@@ -31,32 +32,35 @@ class OpenAIChat(
         self,
         *,
         predictor: OpenAIChatGPTPredictor[Any, Any],
-        messages: Optional[List[ChatCompletionMessageParam]]=None,
-        preprocess: Optional[List[ActionType]]=None,
-        postprocess: Optional[List[ActionType]]=None,
+        messages: Optional[str]=None,
+        preprocess: Optional[Component]=None,
+        postprocess: Optional[Component]=None,
         input_class: Type[Input]=ChatInput,
         output_class: Type[Output]=ChatOutput,
         name: Optional[str]=None,
     ) -> None:
         """
         Args:
-            predictor (Predictor[Any, Any]): Predictor that will be used in task. 
+            predictor (Optional[Predictor[Any, Any]]): Predictor that will be used in task. 
                 If equals to None, default TokenSearcherPredictor will be used. 
                 Defaults to None.
 
-            preprocess (Optional[List[Action[Any, Any]]]): Chain of actions executed 
-                before predictor. If equals to None, default chain will be used. 
+            messages (Optional[str], optional): Key to use to access memory for messages.
+                If equals to None, a unique key will be generated. Defaults to None.
+                
+            preprocess (Optional[Component]]): Component executed 
+                before predictor. If equals to None, default component will be used. 
                 Defaults to None.
 
-                Default chain:
-                    [TokenSeatcherTextCleanerPreprocessor]
+                Default component:
+                    ChatPreprocessor | GetMemory | ChatAddContext
             
-            postprocess (Optional[List[Action[Any, Any]]]): Chain of actions executed
-                after predictor. If equals to None, default chain will be used.
+            postprocess (Optional[Component]]): Component executed
+                after predictor. If equals to None, default component will be used.
                 Defaults to None.
 
-                Default chain:
-                    [TokenSearcherTextCleanerPostprocessor]
+                Default component:
+                    ChatPostprocessor | GetMemory | ChatUpdateContext | SetMemory
             
             input_class (Type[Input]): Class for input validation. 
                 Defaults to TokenSearcherTextCleanerInput.
@@ -68,18 +72,22 @@ class OpenAIChat(
                 If equals to None, class name will be used. Defaults to None.
         """
         if messages is None:
-            messages = []
+            messages = uuid.uuid4().hex
         super().__init__(
             predictor=predictor,
-            preprocess=preprocess or [
-                ChatPreprocessor(), 
-                ChatAddContext(messages)
-            ],
-            postprocess=postprocess or [
-                ChatPostprocessor().use(set_key="message"),
-                ChatSaveContext(messages).use(get_key="message")
-            ],
-            input_class=input_class, 
+            preprocess=preprocess or (
+                ChatPreprocessor()
+                | GetMemory([(messages, "context")], default={messages:[]})
+                | ChatAddContext()
+                | SetMemory(messages, "messages")
+            ),
+            postprocess=postprocess or (
+                ChatPostprocessor().use(set_key="message")
+                | GetMemory([(messages, "context")])
+                | ChatUpdateContext()
+                | SetMemory(messages, "context")
+            ),
+            input_class=input_class,
             output_class=output_class,
             name=name,
         )

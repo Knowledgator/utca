@@ -218,6 +218,7 @@ class GetMemory(Component):
     def __init__(
         self, 
         identifiers: List[Union[str, Tuple[str, str]]],
+        default: Optional[Dict[str, Any]]=None,
         memory_instruction: MemoryGetInstruction=MemoryGetInstruction.GET,
     ):
         """
@@ -225,11 +226,15 @@ class GetMemory(Component):
             identifiers (List[Union[str, Tuple[str, str]]]): Key/keys that will be used to
                 access data in memory and for setting to register.
 
+            default (Dict[str, Any]): Returned value if keys not found. If equals to None, 
+                an exception will be raised. Defaults to None.
+
             memory_instruction (MemoryGetInstruction, optional): Strategy for memory access.
                 Defaults to MemoryGetInstruction.GET.
         """
         super().__init__()
         self.identifiers = identifiers
+        self.default = default
         self.memory_instruction = memory_instruction
 
     
@@ -253,9 +258,9 @@ class GetMemory(Component):
             evaluator = self.set_up_default_evaluator()
 
         if self.memory_instruction == MemoryGetInstruction.GET:
-            register = evaluator.get_memory(input_data, self.identifiers)
+            register = evaluator.get_memory(input_data, self.identifiers, self.default or {})
         elif self.memory_instruction == MemoryGetInstruction.POP:
-            register = evaluator.get_memory(input_data, self.identifiers, delete=True)
+            register = evaluator.get_memory(input_data, self.identifiers, self.default or {}, delete=True)
         else:
             raise InavalidMemoryInstruction()
         return register
@@ -325,6 +330,7 @@ class MemoryManager:
         self, 
         register: Transformable, 
         identifiers: List[Union[str, Tuple[str, str]]],
+        default: Dict[str, Any],
         delete: bool=False
     ) -> Transformable:
         """
@@ -335,6 +341,9 @@ class MemoryManager:
 
             identifiers (List[Union[str, Tuple[str, str]]]): Key/keys that will be used to
                 access data in memory and for setting to register.
+
+            default (Dict[str, Any]): Returned value if keys not found. If equals to None, 
+                an exception will be raised. Defaults to None.
             
             delete (bool, optional): If equals to True, deletes accessed memory identifiers. 
                 Defaults to False.
@@ -349,12 +358,16 @@ class MemoryManager:
             else:
                 get_key = identifier
                 set_key = identifier
+            try:
+                data = self.memory.retrieve_store(get_key)
+            except:
+                data = default.get(get_key)
             setattr(
                 register,
                 set_key,
-                self.memory.retrieve_store(get_key)
+                data
             )
-            if delete: # need refactor!
+            if delete:
                 self.memory.delete_store(get_key)
         return register
 

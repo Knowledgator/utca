@@ -2,8 +2,8 @@ from typing import Type, Optional, List, Any
 
 from transformers import AutoModel, AutoTokenizer # type: ignore
 
+from utca.core.executable_level_1.component import Component
 from utca.core.executable_level_1.schema import IOModel, Input, Output
-from utca.core.executable_level_1.executor import ActionType
 from utca.core.predictor_level_2.predictor import Predictor
 from utca.core.task_level_3.task import Task
 from utca.implementation.predictors.transformers_predictor.transformers_model import (
@@ -40,8 +40,8 @@ class TransformersTextEmbedding(
         self,
         *,
         predictor: Optional[Predictor[Any, Any]]=None,
-        preprocess: Optional[List[ActionType]]=None,
-        postprocess: Optional[List[ActionType]]=None,
+        preprocess: Optional[Component]=None,
+        postprocess: Optional[Component]=None,
         input_class: Type[Input]=TextEmbeddingInput,
         output_class: Type[Output]=TextEmbeddingOutput,
         name: Optional[str]=None,
@@ -51,21 +51,21 @@ class TransformersTextEmbedding(
             predictor (Optional[Predictor[Any, Any]], optional): Predictor that will be used in task.
                 If equals to None, default predictor will be used. Defaults to None.
             
-            preprocess (Optional[List[ActionType]], optional): Chain of actions executed
-                before predictor. If equals to None, default chain will be used. 
+            preprocess (Optional[Component], optional): Component executed
+                before predictor. If equals to None, default component will be used. 
                 Defaults to None.
 
-                Default chain: 
+                Default component: 
                     [EmbeddingPreprocessor]
 
-                If default chain is used, EmbeddingPreprocessor will use AutoTokenizer from 
+                If default component is used, EmbeddingPreprocessor will use AutoTokenizer from 
                 predictor model.
             
-            postprocess (Optional[List[ActionType]], optional): Chain of actions executed
-                after predictor. If equals to None, default chain will be used. 
+            postprocess (Optional[Component], optional): Component executed
+                after predictor. If equals to None, default component will be used. 
                 Defaults to None.
 
-                Default chain: 
+                Default component: 
                     [EmbeddingPostprocessor, ConvertEmbeddingsToNumpyArrays]
             
             input_class (Type[Input], optional): Class for input validation. 
@@ -89,17 +89,15 @@ class TransformersTextEmbedding(
 
         super().__init__(
             predictor=predictor,
-            preprocess=preprocess or [
-                EmbeddingPreprocessor(
-                    tokenizer=AutoTokenizer.from_pretrained( # type: ignore 
-                        predictor.config._name_or_path
-                    )
+            preprocess=preprocess or EmbeddingPreprocessor(
+                tokenizer=AutoTokenizer.from_pretrained( # type: ignore 
+                    predictor.config._name_or_path
                 )
-            ],
-            postprocess=postprocess or [
-                EmbeddingPostprocessor(),
-                ConvertEmbeddingsToNumpyArrays()    
-            ],
+            ),
+            postprocess=postprocess or (
+                EmbeddingPostprocessor()
+                | ConvertEmbeddingsToNumpyArrays()    
+            ),
             input_class=input_class, 
             output_class=output_class,
             name=name,

@@ -1,7 +1,7 @@
-from typing import Any, List, Optional, Type
+from typing import Any, Optional, Type
 
+from utca.core.executable_level_1.component import Component
 from utca.core.executable_level_1.schema import Input, Output
-from utca.core.executable_level_1.executor import ActionType
 from utca.core.predictor_level_2.predictor import Predictor
 from utca.core.task_level_3.task import Task
 from utca.implementation.predictors.comprehend_it.predictor import (
@@ -20,8 +20,8 @@ class ComprehendIt(
         self,
         *,
         predictor: Optional[Predictor[Any, Any]]=None,
-        preprocess: Optional[List[ActionType]]=None,
-        postprocess: Optional[List[ActionType]]=None,
+        preprocess: Optional[Component]=None,
+        postprocess: Optional[Component]=None,
         input_class: Type[Input]=ComprehendItPredictorInput,
         output_class: Type[Output]=ComprehendItPredictorOutput,
         name: Optional[str]=None,
@@ -31,10 +31,10 @@ class ComprehendIt(
             predictor (Optional[Predictor[Any, Any]]): Predictor that will be used in task. 
                 If equals to None, default ComprehendItPredictor will be used. Defaults to None.
 
-            preprocess (Optional[List[ActionType]]): Chain of actions executed 
+            preprocess (Optional[Component]): Chain of actions executed 
                 before predictor. Defaults to None.
             
-            postprocess (Optional[List[ActionType]]): Chain of actions executed
+            postprocess (Optional[Component]): Chain of actions executed
                 after predictor. Defaults to None.
             
             input_class (Type[Input]): Class for input validation. Defaults to ComprehendItPredictorInput.
@@ -49,8 +49,8 @@ class ComprehendIt(
 
         super().__init__(
             predictor=predictor,
-            preprocess=preprocess or [],
-            postprocess=postprocess or [],
+            preprocess=preprocess,
+            postprocess=postprocess,
             input_class=input_class, 
             output_class=output_class,
             name=name,

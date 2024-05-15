@@ -1,7 +1,7 @@
-from typing import Any, List, Type, Optional
+from typing import Any, Optional, Type
 
+from utca.core.executable_level_1.component import Component
 from utca.core.executable_level_1.schema import Input, Output
-from utca.core.executable_level_1.executor import ActionType
 from utca.core.predictor_level_2.predictor import Predictor
 from utca.core.task_level_3.task import Task
 from utca.implementation.predictors.transformers_predictor.transformers_pipeline import (
@@ -25,8 +25,8 @@ class TransformersDocumentQandA(
         self,
         *,
         predictor: Optional[Predictor[Any, Any]]=None,
-        preprocess: Optional[List[ActionType]]=None,
-        postprocess: Optional[List[ActionType]]=None,
+        preprocess: Optional[Component]=None,
+        postprocess: Optional[Component]=None,
         input_class: Type[Input]=TransformersVisualQandAInput,
         output_class: Type[Output]=TransformersBasicOutput,
         name: Optional[str]=None,
@@ -36,10 +36,10 @@ class TransformersDocumentQandA(
             predictor (Optional[Predictor[Any, Any]], optional): Predictor that will be used in task.
                 If equals to None, default predictor will be used. Defaults to None.
             
-            preprocess (Optional[List[ActionType]], optional): Chain of actions executed 
+            preprocess (Optional[Component], optional): Component executed 
                 before predictor. Defaults to None.
             
-            postprocess (Optional[List[ActionType]], optional): Chain of actions executed
+            postprocess (Optional[Component], optional): Component executed
                 after predictor. Defaults to None.
             
             input_class (Type[Input], optional): Class for input validation. 
@@ -62,8 +62,8 @@ class TransformersDocumentQandA(
 
         super().__init__(
             predictor=predictor,
-            preprocess=preprocess or [],
-            postprocess=postprocess or [],
+            preprocess=preprocess,
+            postprocess=postprocess,
             input_class=input_class, 
             output_class=output_class,
             name=name,

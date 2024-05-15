@@ -1,6 +1,4 @@
-from typing import Any, Dict, List, Generator, Optional
-
-from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
+from typing import Any, Dict, Generator
 
 from utca.core.executable_level_1.actions import Action
 
@@ -34,20 +32,13 @@ class ChatAddContext(Action[Dict[str, Any], Dict[str, Any]]):
         input_data (Dict[str, Any]): Expected keys:
             "messages" (Iterable[ChatCompletionMessageParam]): Input messages.
 
+            "context" (Iterable[ChatCompletionMessageParam]): Context messages.
+
     Returns:
         Dict[str, Any]: Expected keys:
             "messages" (Iterable[ChatCompletionMessageParam]): Context messages
                 and input messages.
     """
-    def __init__(
-        self, 
-        messages: List[ChatCompletionMessageParam],
-        name: Optional[str]=None
-    ) -> None:
-        super().__init__(name)
-        self.messages = messages
-
-
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -56,14 +47,15 @@ class ChatAddContext(Action[Dict[str, Any], Dict[str, Any]]):
             input_data (Dict[str, Any]): Expected keys:
                 "messages" (Iterable[ChatCompletionMessageParam]): Input messages.
 
+                "context" (Iterable[ChatCompletionMessageParam]): Context messages.
+
         Returns:
             Dict[str, Any]: Expected keys:
                 "messages" (Iterable[ChatCompletionMessageParam]): Context messages
                     and input messages.
         """
-        self.messages.extend(input_data["messages"])
         return {
-            "messages": self.messages
+            "messages": [*input_data["context"], *input_data["messages"]],
         }
 
 
@@ -130,27 +122,36 @@ class ChatStreamPostprocessor(Action[Dict[str, Any], Generator[str, None, None]]
         )
     
 
-class ChatSaveContext(Action[str, None]):
+class ChatUpdateContext(Action[Dict[str, Any], Dict[str, Any]]):
     """
-    Save chat context
-    
+    Update chat context
+
     Args:
-        input_data (str): Response message.
+        input_data (Dict[str, Any]): Expected keys:
+            "message" (str): Response message.
+
+            "context" (Iterable[ChatCompletionMessageParam]): Context.
+    
+    Returns: 
+        Dict[str, Any]: Expected keys:
+            "context" (Iterable[ChatCompletionMessageParam]): Updated context.
     """
-    def __init__(
-        self, 
-        messages: List[ChatCompletionMessageParam],
-        name: Optional[str]=None
-    ) -> None:
-        super().__init__(name)
-        self.messages = messages
-
-
     def execute(
-        self, input_data: str
-    ) -> None:
+        self, input_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Args:
-            input_data (str): Response message.
+            input_data (Dict[str, Any]): Expected keys:
+                "message" (str): Response message.
+
+                "context" (Iterable[ChatCompletionMessageParam]): Context.
+        
+        Returns: 
+            Dict[str, Any]: Expected keys:
+                "context" (Iterable[ChatCompletionMessageParam]): Updated context.
         """
-        self.messages.append({"role": "assistant", "content": input_data})
+        return {
+            "context": [
+                *input_data["context"], {"role": "assistant", "content": input_data["message"]}
+            ]
+        }

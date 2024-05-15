@@ -1,11 +1,11 @@
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, Optional, Tuple, Type
 
 from transformers import ( # type: ignore
     ViltProcessor, ViltForQuestionAnswering
 )
 
+from utca.core.executable_level_1.component import Component
 from utca.core.executable_level_1.schema import IOModel, Input, Output
-from utca.core.executable_level_1.executor import ActionType
 from utca.core.predictor_level_2.predictor import Predictor
 from utca.core.task_level_3.task import Task
 from utca.implementation.predictors.transformers_predictor.transformers_model import (
@@ -42,8 +42,8 @@ class TransformersVisualQandA(
         self,
         *,
         predictor: Optional[Predictor[Any, Any]]=None,
-        preprocess: Optional[List[ActionType]]=None,
-        postprocess: Optional[List[ActionType]]=None,
+        preprocess: Optional[Component]=None,
+        postprocess: Optional[Component]=None,
         input_class: Type[Input]=TransformersVisualQandAInput,
         output_class: Type[Output]=TransformersVisualQandAOutput,
         name: Optional[str]=None,
@@ -53,22 +53,22 @@ class TransformersVisualQandA(
             predictor (Optional[Predictor[Any, Any]], optional): Predictor that will be used in task. 
                 If equals to None, default predictor will be used. Defaults to None.
             
-            preprocess (Optional[List[ActionType]], optional): Chain of actions executed
-                before predictor. If equals to None, default chain will be used. Defaults to None.
+            preprocess (Optional[Component], optional): Component executed
+                before predictor. If equals to None, default component will be used. Defaults to None.
 
-                Default chain: 
-                    [VisualQandAPreprocessor]
+                Default component: 
+                    VisualQandAPreprocessor
 
-                If default chain is used, VisualQandAPreprocessor will use ViltProcessor 
+                If default component is used, VisualQandAPreprocessor will use ViltProcessor 
                     from "dandelin/vilt-b32-finetuned-vqa" model.
             
-            postprocess (Optional[List[ActionType]], optional): Chain of actions executed
-                after predictor. If equals to None, default chain will be used. Defaults to None.
+            postprocess (Optional[Component], optional): Component executed
+                after predictor. If equals to None, default component will be used. Defaults to None.
 
-                Default chain: 
-                    [VisualQandASingleAnswerPostprocessor]
+                Default component: 
+                    VisualQandASingleAnswerPostprocessor
 
-                If default chain is used, VisualQandASingleAnswerPostprocessor will use labels 
+                If default component is used, VisualQandASingleAnswerPostprocessor will use labels 
                 from "dandelin/vilt-b32-finetuned-vqa" model.
 
             input_class (Type[Input], optional): Class for input validation. 
@@ -92,19 +92,15 @@ class TransformersVisualQandA(
 
         if not preprocess:
             processor = ViltProcessor.from_pretrained(predictor.config._name_or_path) # type: ignore
-            preprocess=[
-                VisualQandAPreprocessor(
-                    processor=processor # type: ignore
-                )
-            ]
+            preprocess=VisualQandAPreprocessor(
+                processor=processor # type: ignore
+            )
         
         if not postprocess:
             labels = predictor.config.id2label # type: ignore
-            postprocess=[ # type: ignore
-                VisualQandASingleAnswerPostprocessor(
-                    labels=labels # type: ignore
-                )
-            ]
+            postprocess=VisualQandASingleAnswerPostprocessor(
+                labels=labels # type: ignore
+            )
 
         super().__init__(
             predictor=predictor,

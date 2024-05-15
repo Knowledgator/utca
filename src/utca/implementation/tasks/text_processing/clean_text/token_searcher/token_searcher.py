@@ -1,7 +1,7 @@
-from typing import Any, List, Optional, Type
+from typing import Any, Optional, Type
 
+from utca.core.executable_level_1.component import Component
 from utca.core.executable_level_1.schema import IOModel, Input
-from utca.core.executable_level_1.executor import ActionType
 from utca.core.predictor_level_2.predictor import Predictor
 from utca.core.task_level_3.task import NERTask
 from utca.core.task_level_3.schema import (
@@ -47,8 +47,8 @@ class TokenSearcherTextCleaner(
     def __init__(
         self,
         predictor: Optional[Predictor[Any, Any]]=None,
-        preprocess: Optional[List[ActionType]]=None,
-        postprocess: Optional[List[ActionType]]=None,
+        preprocess: Optional[Component]=None,
+        postprocess: Optional[Component]=None,
         input_class: Type[Input]=TokenSearcherTextCleanerInput,
         output_class: Type[NEROutputType]=TokenSearcherTextCleanerOutput,
         name: Optional[str]=None,
@@ -59,19 +59,19 @@ class TokenSearcherTextCleaner(
                 If equals to None, default TokenSearcherPredictor will be used. 
                 Defaults to None.
 
-            preprocess (Optional[List[ActionType]], optional): Chain of actions executed 
-                before predictor. If equals to None, default chain will be used. 
+            preprocess (Optional[Component], optional): Component executed 
+                before predictor. If equals to None, default component will be used. 
                 Defaults to None.
 
-                Default chain:
-                    [TokenSeatcherTextCleanerPreprocessor]
+                Default component:
+                    TokenSeatcherTextCleanerPreprocessor
             
-            postprocess (Optional[List[ActionType]], optional): Chain of actions executed
-                after predictor. If equals to None, default chain will be used.
+            postprocess (Optional[Component], optional): Component executed
+                after predictor. If equals to None, default component will be used.
                 Defaults to None.
 
-                Default chain:
-                    [TokenSearcherTextCleanerPostprocessor]
+                Default component:
+                    TokenSearcherTextCleanerPostprocessor
             
             input_class (Type[Input], optional): Class for input validation. 
                 Defaults to TokenSearcherTextCleanerInput.
@@ -84,8 +84,8 @@ class TokenSearcherTextCleaner(
         """
         super().__init__(
             predictor=predictor or TokenSearcherPredictor(),
-            preprocess=preprocess or [TokenSearcherTextCleanerPreprocessor()],
-            postprocess=postprocess or [TokenSearcherTextCleanerPostprocessor()],
+            preprocess=preprocess or TokenSearcherTextCleanerPreprocessor(),
+            postprocess=postprocess or TokenSearcherTextCleanerPostprocessor(),
             input_class=input_class,
             output_class=output_class,
             name=name,

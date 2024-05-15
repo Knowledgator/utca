@@ -141,7 +141,7 @@ from utca.implementation.tasks.text_processing.chat.openai.actions import (
     ChatAddContext,
     ChatPostprocessor,
     ChatStreamPostprocessor,
-    ChatSaveContext,
+    ChatUpdateContext,
 )
 
 __all__ = [
@@ -231,5 +231,5 @@ __all__ = [
     "ChatAddContext",
     "ChatPostprocessor",
     "ChatStreamPostprocessor",
-    "ChatSaveContext",
+    "ChatUpdateContext",
 ]
