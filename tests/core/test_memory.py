@@ -11,14 +11,14 @@ from utca.core import (
 def test_get_memory():
     m = MemoryManager(initial_data={"test": "OK"})
     res = Evaluator(
-        schema=GetMemory(["test"], MemoryGetInstruction.GET),
+        schema=GetMemory(["test"], memory_instruction=MemoryGetInstruction.GET),
         memory_manager=m
     ).run()
     assert res["test"] == "OK"
     assert m.memory.memory["test"] == "OK"
     
     res = Evaluator(
-        schema=GetMemory(["test"], MemoryGetInstruction.POP),
+        schema=GetMemory(["test"], memory_instruction=MemoryGetInstruction.POP),
         memory_manager=m
     ).run()
     assert res["test"] == "OK"
