@@ -19,6 +19,7 @@ from utca.implementation.predictors.transformers_predictor.schema import (
     TransformersBasicInput,
     TransformersLogitsOutput,
     TransformersBasicOutput,
+    TransformersDETROutput,
 )
 from utca.implementation.predictors.transformers_predictor.transformers_pipeline import (
     TransformersPipeline,
@@ -81,6 +82,8 @@ __all__ = [
     "TransformersBasicInput",
     "TransformersLogitsOutput",
     "TransformersBasicOutput",
+    "TransformersDETROutput",
+
 
     "TokenSearcherPredictor", 
     "TokenSearcherPredictorConfig",

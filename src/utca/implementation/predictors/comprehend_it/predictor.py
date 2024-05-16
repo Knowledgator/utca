@@ -9,7 +9,7 @@ from utca.implementation.predictors.transformers_predictor.transformers_pipeline
 )
 from utca.implementation.predictors.comprehend_it.schema import (
     ComprehendItPredictorConfig,
-    ComprehendItPredictorInput, 
+    ComprehendItPredictorInput,
     ComprehendItPredictorOutput
 )   
 

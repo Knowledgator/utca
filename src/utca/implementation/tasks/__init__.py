@@ -158,6 +158,10 @@ from utca.implementation.tasks.text_processing.chat.openai.actions import (
     ChatUpdateContext,
 )
 
+from utca.implementation.tasks.text_processing.text_classification.transformers_task.text_classification import (
+    TransformersTextClassification
+)
+
 __all__ = [
     # Audio processing
     "TransformersTextToSpeech",
@@ -253,4 +257,6 @@ __all__ = [
     "ChatPostprocessor",
     "ChatStreamPostprocessor",
     "ChatUpdateContext",
+
+    "TransformersTextClassification"
 ]
