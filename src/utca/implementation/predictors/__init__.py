@@ -52,6 +52,15 @@ from utca.implementation.predictors.openai_chat_gpt.schema import (
     ChatCompletionOutput,
     ChatCompletionStreamOutput,
 )
+from utca.implementation.predictors.openai_whisper.predictor import (
+    OpenAIWhisperPredictor,
+)
+from utca.implementation.predictors.openai_whisper.schema import (
+    WhisperModelConfig,
+    WhisperTranscriptionConfig,
+    WhisperInput,
+    WhisperOutput,
+)
 
 __all__ = [
     "TransformersModel",
@@ -92,4 +101,10 @@ __all__ = [
     "ChatGPTInput",
     "ChatCompletionOutput",
     "ChatCompletionStreamOutput",
+
+    "OpenAIWhisperPredictor",
+    "WhisperModelConfig",
+    "WhisperTranscriptionConfig",
+    "WhisperInput",
+    "WhisperOutput",
 ]

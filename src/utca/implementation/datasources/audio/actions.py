@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any, Dict, Optional
 
 import soundfile as sf # type: ignore
 import numpy as np
@@ -19,6 +19,22 @@ class AudioRead(Action[Dict[str, Any], Dict[str, Any]]):
             
             'sampling_rate' (int);
     """
+    def __init__(
+        self, 
+        dtype: str="float64",
+        name: Optional[str]=None,
+    ) -> None:
+        """
+        Args:
+            dtype (str): Audio data dtype.
+
+            name (Optional[str], optional): Name for identification. If equals to None,
+                class name will be used. Defaults to None.
+        """
+        super().__init__(name)
+        self.dtype = dtype
+
+
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Args:
@@ -31,7 +47,10 @@ class AudioRead(Action[Dict[str, Any], Dict[str, Any]]):
                 
                 'sampling_rate' (int);
         """
-        audio_data, samplerate = sf.read(input_data["path_to_file"]) # type: ignore 
+        audio_data, samplerate = sf.read( # type: ignore 
+            input_data["path_to_file"],
+            dtype=self.dtype
+        ) 
         return {
             'audio': audio_data,
             'sampling_rate': samplerate
