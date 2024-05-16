@@ -3,6 +3,10 @@ from utca.implementation.tasks.audio_processing.text_to_speech.transformers_task
     TransformersTextToSpeech,
 )
 
+from utca.implementation.tasks.audio_processing.speech_to_text.whisper.whisper import (
+    WhisperSpeechToText
+)
+
 # Image processing
 from utca.implementation.tasks.image_processing.charts_and_plots_analysis.transformers_task.transformers_charts_and_plots_analysis import (
     TransformersChartsAndPlotsAnalysis,
@@ -147,6 +151,7 @@ from utca.implementation.tasks.text_processing.chat.openai.actions import (
 __all__ = [
     # Audio processing
     "TransformersTextToSpeech",
+    "WhisperSpeechToText",
 
     # Image processing
     "TransformersChartsAndPlotsAnalysis",

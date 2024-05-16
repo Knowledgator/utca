@@ -3,13 +3,11 @@ PATH = pathlib.Path(__file__).parent.resolve()
 
 from utca.core import RenameAttribute, SetValue, ExecuteFunction
 from utca.implementation.predictors import (
-    OpenAIWhisperPredictor,
-    WhisperModelConfig,
     OpenAIChatGPTPredictor,
     ChatGPTConfig,
 )
 from utca.implementation.tasks import (
-    TransformersTextToSpeech, OpenAIChat
+    WhisperSpeechToText, OpenAIChat, TransformersTextToSpeech, 
 )
 from utca.implementation.datasources.audio import (
     AudioWrite, AudioRead
@@ -18,9 +16,7 @@ from utca.implementation.datasources.audio import (
 if __name__ == "__main__":
     pipeline = (
         AudioRead(dtype="float32")
-        | OpenAIWhisperPredictor(
-            model_cfg=WhisperModelConfig(name="base"),
-        )
+        | WhisperSpeechToText()
         | RenameAttribute("text", "prompt")
         | ExecuteFunction(lambda input_data: print(input_data)) # type: ignore
         | OpenAIChat(
