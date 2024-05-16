@@ -276,3 +276,8 @@ class TransformersLogitsOutput(IOModel):
 
 class TransformersBasicOutput(IOModel):
     output: Any
+
+
+class TransformersDETROutput(IOModel):
+    pred_boxes: Any
+    logits: Any

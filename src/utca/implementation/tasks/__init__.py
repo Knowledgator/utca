@@ -45,6 +45,16 @@ from utca.implementation.tasks.image_processing.visual_q_and_a.transformers_task
     VisualQandASingleAnswerPostprocessor,
 )
 
+from utca.implementation.tasks.image_processing.object_detection.transformers_task.transformers_object_detection import (
+    TransformersObjectDetection,
+    TransformersObjectDetectionInput,
+    TransformersObjectDetectionOutput,
+)
+from utca.implementation.tasks.image_processing.object_detection.transformers_task.actions import (
+    ObjectDetectionPreprocessor,
+    DETRPostprocessor,
+)
+
 # Text processing
 from utca.implementation.tasks.text_processing.clean_text.token_searcher.token_searcher import (
     TokenSearcherTextCleaner,
@@ -176,6 +186,12 @@ __all__ = [
     "VisualQandAPreprocessor",
     "VisualQandAMultianswerPostprocessor",
     "VisualQandASingleAnswerPostprocessor",
+
+    "TransformersObjectDetection",
+    "TransformersObjectDetectionInput",
+    "TransformersObjectDetectionOutput",
+    "ObjectDetectionPreprocessor",
+    "DETRPostprocessor",
 
     # Text processing
     "TokenSearcherTextCleaner",
