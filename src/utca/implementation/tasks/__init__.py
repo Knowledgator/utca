@@ -145,21 +145,32 @@ from utca.implementation.tasks.text_processing.ner.gliner_task.actions import (
     GLiNERPostprocessor,
 )
 
+from utca.implementation.tasks.text_processing.chat.schema import (
+    ChatInput, ChatOutput
+)
+from utca.implementation.tasks.text_processing.chat.actions import (
+    ChatAddContext, ChatUpdateContext
+)
+
 from utca.implementation.tasks.text_processing.chat.openai.openai_chat import (
     OpenAIChat,
-    ChatInput,
-    ChatOutput,
 )
 from utca.implementation.tasks.text_processing.chat.openai.actions import (
-    ChatPreprocessor,
-    ChatAddContext,
-    ChatPostprocessor,
-    ChatStreamPostprocessor,
-    ChatUpdateContext,
+    OpenAIChatPreprocessor,
+    OpenAIChatPostprocessor,
+    OpenAIChatStreamPostprocessor,
+)
+
+from utca.implementation.tasks.text_processing.chat.transformers_task.transformers_chat import (
+    TransformersChat,
+)
+from utca.implementation.tasks.text_processing.chat.transformers_task.actions import (
+    ChatPreprocessor, 
+    ChatPostprocessor, 
 )
 
 from utca.implementation.tasks.text_processing.text_classification.transformers_task.text_classification import (
-    TransformersTextClassification
+    TransformersTextClassification,
 )
 
 __all__ = [
@@ -249,14 +260,19 @@ __all__ = [
     "GLiNERPreprocessor",
     "GLiNERPostprocessor",
 
-    "OpenAIChat",
     "ChatInput",
     "ChatOutput",
-    "ChatPreprocessor",
     "ChatAddContext",
-    "ChatPostprocessor",
-    "ChatStreamPostprocessor",
     "ChatUpdateContext",
 
-    "TransformersTextClassification"
+    "OpenAIChat",
+    "OpenAIChatPreprocessor",
+    "OpenAIChatPostprocessor",
+    "OpenAIChatStreamPostprocessor",
+
+    "TransformersChat",
+    "ChatPreprocessor", 
+    "ChatPostprocessor", 
+
+    "TransformersTextClassification",
 ]
