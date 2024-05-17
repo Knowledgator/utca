@@ -226,8 +226,10 @@ class GetMemory(Component):
             identifiers (List[Union[str, Tuple[str, str]]]): Key/keys that will be used to
                 access data in memory and for setting to register.
 
-            default (Dict[str, Any]): Returned value if keys not found. If equals to None, 
-                an exception will be raised. Defaults to None.
+            default (Dict[str, Any]): A map of values to be returned for each provided identifier 
+                if the identifier(s) are not found. If an identifier is not found and 
+                no default value is provided for it, an exception will be raised. 
+                Defaults to None.
 
             memory_instruction (MemoryGetInstruction, optional): Strategy for memory access.
                 Defaults to MemoryGetInstruction.GET.
@@ -342,8 +344,10 @@ class MemoryManager:
             identifiers (List[Union[str, Tuple[str, str]]]): Key/keys that will be used to
                 access data in memory and for setting to register.
 
-            default (Dict[str, Any]): Returned value if keys not found. If equals to None, 
-                an exception will be raised. Defaults to None.
+            default (Dict[str, Any]): A map of values to be returned for each provided identifier 
+                if the identifier(s) are not found. If an identifier is not found and 
+                no default value is provided for it, an exception will be raised. 
+                Defaults to None.
             
             delete (bool, optional): If equals to True, deletes accessed memory identifiers. 
                 Defaults to False.
@@ -361,7 +365,9 @@ class MemoryManager:
             try:
                 data = self.memory.retrieve_store(get_key)
             except:
-                data = default.get(get_key)
+                if not get_key in default:
+                    raise KeyError(f"No specified identifier found: {get_key}")
+                data = default[get_key]
             setattr(
                 register,
                 set_key,

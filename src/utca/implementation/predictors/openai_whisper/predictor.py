@@ -16,12 +16,12 @@ class OpenAIWhisperPredictor(
     Predictor[Input, Output]
 ):
     """
-    Basic ChatGPT predictor
+    Whisper predictor
     """
     def __init__(
         self,
         *,
-        model_cfg: WhisperModelConfig,
+        model_cfg: Optional[WhisperModelConfig]=None,
         transcription_cfg: Optional[WhisperTranscriptionConfig]=None,
         input_class: Type[Input]=WhisperInput,
         ouput_class: Type[Output]=WhisperOutput,
@@ -29,13 +29,19 @@ class OpenAIWhisperPredictor(
     ) -> None:
         """
         Args:
-            cfg (Union[
-                OpenAIWhisperTranscriptionConfig,
-                OpenAIWhisperTranslationConfig
-            ]): Whisper configuration.
+            model_cfg (Optional[WhisperModelConfig], optional): Whisper model configuration.
+                If equals to None, default WhisperModelConfig configuration will be used.
+                Defaults to None.
+
+            transcription_cfg (Optional[WhisperTranscriptionConfig], optional): Transcription configuration.
+                If equals to None, default WhisperTranscriptionConfig configuration will be used.
+                Defaults to None.
 
             input_class (Type[Input], optional): Class for input validation.
                 Defaults to WhisperInput.
+
+            input_class (Type[Output], optional): Class for input validation.
+                Defaults to WhisperOutput.
             
             name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
@@ -45,8 +51,8 @@ class OpenAIWhisperPredictor(
             output_class=ouput_class,
             name=name,
         )
-        self.cfg = model_cfg
-        self.model = whisper.load_model(**model_cfg.extract())
+        self.cfg = model_cfg or WhisperModelConfig()
+        self.model = whisper.load_model(**self.cfg.extract())
         self.transcription_cfg = transcription_cfg or WhisperTranscriptionConfig()
 
 
