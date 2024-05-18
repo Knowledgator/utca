@@ -52,7 +52,7 @@ class TransformersObjectDetection(
     Task[Input, Output]
 ):
     """
-    Basic image classification task
+    Basic object detection task
     """
     default_model = "facebook/detr-resnet-50"
     

@@ -16,6 +16,14 @@ class Processor(Protocol):
 class ObjectDetectionPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     """
     Prepare model input
+
+    Args:
+        input_data (Dict[str, Any]): Expected keys:
+            "image" (Image.Image): Image to analyze;
+
+    Returns:
+        Dict[str, Any]: Expected keys:
+            "pixel_values" (Any);
     """
     def __init__(
         self, 
@@ -40,6 +48,7 @@ class ObjectDetectionPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
         Args:
             input_data (Dict[str, Any]): Expected keys:
                 "image" (Image.Image): Image to analyze;
+
         Returns:
             Dict[str, Any]: Expected keys:
                 "pixel_values" (Any);
@@ -53,6 +62,22 @@ class ObjectDetectionPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
 class DETRPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     """
     Process model output
+
+    Args:
+        input_data (Dict[str, Any]): Expected keys:
+            "image" (Image.Image): Processed image;
+
+            "logits" (Any): Model output;
+
+            "pred_boxes" (Any);
+    
+    Returns:
+        Dict[str, Any]: Expected keys:
+            "scores" (List[float]): Probability scores.
+
+            "labels" (List[str]): Classified labels.
+            
+            "boxes" (List[Tuple[float, float, float, float]]): Bounding boxes.
     """
     def __init__(
         self, 

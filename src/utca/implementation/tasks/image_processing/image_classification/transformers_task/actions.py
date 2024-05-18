@@ -60,7 +60,7 @@ class ImageClassificationMultilabelPostprocessor(Action[Dict[str, Any], Dict[str
     ) -> None:
         """
         Args:
-            labels (List[str]): Labels for classification.
+            labels (Mapping[Any, str]): Labels for classification.
             
             threshold (float): Labels threshold score. Defaults to 0.
             
