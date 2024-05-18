@@ -9,11 +9,11 @@ class ChatPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                "prompt" (str): Input prompt
+                "prompt" (str): Input prompt;
 
         Returns:
             Dict[str, Any]: Expected keys:
-                "messages" (Iterable[ChatCompletionMessageParam]): Input messages.
+                "messages" (Iterable[ChatCompletionMessageParam]): Input messages;
         """
         return {
             "messages": [{
@@ -30,7 +30,7 @@ class ChatPostprocessor(Action[Dict[str, Any], str]):
     Args:
         input_data (Dict[str, Any]): Expected keys:
             "output" (List[Dict[str, Any]]): Expected keys:
-                "generated_text" (str)
+                "generated_text" (str);
 
     Returns:
         str: Response message.
@@ -42,7 +42,7 @@ class ChatPostprocessor(Action[Dict[str, Any], str]):
         Args:
             input_data (Dict[str, Any]): Expected keys:
                 "output" (List[Dict[str, Any]]): Expected keys:
-                    "generated_text" (str)
+                    "generated_text" (str);
 
         Returns:
             str: Response message.

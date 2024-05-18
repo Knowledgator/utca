@@ -4,17 +4,28 @@ from utca.core.executable_level_1.actions import Action
 
 
 class OpenAIChatPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+    """
+    Create message template for input prompt
+
+    Args:
+        input_data (Dict[str, Any]): Expected keys:
+            "prompt" (str): Input prompt;
+
+    Returns:
+        Dict[str, Any]: Expected keys:
+            "messages" (Iterable[ChatCompletionMessageParam]): Input messages;    
+    """
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                "prompt" (str): Input prompt
+                "prompt" (str): Input prompt;
 
         Returns:
             Dict[str, Any]: Expected keys:
-                "messages" (Iterable[ChatCompletionMessageParam]): Input messages.
+                "messages" (Iterable[ChatCompletionMessageParam]): Input messages;
         """
         return {
             "messages": [{
@@ -32,7 +43,7 @@ class OpenAIChatPostprocessor(Action[Dict[str, Any], str]):
         input_data (Dict[str, Any]): Expected keys:
             "choices" (List[Dict[str, Any]]): Expected keys:
                 "message" (Dict[str, Any]): Expected keys:
-                    "content" (str)
+                    "content" (str);
 
     Returns:
         str: Response message.
@@ -45,7 +56,7 @@ class OpenAIChatPostprocessor(Action[Dict[str, Any], str]):
             input_data (Dict[str, Any]): Expected keys:
                 "choices" (List[Dict[str, Any]]): Expected keys:
                     "message" (Dict[str, Any]): Expected keys:
-                        "content" (str)
+                        "content" (str);
 
         Returns:
             str: Response message.
@@ -62,7 +73,7 @@ class OpenAIChatStreamPostprocessor(Action[Dict[str, Any], Generator[str, None, 
             "stream" (Iterable[Dict[str, Any]]): Expected keys:
                 "choices" (List[Dict[str, Any]]): Expected keys:
                     "delta" (Dict[str, Any]): Expected keys:
-                        "content" (str)
+                        "content" (str);
 
     Returns:
         Generator[str, None, None]: Response chunks.
@@ -76,7 +87,7 @@ class OpenAIChatStreamPostprocessor(Action[Dict[str, Any], Generator[str, None, 
                 "stream" (Iterable[Dict[str, Any]]): Expected keys:
                     "choices" (List[Dict[str, Any]]): Expected keys:
                         "delta" (Dict[str, Any]): Expected keys:
-                            "content" (str)
+                            "content" (str);
 
         Returns:
             Generator[str, None, None]: Response chunks.

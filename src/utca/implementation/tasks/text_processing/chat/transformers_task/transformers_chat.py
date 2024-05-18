@@ -1,8 +1,6 @@
 from typing import Any, Type, Optional
 import uuid
 
-from transformers import AutoTokenizer # type: ignore
-
 from utca.core.executable_level_1.actions import RenameAttribute
 from utca.core.executable_level_1.component import Component
 from utca.core.executable_level_1.memory import GetMemory, SetMemory
@@ -49,6 +47,9 @@ class TransformersChat(
 
             messages (Optional[str], optional): Key to use to access memory for messages.
                 If equals to None, a unique key will be generated. Defaults to None.
+
+                ***Note***: This parameter will function correctly only 
+                when using the default preprocessor and postprocessor.
             
             preprocess (Optional[Component]]): Component executed 
                 before predictor. If equals to None, default component will be used. 

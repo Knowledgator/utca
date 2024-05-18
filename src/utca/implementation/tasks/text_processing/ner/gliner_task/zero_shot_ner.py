@@ -21,7 +21,7 @@ from utca.implementation.tasks.text_processing.ner.gliner_task.actions import (
 class GLiNERInput(IOModel):
     """
     Arguments:
-        text (str): Text to clean.
+        text (str): Text to process.
 
         labels(List[str]): Labels for classification.
     """

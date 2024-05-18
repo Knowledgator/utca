@@ -21,6 +21,7 @@ from utca.implementation.tasks.text_processing.chat.openai.actions import (
 class OpenAIChat(
     Task[Input, Output]
 ):
+    """Basic chat based on OpenAI"""
     def __init__(
         self,
         *,
@@ -40,6 +41,9 @@ class OpenAIChat(
 
             messages (Optional[str], optional): Key to use to access memory for messages.
                 If equals to None, a unique key will be generated. Defaults to None.
+
+                ***Note***: This parameter will function correctly only 
+                when using the default preprocessor and postprocessor.
                 
             preprocess (Optional[Component]]): Component executed 
                 before predictor. If equals to None, default component will be used. 

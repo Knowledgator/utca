@@ -40,7 +40,7 @@ class ChatUpdateContext(Action[Dict[str, Any], Dict[str, Any]]):
 
 class ChatAddContext(Action[Dict[str, Any], Dict[str, Any]]):
     """
-    Add context
+    Add context to new messages
 
     Args:
         input_data (Dict[str, Any]): Expected keys:
