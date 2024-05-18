@@ -5,16 +5,19 @@ from utca.core.task_level_3.objects.objects import (
     ClassifiedEntity
 )
 from utca.implementation.predictors.token_searcher.utils import (
-    build_entity, sent_tokenizer
+    build_entity
 )
+from utca.implementation.tasks.text_processing.utils import sent_tokenizer
 
 class TokenSearcherNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     """
-    Create prompts with providied text
+    Create prompts with provided text
 
     Arguments:
         input_data (Dict[str, Any]): Expected keys:
             "text" (str): Text to process;
+
+            "labels" (List[str]): Labels for classification;
 
     Returns:
         Dict[str, Any]: Expected keys:
@@ -54,14 +57,14 @@ Text:
         chunks: List[str] = []
         starts: List[int] = []
 
-        sentences: List[Tuple[int, int]] = [*sent_tokenizer(text)]
+        sentences: List[Tuple[int, int]] = list(sent_tokenizer(text))
 
         for i in range(0, len(sentences), self.sents_batch):
             start = sentences[i][0]
             starts.append(start)
 
             last_sentence = self.get_last_sentence_id(i, len(sentences))
-            end = sentences[last_sentence][0]
+            end = sentences[last_sentence][-1]
 
             chunks.append(text[start:end])
         return chunks, starts

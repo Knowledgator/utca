@@ -4,7 +4,7 @@ from utca.core.executable_level_1.actions import Action
 from utca.core.task_level_3.objects.objects import (
     ClassifiedEntity
 )
-from utca.implementation.predictors.token_searcher.utils import sent_tokenizer
+from utca.implementation.tasks.text_processing.utils import sent_tokenizer
 
 class GLiNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     """
@@ -31,8 +31,6 @@ class GLiNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     ) -> None:
         """
         Args:
-            labels (List[str]) - list of labels to recognize in a text.
-
             sents_batch (int): Chunks size in sentences. Defaults to 10.
 
             threshold (float): Minimial score to put entities into the output.
@@ -53,17 +51,18 @@ class GLiNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
         chunks: List[str] = []
         starts: List[int] = []
 
-        sentences: List[Tuple[int, int]] = [*sent_tokenizer(text)]
+        sentences: List[Tuple[int, int]] = list(sent_tokenizer(text))
 
         for i in range(0, len(sentences), self.sents_batch):
             start = sentences[i][0]
             starts.append(start)
 
             last_sentence = self.get_last_sentence_id(i, len(sentences))
-            end = sentences[last_sentence][0]
+            end = sentences[last_sentence][-1]
 
             chunks.append(text[start:end])
         return chunks, starts
+
 
     def execute(
         self, input_data: Dict[str, Any]
@@ -72,8 +71,6 @@ class GLiNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
         Arguments:
             input_data (Dict[str, Any]): Expected keys:
                 "text" (str): Text to process;
-
-                "labels" (List[str]): Labels for classification;
 
         Returns:
             Dict[str, Any]: Expected keys:
@@ -101,8 +98,6 @@ class GLiNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
         input_data (Dict[str, Any]): Expected keys:
             "output" (List[List[Dict[str, Any]]]): Model output;
 
-            "labels" (List[str]): Labels for classification;
-            
             "text" (str): Processed text;
             
             "chunks_starts" (List[int]): Chunks start positions;
@@ -122,8 +117,6 @@ class GLiNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
             input_data (Dict[str, Any]): Expected keys:
                 "output" (List[List[Dict[str, Any]]]): Model output;
 
-                "labels" (List[str]): Labels for classification;
-                
                 "text" (str): Processed text;
                 
                 "chunks_starts" (List[int]): Chunks start positions;

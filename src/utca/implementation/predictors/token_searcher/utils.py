@@ -1,16 +1,9 @@
-from typing import Tuple, Iterator, cast, Dict, Union, Any, overload, Optional
+from typing import Any, Dict, Union, Optional, overload
 import string
 
 from utca.core.task_level_3.objects.objects import (
     Entity, ClassifiedEntity
 )
-import nltk # type: ignore
-nltk.download('punkt', quiet=True) # type: ignore
-tokenizer = nltk.load("tokenizers/punkt/english.pickle") # type: ignore
-
-def sent_tokenizer(text: str) -> Iterator[Tuple[int, int]]:
-    return cast(Iterator[Tuple[int, int]], tokenizer.span_tokenize(text)) # type: ignore
-
 
 def clean_span(text: str, start: int, end: int, shift: int=0):
     junk = {*string.punctuation, *' \n\r\t'}
