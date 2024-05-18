@@ -1,5 +1,11 @@
-from utca.implementation.schemas.semantic_search_schema import SemanticSearchSchema
+from utca.implementation.schemas.semantic_search_schema import (
+    SemanticSearchSchema,
+    SemanticSearchSchemaInput,
+    SemanticSearchSchemaOutput,
+)
 
 __all__ = [
-    "SemanticSearchSchema"    
+    "SemanticSearchSchema",
+    "SemanticSearchSchemaInput",
+    "SemanticSearchSchemaOutput",
 ]
