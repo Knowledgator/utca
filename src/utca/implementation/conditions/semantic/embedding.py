@@ -7,7 +7,7 @@ from utca.core.executable_level_1.actions import (
     ExecuteFunction,
     AddData
 )
-from utca.implementation.schemas.semantic_search_schema import (
+from utca.implementation.schemas.semantic_search.semantic_search_schema import (
     SemanticSearchSchema
 )
 
