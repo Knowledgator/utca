@@ -33,11 +33,11 @@ class RequestsHTML(Executable[RequestsHTMLInput, RequestsHTMLOutput]):
             js_rendering (bool, optional): Specifies whether the page should be rendered.
                 Defaults to False.
 
-            input_class (Type[Web2MeaningInput], optional): Class for input validation.
-                Defaults to Web2MeaningInput.
+            input_class (Type[RequestsHTMLInput], optional): Class for input validation.
+                Defaults to RequestsHTMLInput.
             
-            output_class (Type[Web2MeaningOutput], optional): Class for output validation.
-                Defaults to Web2MeaningOutput.
+            output_class (Type[RequestsHTMLOutput], optional): Class for output validation.
+                Defaults to RequestsHTMLOutput.
            
             name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
