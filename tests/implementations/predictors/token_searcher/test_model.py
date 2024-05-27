@@ -1,11 +1,10 @@
-from utca.core import Transformable
 from utca.implementation.predictors import (
     TokenSearcherPredictor
 )
 
 def test_tokensearcher():
     predictor = TokenSearcherPredictor()
-    actual_ouput = predictor(Transformable({
+    actual_ouput = predictor.run({
         "inputs": [(
             "Identify organizations mentioned in the text:"
             " The National Aeronautics and Space Administration"
@@ -13,7 +12,7 @@ def test_tokensearcher():
             " government responsible for the civilian space program,"
             " as well as aeronautics and space research."
         )]
-    })).extract()
+    })
 
     expected_ouput = {"entity_group": "ENT", "score": 0.793671, "word": "NationalAeronauticsandSpaceAdministration", "start": 49, "end": 95}
     assert (

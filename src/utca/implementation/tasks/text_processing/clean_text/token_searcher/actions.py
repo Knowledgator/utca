@@ -23,7 +23,7 @@ class TokenSearcherTextCleanerPreprocessor(Action[Dict[str, Any], Dict[str, Any]
     prompt: str = """
 Clean the following text extracted from the web matching not relevant parts:
 
- {text}
+{text}
 """
 
     def execute(

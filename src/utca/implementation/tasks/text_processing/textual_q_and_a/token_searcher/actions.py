@@ -20,7 +20,7 @@ class TokenSearcherQandAPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     """
     prompt: str = """{question}
 Text:
- {text}"""
+{text}"""
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:

@@ -32,7 +32,7 @@ class TokenSearcherNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
 Identify entities in the text having the following classes:
 {label}
 Text:
- """
+"""
     def __init__(
         self, 
         sents_batch: int=10,
