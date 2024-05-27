@@ -24,6 +24,9 @@ pillow = "^10.3.0"
 openai = "^1.29.0"
 openai-whisper = "^20231117"
 requests-html = "^0.10.0"
+reportlab = "^4.2.0"
+requests = "^2.32.2"
+gliner = "^0.2.0"
 
 
 [build-system]
