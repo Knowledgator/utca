@@ -23,6 +23,7 @@ numpy = "^1.26.4"
 pillow = "^10.3.0"
 openai = "^1.29.0"
 openai-whisper = "^20231117"
+requests-html = "^0.10.0"
 
 
 [build-system]

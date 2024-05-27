@@ -17,6 +17,11 @@ from utca.implementation.schemas.web_scraping.web2meaning.schema import (
     Web2MeaningDateParameters,
     Web2MeaningTextParameters
 )
+from utca.implementation.schemas.web_scraping.requests_html.requests_html import (
+    RequestsHTML,
+    RequestsHTMLInput,
+    RequestsHTMLOutput,
+)
 
 __all__ = [
     "SemanticSearchSchema",
@@ -31,5 +36,8 @@ __all__ = [
     "Web2MeaningMediaParameters",
     "Web2MeaningMetadataParameters",
     "Web2MeaningDateParameters",
-    "Web2MeaningTextParameters"
+    "Web2MeaningTextParameters",
+    "RequestsHTML",
+    "RequestsHTMLInput",
+    "RequestsHTMLOutput",
 ]
