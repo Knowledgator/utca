@@ -4,20 +4,19 @@
 {
     "distutils": {
         "depends": [
-            "utca/implementation/datasources/trie/trie.cpp",
-            "utca/implementation/datasources/trie/trie.h"
+            "src/utca/implementation/datasources/trie/trie.cpp",
+            "src/utca/implementation/datasources/trie/trie.h"
         ],
         "extra_compile_args": [
-            "-std=c++17"
+            "-std=c++11"
         ],
         "include_dirs": [
-            "utca/implementation/datasources/trie",
-            "./utca/implementation/datasources/trie"
+            "src/utca/implementation/datasources/trie"
         ],
         "language": "c++",
         "name": "labels_trie",
         "sources": [
-            "/home/mvy/open_source/knowledgator/utca/utca/implementation/datasources/trie/labels_trie.pyx"
+            "/home/mvy/open_source/knowledgator/utca/src/utca/implementation/datasources/trie/labels_trie.pyx"
         ]
     },
     "module_name": "labels_trie"
@@ -1511,7 +1510,7 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "<stringsource>",
-  "utca/implementation/datasources/trie/labels_trie.pyx",
+  "src/utca/implementation/datasources/trie/labels_trie.pyx",
 };
 /* #### Code section: utility_code_proto_before_types ### */
 /* ForceInitThreads.proto */
@@ -2229,7 +2228,7 @@ static const char __pyx_k_vector_vector_cython_int[] = "vector[vector[cython.int
 static const char __pyx_k_LabelsTrie___reduce_cython[] = "LabelsTrie.__reduce_cython__";
 static const char __pyx_k_LabelsTrie___setstate_cython[] = "LabelsTrie.__setstate_cython__";
 static const char __pyx_k_self_c_trie_cannot_be_converted[] = "self.c_trie cannot be converted to a Python object for pickling";
-static const char __pyx_k_utca_implementation_datasources[] = "utca/implementation/datasources/trie/labels_trie.pyx";
+static const char __pyx_k_src_utca_implementation_datasour[] = "src/utca/implementation/datasources/trie/labels_trie.pyx";
 /* #### Code section: decls ### */
 static int __pyx_pf_11labels_trie_10LabelsTrie___init__(struct __pyx_obj_11labels_trie_LabelsTrie *__pyx_v_self, std::vector<std::vector<int> >  __pyx_v_list); /* proto */
 static PyObject *__pyx_pf_11labels_trie_10LabelsTrie_2add_batch(struct __pyx_obj_11labels_trie_LabelsTrie *__pyx_v_self, std::vector<std::vector<int> >  __pyx_v_list); /* proto */
@@ -2316,9 +2315,9 @@ typedef struct {
   PyObject *__pyx_kp_s_self_c_trie_cannot_be_converted;
   PyObject *__pyx_n_s_setstate;
   PyObject *__pyx_n_s_setstate_cython;
+  PyObject *__pyx_kp_s_src_utca_implementation_datasour;
   PyObject *__pyx_kp_s_stringsource;
   PyObject *__pyx_n_s_test;
-  PyObject *__pyx_kp_s_utca_implementation_datasources;
   PyObject *__pyx_kp_s_vector_cython_int;
   PyObject *__pyx_kp_s_vector_vector_cython_int;
   PyObject *__pyx_tuple_;
@@ -2413,9 +2412,9 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_kp_s_self_c_trie_cannot_be_converted);
   Py_CLEAR(clear_module_state->__pyx_n_s_setstate);
   Py_CLEAR(clear_module_state->__pyx_n_s_setstate_cython);
+  Py_CLEAR(clear_module_state->__pyx_kp_s_src_utca_implementation_datasour);
   Py_CLEAR(clear_module_state->__pyx_kp_s_stringsource);
   Py_CLEAR(clear_module_state->__pyx_n_s_test);
-  Py_CLEAR(clear_module_state->__pyx_kp_s_utca_implementation_datasources);
   Py_CLEAR(clear_module_state->__pyx_kp_s_vector_cython_int);
   Py_CLEAR(clear_module_state->__pyx_kp_s_vector_vector_cython_int);
   Py_CLEAR(clear_module_state->__pyx_tuple_);
@@ -2488,9 +2487,9 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_kp_s_self_c_trie_cannot_be_converted);
   Py_VISIT(traverse_module_state->__pyx_n_s_setstate);
   Py_VISIT(traverse_module_state->__pyx_n_s_setstate_cython);
+  Py_VISIT(traverse_module_state->__pyx_kp_s_src_utca_implementation_datasour);
   Py_VISIT(traverse_module_state->__pyx_kp_s_stringsource);
   Py_VISIT(traverse_module_state->__pyx_n_s_test);
-  Py_VISIT(traverse_module_state->__pyx_kp_s_utca_implementation_datasources);
   Py_VISIT(traverse_module_state->__pyx_kp_s_vector_cython_int);
   Py_VISIT(traverse_module_state->__pyx_kp_s_vector_vector_cython_int);
   Py_VISIT(traverse_module_state->__pyx_tuple_);
@@ -2579,9 +2578,9 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_kp_s_self_c_trie_cannot_be_converted __pyx_mstate_global->__pyx_kp_s_self_c_trie_cannot_be_converted
 #define __pyx_n_s_setstate __pyx_mstate_global->__pyx_n_s_setstate
 #define __pyx_n_s_setstate_cython __pyx_mstate_global->__pyx_n_s_setstate_cython
+#define __pyx_kp_s_src_utca_implementation_datasour __pyx_mstate_global->__pyx_kp_s_src_utca_implementation_datasour
 #define __pyx_kp_s_stringsource __pyx_mstate_global->__pyx_kp_s_stringsource
 #define __pyx_n_s_test __pyx_mstate_global->__pyx_n_s_test
-#define __pyx_kp_s_utca_implementation_datasources __pyx_mstate_global->__pyx_kp_s_utca_implementation_datasources
 #define __pyx_kp_s_vector_cython_int __pyx_mstate_global->__pyx_kp_s_vector_cython_int
 #define __pyx_kp_s_vector_vector_cython_int __pyx_mstate_global->__pyx_kp_s_vector_vector_cython_int
 #define __pyx_tuple_ __pyx_mstate_global->__pyx_tuple_
@@ -4398,9 +4397,9 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_kp_s_self_c_trie_cannot_be_converted, __pyx_k_self_c_trie_cannot_be_converted, sizeof(__pyx_k_self_c_trie_cannot_be_converted), 0, 0, 1, 0},
     {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
     {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
+    {&__pyx_kp_s_src_utca_implementation_datasour, __pyx_k_src_utca_implementation_datasour, sizeof(__pyx_k_src_utca_implementation_datasour), 0, 0, 1, 0},
     {&__pyx_kp_s_stringsource, __pyx_k_stringsource, sizeof(__pyx_k_stringsource), 0, 0, 1, 0},
     {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
-    {&__pyx_kp_s_utca_implementation_datasources, __pyx_k_utca_implementation_datasources, sizeof(__pyx_k_utca_implementation_datasources), 0, 0, 1, 0},
     {&__pyx_kp_s_vector_cython_int, __pyx_k_vector_cython_int, sizeof(__pyx_k_vector_cython_int), 0, 0, 1, 0},
     {&__pyx_kp_s_vector_vector_cython_int, __pyx_k_vector_vector_cython_int, sizeof(__pyx_k_vector_vector_cython_int), 0, 0, 1, 0},
     {0, 0, 0, 0, 0, 0, 0}
@@ -4432,7 +4431,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_tuple_ = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_list); if (unlikely(!__pyx_tuple_)) __PYX_ERR(1, 18, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
-  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_utca_implementation_datasources, __pyx_n_s_add_batch, 18, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(1, 18, __pyx_L1_error)
+  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_utca_implementation_datasour, __pyx_n_s_add_batch, 18, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(1, 18, __pyx_L1_error)
 
   /* "labels_trie.pyx":22
  * 
@@ -4441,7 +4440,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         self.c_trie.add(list, False)
  * 
  */
-  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_utca_implementation_datasources, __pyx_n_s_add, 22, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(1, 22, __pyx_L1_error)
+  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_utca_implementation_datasour, __pyx_n_s_add, 22, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(1, 22, __pyx_L1_error)
 
   /* "labels_trie.pyx":26
  * 
@@ -4450,7 +4449,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         return self.c_trie.get_possible_next_keys(list)
  * 
  */
-  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_utca_implementation_datasources, __pyx_n_s_get, 26, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(1, 26, __pyx_L1_error)
+  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_utca_implementation_datasour, __pyx_n_s_get, 26, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(1, 26, __pyx_L1_error)
 
   /* "labels_trie.pyx":30
  * 
@@ -4459,7 +4458,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         self.c_trie.remove_batch(&list)
  * 
  */
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_utca_implementation_datasources, __pyx_n_s_remove_batch, 30, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(1, 30, __pyx_L1_error)
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_utca_implementation_datasour, __pyx_n_s_remove_batch, 30, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(1, 30, __pyx_L1_error)
 
   /* "labels_trie.pyx":34
  * 
@@ -4468,7 +4467,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         self.c_trie.remove_entity(list)
  * 
  */
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_utca_implementation_datasources, __pyx_n_s_remove_entity, 34, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(1, 34, __pyx_L1_error)
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_utca_implementation_datasour, __pyx_n_s_remove_entity, 34, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(1, 34, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<

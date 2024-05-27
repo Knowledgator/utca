@@ -49,9 +49,9 @@ namespace cpp_trie {
         return !children.empty();
     }
 
-    std::vector<cpp_trie::Node *>::iterator Node::find(int child_key)
+    std::vector<cpp_trie::Node*>::iterator Node::find(int child_key)
     {
-        for (auto i = children.begin(); i != children.end(); i++) {
+        for (std::vector<cpp_trie::Node*>::iterator i = children.begin(); i != children.end(); i++) {
             if ((*i)->get_key() == child_key)
                 return i;
         }
@@ -59,8 +59,9 @@ namespace cpp_trie {
     }
 
     void Node::delete_child(int child_key)
-    {   
-        if (auto i = find(child_key); i != children.end())
+    {
+        std::vector<cpp_trie::Node*>::iterator i = find(child_key);
+        if (i != children.end())
             children.erase(i);
     }
 
@@ -98,7 +99,8 @@ namespace cpp_trie {
     {
         Node* current = root;
         for (int token_id : entity) {
-            if (Node* next = current->get_child(token_id); next)
+            Node* next = current->get_child(token_id);
+            if (next)
                 current = next;
             else {
                 Node* new_child = new Node(token_id, permanent);
@@ -113,7 +115,8 @@ namespace cpp_trie {
         std::vector<int> res;
         Node* tmp = root;
         for (int i : entity){
-            if (Node* next = tmp->get_child(i); next) {
+            Node* next = tmp->get_child(i);
+            if (next) {
                 tmp = next;
             } else {
                 return res;
@@ -121,7 +124,7 @@ namespace cpp_trie {
         }
 
         std::vector<Node*> children = tmp->get_children();
-        res.reserve(size(children));
+        res.reserve(children.size());
         for (Node* c : children) {
             res.push_back(c->get_key());
         }
@@ -133,7 +136,8 @@ namespace cpp_trie {
         std::vector<Node*> b {root};
         Node* tmp = root;
         for (int token_id : entity) {
-            if (Node* next = tmp->get_child(token_id); next)
+            Node* next = tmp->get_child(token_id);
+            if (next)
                 tmp = next;
             else
                 return std::vector<Node*>{};
@@ -157,7 +161,7 @@ namespace cpp_trie {
             return;
         }
 
-        for (auto c = b.rbegin(), p = b.rbegin()+1; p != b.rend(); c++, p++) {
+        for (std::vector<Node*>::reverse_iterator c = b.rbegin(), p = b.rbegin()+1; p != b.rend(); c++, p++) {
             if ((*c)->has_children() || (*c)->is_permanent())
                 break;
             (*p)->delete_child((*c)->get_key());
