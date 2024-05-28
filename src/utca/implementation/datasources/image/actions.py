@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional, Tuple, cast
+from typing import Dict, Any, Literal, Optional, Tuple, cast
 
 from PIL import Image, ImageOps
 
@@ -28,7 +28,7 @@ class ImageRead(Action[Dict[str, Any], Image.Image]):
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                'path_to_file' (str): Path to image file;
+                "path_to_file" (str): Path to image file;
 
         Raises:
             Exception: If unable to read image.
@@ -50,17 +50,53 @@ class ImageWrite(Action[Dict[str, Any], None]):
         """
         Args:
             input_data (Dict[str, Any]): Expected keys:
-                'image' (Image.Image): Image;
+                "image" (Image.Image): Image;
 
-                'path_to_file' (str): Path to image file;
+                "path_to_file" (str): Path to image file;
 
         Raises:
             Exception: If unable to write image.
         """
         try:
-            cast(Image.Image, input_data['image']).save(input_data['path_to_file']) # type: ignore
+            cast(Image.Image, input_data["image"]).save(input_data["path_to_file"]) # type: ignore
         except Exception as e:
             raise Exception(f"Unable to write image: {e}")
+
+
+class ImageConvertChannels(Action[Image.Image, Image.Image]):
+    """
+    Convert image channels
+    """
+    def __init__(
+        self, 
+        channels_mode: Literal["RGB", "RGBA", "L", "P", "PA", "CMYK"]="RGB",
+        name: Optional[str]=None,
+        default_key: str="image",
+    ):
+        """
+        Args:
+            channels_mode (Literal["RGB", "RGBA", "L", "P", "PA", "CMYK"], optional): Channels mode to use.
+                Defaults to "RGB".
+
+            name (Optional[str], optional): Name for identification.
+                    If equals to None, class name will be used. Defaults to None.
+
+            default_key (str, optional): What key will be used by default. 
+                Defaults to "image".
+        """
+        self.channels_mode = channels_mode
+        super().__init__(name=name, default_key=default_key)
+
+
+    def execute(self, input_data: Image.Image) -> Image.Image:
+        """
+        Args:
+            input_data (Image.Image): Image.
+
+        Returns:
+            Image.Image: Coverted image.
+        """
+        return input_data.convert(self.channels_mode)
 
 
 class ImageRotate(Action[Image.Image, Image.Image]):

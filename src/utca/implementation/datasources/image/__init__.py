@@ -1,6 +1,7 @@
 from utca.implementation.datasources.image.actions import (
     ImageRead, 
-    ImageWrite, 
+    ImageWrite,
+    ImageConvertChannels,
     ImageCrop, 
     ImagePad, 
     ImageResize, 
@@ -9,7 +10,8 @@ from utca.implementation.datasources.image.actions import (
 
 __all__ = [
     "ImageRead", 
-    "ImageWrite", 
+    "ImageWrite",
+    "ImageConvertChannels", 
     "ImageCrop", 
     "ImagePad", 
     "ImageResize", 
