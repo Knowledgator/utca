@@ -207,8 +207,8 @@ class TokenSearcherRelationExtractionPostprocessor(Action[Dict[str, Any], Dict[s
         return {
             rel: [
                 e for e in entities
-                if e["entity"] in ends
-            ] if ends else None
+                if not ends or e["entity"] in ends
+            ]
             for rel, ends in expected_ends.items()
         }
 
@@ -226,12 +226,13 @@ class TokenSearcherRelationExtractionPostprocessor(Action[Dict[str, Any], Dict[s
             ).__dict__,
             "score": 1
         }
-        if targets is None:
-            return tmp_target
+        if not targets:
+            return None
+        
         for t in targets:
             if t["start"] <= tmp_target["start"] and t["end"] >= tmp_target["end"]:
                 return t
-        return tmp_target
+        return None
 
 
     def validate_labels(
