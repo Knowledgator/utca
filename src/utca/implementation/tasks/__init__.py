@@ -173,6 +173,19 @@ from utca.implementation.tasks.text_processing.text_classification.transformers_
     TransformersTextClassification,
 )
 
+from utca.implementation.tasks.text_processing.relation_extraction.schema import (
+    RelationExtractionInput,
+    RelationExtractionOutput,
+)
+
+from utca.implementation.tasks.text_processing.relation_extraction.token_searcher.relation_extraction import (
+    TokenSearcherRelationExtraction,
+)
+from utca.implementation.tasks.text_processing.relation_extraction.token_searcher.actions import (
+    TokenSearcherRelationExtractionPreprocessor,
+    TokenSearcherRelationExtractionPostprocessor,
+)
+
 __all__ = [
     # Audio processing
     "TransformersTextToSpeech",
@@ -275,4 +288,11 @@ __all__ = [
     "ChatPostprocessor", 
 
     "TransformersTextClassification",
+
+    "RelationExtractionInput",
+    "RelationExtractionOutput",
+
+    "TokenSearcherRelationExtraction",
+    "TokenSearcherRelationExtractionPreprocessor",
+    "TokenSearcherRelationExtractionPostprocessor",
 ]
