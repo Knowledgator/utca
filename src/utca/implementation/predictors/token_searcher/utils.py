@@ -46,7 +46,7 @@ def build_entity(
     label: Optional[str]=None,
     shift: int=0,
 ) -> Union[Entity, ClassifiedEntity, None]:
-    if raw_entity['score'] > threshold:
+    if raw_entity['score'] >= threshold:
         span, start, end = clean_span(
             text, 
             raw_entity['start'] + 1, 
