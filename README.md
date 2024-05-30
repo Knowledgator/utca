@@ -12,6 +12,8 @@ pip install -U utca
 
 ## Documentation
 
+Please refer to the detailed documentation available [here](https://utca.knowledgator.com/). This comprehensive guide provides everything you need to get started, including installation instructions, and usage examples. For advanced users, the documentation also covers API reference and customization options.
+
 ## Quickstart
 
 For this example will be used simple ExecutionSchema with TokenSearcherNER task. This program will extract entities with provided labels and threshold.
