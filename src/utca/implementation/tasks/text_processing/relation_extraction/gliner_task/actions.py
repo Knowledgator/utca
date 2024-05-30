@@ -3,6 +3,19 @@ from typing import Any, Dict, List, Set, Optional, Tuple, Generator, cast
 from utca.core.executable_level_1.actions import Action
 
 class GLiNERRelationExtractionPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+    """
+    Create labels for relation extraction
+
+    Args:
+        input_data (Dict[str, Any]): Expected keys:
+            "relations" (List[Relation]): Relations parameters;
+
+            "entities" (List[ClassifiedEntity]): Entities to use;
+
+    Returns:
+        Dict[str, Any]: Expected keys:
+            "labels" (List[str]): Labels model inputs;
+    """
     def create_label(self, span: str, relation: str) -> str:
         return f"{span} <> {relation}"
         
@@ -81,20 +94,18 @@ class GLiNERRelationExtractionPostprocessor(Action[Dict[str, Any], Dict[str, Any
     """
     Format output
 
-    Arguments:
+    Args:
         input_data (Dict[str, Any]): Expected keys:
-            "output" (List[List[Dict[str, Any]]]): Model output;
+            "output" (List[List[Dict[str, Any]]]): Model output; 
 
-            "text" (str): Processed text;
-            
-            "chunks_starts" (List[int]): Chunks start positions;
-            
-            
+            "relations" (List[Relation]): Relations parameters;
+
+            "entities" (List[ClassifiedEntity]): Entities to use;
+
+            "chunks_starts" (List[int]): Chunks starts;
     Returns:
         Dict[str, Any]: Expected keys:
-            "text" (str): Processed text;
-            
-            "output" (List[ClassifiedEntity]): Classified entities;
+            "output" (List[Triplets]): Extracted relations;
     """
     def get_expected_start_labels(
         self, relations: List[Dict[str, Any]]
@@ -219,7 +230,7 @@ class GLiNERRelationExtractionPostprocessor(Action[Dict[str, Any], Dict[str, Any
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Arguments:
+        Args:
             input_data (Dict[str, Any]): Expected keys:
                 "output" (List[List[Dict[str, Any]]]): Model output; 
 

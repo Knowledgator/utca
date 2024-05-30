@@ -100,6 +100,7 @@ class GLiNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
 
             "text" (str): Processed text;
             
+            "chunks_starts" (List[int]): Chunks starts;
     Returns:
         Dict[str, Any]: Expected keys:
             "text" (str): Processed text;
@@ -134,6 +135,8 @@ class GLiNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
                 "output" (List[List[Dict[str, Any]]]): Model output;
 
                 "text" (str): Processed text;
+
+                "chunks_starts" (List[int]): Chunks starts;
         Returns:
             Dict[str, Any]: Expected keys:
                 "text" (str): Processed text;
