@@ -15,11 +15,11 @@ class TokenSearcherRelationExtractionPreprocessor(Action[Dict[str, Any], Dict[st
 
             "relations" (List[Relation]): Relations parameters;
 
-            "entities" (Dict[str, Any]): Entities to use;
+            "entities" (List[ClassifiedEntity]): Entities to use;
 
     Returns:
         Dict[str, Any]: Expected keys:
-            "source_entities" (Dict[str, Any]): Source entities to use;
+            "source_entities" (List[ClassifiedEntity]): Source entities to use;
 
             "relations_labels" (List[str]): Corresponding relations labels;
 
@@ -127,11 +127,11 @@ Text:
 
                 "relations" (List[Relation]): Relations parameters;
 
-                "entities" (Dict[str, Any]): Entities to use;
+                "entities" (List[ClassifiedEntity]): Entities to use;
 
         Returns:
             Dict[str, Any]: Expected keys:
-                "source_entities" (Dict[str, Any]): Source entities to use;
+                "source_entities" (List[ClassifiedEntity]): Source entities to use;
 
                 "relations_labels" (List[str]): Corresponding relations labels;
 
@@ -158,11 +158,11 @@ class TokenSearcherRelationExtractionPostprocessor(Action[Dict[str, Any], Dict[s
 
             "relations" (List[Relation]): Relations parameters;
 
-            "source_entities" (Dict[str, Any]): Used source entities;
+            "source_entities" (List[ClassifiedEntity]): Used source entities;
 
             "relations_labels" (List[str]): Corresponding relations labels;
             
-            "entities" (Dict[str, Any]): Entities to use;
+            "entities" (List[ClassifiedEntity]): Entities to use;
 
             "prompt_lengths" (List[int]): Prompt lenghts;
             
@@ -177,7 +177,7 @@ class TokenSearcherRelationExtractionPostprocessor(Action[Dict[str, Any], Dict[s
     ) -> None:
         """
         Arguments:
-            threshold (float): Entities threshold score. Defaults to 0.
+            threshold (float): Relations threshold score. Defaults to 0.
             
             name (Optional[str], optional): Name for identification. If equals to None,
                 class name will be used. Defaults to None.      
@@ -310,21 +310,23 @@ class TokenSearcherRelationExtractionPostprocessor(Action[Dict[str, Any], Dict[s
         """
         Arguments:
             input_data (Dict[str, Any]): Expected keys:
-                "output" (List[List[Dict[str, Any]]]): Model output;
-
-                "labels" (List[str]): Labels for classification;
-                
                 "text" (str): Processed text;
+
+                "output" (List[List[Dict[str, Any]]]): Model output; 
+
+                "relations" (List[Relation]): Relations parameters;
+
+                "source_entities" (List[ClassifiedEntity]): Used source entities;
+
+                "relations_labels" (List[str]): Corresponding relations labels;
                 
-                "chunks_starts" (List[int]): Chunks start positions;
-                
+                "entities" (List[ClassifiedEntity]): Entities to use;
+
                 "prompt_lengths" (List[int]): Prompt lenghts;
 
         Returns:
             Dict[str, Any]: Expected keys:
-                "text" (str): Processed text;
-                
-                "output" (List[ClassifiedEntity]): Classified entities;
+                "output" (List[Triplets]): Extracted relations;
         """
         return {
             "output": list(self.extract_relations(
