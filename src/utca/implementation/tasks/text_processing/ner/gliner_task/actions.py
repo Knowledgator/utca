@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Generator, Optional, Tuple
 
 from utca.core.executable_level_1.actions import Action
 from utca.core.task_level_3.objects.objects import (
@@ -100,15 +100,31 @@ class GLiNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
 
             "text" (str): Processed text;
             
-            "chunks_starts" (List[int]): Chunks start positions;
-            
-            
     Returns:
         Dict[str, Any]: Expected keys:
             "text" (str): Processed text;
             
             "output" (List[ClassifiedEntity]): Classified entities;
     """
+    def process_entities(
+        self, 
+        raw_entities: List[List[Dict[str, Any]]],
+        chunk_starts: List[int]
+    ) -> Generator[ClassifiedEntity, None, None]:
+        for id, output in enumerate(raw_entities):
+            shift = chunk_starts[id]
+            for ent in output:
+                start = ent['start'] + shift
+                end = ent['end'] + shift
+                yield ClassifiedEntity(
+                    start=start,
+                    end=end,
+                    span=ent['text'],
+                    score=ent['score'],
+                    entity=ent['label']
+                )
+
+
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -118,31 +134,15 @@ class GLiNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
                 "output" (List[List[Dict[str, Any]]]): Model output;
 
                 "text" (str): Processed text;
-                
-                "chunks_starts" (List[int]): Chunks start positions;
-                
         Returns:
             Dict[str, Any]: Expected keys:
                 "text" (str): Processed text;
                 
                 "output" (List[ClassifiedEntity]): Classified entities;
         """
-        outputs: List[ClassifiedEntity] = []
-
-        for id, output in enumerate(input_data["output"]):
-            shift = input_data["chunks_starts"][id]
-            for ent in output:
-                start = ent['start'] + shift
-                end = ent['end'] + shift
-                cls_ent = ClassifiedEntity(
-                    start=start,
-                    end=end,
-                    span=ent['text'],
-                    score=ent['score'],
-                    entity=ent['label']
-                )
-                outputs.append(cls_ent)
         return {
             "text": input_data["text"],
-            "output": outputs
+            "output": list(
+                self.process_entities(input_data["output"], input_data["chunks_starts"])
+            )
         }

@@ -186,6 +186,14 @@ from utca.implementation.tasks.text_processing.relation_extraction.token_searche
     TokenSearcherRelationExtractionPostprocessor,
 )
 
+from utca.implementation.tasks.text_processing.relation_extraction.gliner_task.relation_extraction import (
+    GLiNERRelationExtraction,
+)
+from utca.implementation.tasks.text_processing.relation_extraction.gliner_task.actions import (
+    GLiNERRelationExtractionPreprocessor,
+    GLiNERRelationExtractionPostprocessor,
+)
+
 __all__ = [
     # Audio processing
     "TransformersTextToSpeech",
@@ -295,4 +303,8 @@ __all__ = [
     "TokenSearcherRelationExtraction",
     "TokenSearcherRelationExtractionPreprocessor",
     "TokenSearcherRelationExtractionPostprocessor",
+
+    "GLiNERRelationExtraction",
+    "GLiNERRelationExtractionPreprocessor",
+    "GLiNERRelationExtractionPostprocessor",
 ]

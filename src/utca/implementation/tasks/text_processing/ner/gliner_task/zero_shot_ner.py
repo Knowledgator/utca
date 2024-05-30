@@ -63,17 +63,17 @@ class GLiNER(
                 before predictor. If equals to None, default component will be used. Defaults to None.
 
                 Default component: 
-                    GLiNERNERPreprocessor
+                    GLiNERPreprocessor
             
             postprocess (Optional[Component], optional): Component executed
                 after predictor. If equals to None, default component will be used. Defaults to None.
 
                 Default component: 
-                    GLiNERNERPostprocessor
+                    GLiNERPostprocessor
 
-            input_class (Type[Input], optional): Class for input validation. Defaults to GLiNERNERInput.
+            input_class (Type[Input], optional): Class for input validation. Defaults to GLiNERInput.
             
-            output_class (Type[NEROutputType], optional): Class for output validation. Defaults to GLiNERNEROutput.
+            output_class (Type[NEROutputType], optional): Class for output validation. Defaults to GLiNEROutput.
             
             name (Optional[str], optional): Name for identification. If equals to None,
                 class name will be used. Defaults to None.
