@@ -194,6 +194,14 @@ from utca.implementation.tasks.text_processing.relation_extraction.gliner_task.a
     GLiNERRelationExtractionPostprocessor,
 )
 
+from utca.implementation.tasks.text_processing.textual_q_and_a.gliner_task.q_and_a import (
+    GLiNERQandA,
+)
+from utca.implementation.tasks.text_processing.textual_q_and_a.gliner_task.actions import (
+    GLiNERQandAPreprocessor,
+    GLiNERQandAPostprocessor,
+)
+
 __all__ = [
     # Audio processing
     "TransformersTextToSpeech",
@@ -307,4 +315,8 @@ __all__ = [
     "GLiNERRelationExtraction",
     "GLiNERRelationExtractionPreprocessor",
     "GLiNERRelationExtractionPostprocessor",
+
+    "GLiNERQandA",
+    "GLiNERQandAPreprocessor",
+    "GLiNERQandAPostprocessor",
 ]
