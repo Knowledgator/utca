@@ -59,9 +59,9 @@ predictor = TokenSearcherPredictor(
 ``` python
 ner_task = TokenSearcherNER(
     predictor=predictor,
-    postprocess=[TokenSearcherNERPostprocessor(
+    postprocess=TokenSearcherNERPostprocessor(
         threshold=0.5
-    )]
+    )
 )
 ```
 
