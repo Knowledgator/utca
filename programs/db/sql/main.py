@@ -1,7 +1,6 @@
 from __future__ import annotations
+from typing import List, Optional
 
-from typing import List
-from typing import Optional
 from sqlalchemy import (
     ForeignKey, 
     String,
