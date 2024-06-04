@@ -5,9 +5,7 @@ import numpy.typing as npt
 
 from utca.core.executable_level_1.interpreter import Evaluator
 from utca.core.executable_level_1.executable import Executable
-from utca.core.executable_level_1.schema import (
-    IOModel, Transformable
-)
+from utca.core.executable_level_1.schema import IOModel
 from utca.implementation.tasks.text_processing.embedding.transformers_task.transformers_embedding import (
     TransformersTextEmbedding
 )
@@ -83,12 +81,9 @@ class SemanticSearchSchema(
     
 
     def get_embeddings(self, texts: List[str]) -> npt.NDArray[Any]:
-        return getattr(
-            self.encoder(Transformable({
+        return self.encoder.run({
                 "texts": texts
-            })),
-            "embeddings"
-        )
+            })["embeddings"]
 
 
     def add(self, dataset: List[str]) -> SemanticSearchSchema:
