@@ -134,7 +134,7 @@ class ChromaDBDeleteCollection(ChromaDBAction[str, None]):
         )
 
 
-class ChromaDBCollectionAddData(Action[Dict[str, Any], None]):
+class ChromaDBCollectionAdd(Action[Dict[str, Any], None]):
     """
     Add embeddings to the data store.
     

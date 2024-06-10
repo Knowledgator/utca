@@ -5,7 +5,7 @@ from utca.implementation.datasources.db.neo4j.main import (
     Neo4jClient, Neo4jReadAction, Neo4jWriteAction
 )
 from utca.implementation.datasources.db.chroma.main import (
-    ChromaDBCollectionAddData, 
+    ChromaDBCollectionAdd, 
     ChromaDBCollectionUpdate,
     ChromaDBCollectionUpsert,
     ChromaDBGetCollection,
@@ -31,7 +31,7 @@ __all__ = [
     "ChromaDBCreateCollection",
     "ChromaDBGetOrCreateCollection",
     "ChromaDBDeleteCollection",
-    "ChromaDBCollectionAddData", 
+    "ChromaDBCollectionAdd", 
     "ChromaDBCollectionUpdate",
     "ChromaDBCollectionUpsert",
     "ChromaDBCollectionGet",
