@@ -1,5 +1,5 @@
 from utca.implementation.predictors.transformers_predictor.transformers_model import (
-    TransformersModel,
+    TransformersModel, TransformersGenerativeModel
 )
 from utca.implementation.predictors.transformers_predictor.schema import (
     TransformersModelConfig,
@@ -65,6 +65,7 @@ from utca.implementation.predictors.openai_whisper.schema import (
 
 __all__ = [
     "TransformersModel",
+    "TransformersGenerativeModel",
     "TransformersModelConfig",
     "TransformersPipelineConfig",
     "TransformersImageClassificationModelInput",
