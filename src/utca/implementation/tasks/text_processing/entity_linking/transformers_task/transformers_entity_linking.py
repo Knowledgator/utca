@@ -204,21 +204,32 @@ class TransformersEntityLinking(
 
         self.pad_token_id: int = cast(int, self.tokenizer.pad_token_id)
 
+        expected_kwargs = {
+            "max_new_tokens": 512,
+            "pad_token_id": self.pad_token_id,
+        }
+        required_kwargs = {
+            "return_dict_in_generate": True,
+            "output_scores": True, 
+        }
         if not predictor:
             model = self.initialize_model(self.default_model)
             predictor = TransformersGenerativeModel(
                 TransformersModelConfig(
                     model=model, # type: ignore
-                    kwargs={
-                        "max_new_tokens": 512,
-                        "pad_token_id": self.pad_token_id,
-                        "return_dict_in_generate": True,
-                        "output_scores": True, 
-                    }
+                    kwargs={**expected_kwargs, **required_kwargs}
                 ),
                 input_class=TransformersEntityLinkingInput,
                 output_class=TransformersEntityLinkingOutput,
             )
+        else:
+            if not predictor.cfg.kwargs: # type: ignore
+                predictor.cfg.kwargs = {**expected_kwargs, **required_kwargs} # type: ignore
+            else:
+                for k, v in expected_kwargs.items():
+                    if not k in predictor.cfg.kwargs: # type: ignore
+                        predictor.cfg.kwargs[k] = v # type: ignore
+                predictor.cfg.kwargs.update(required_kwargs) # type: ignore
         self.encoder_decoder: bool = predictor.config.is_encoder_decoder
         self.initialize_labels_trie(labels)
 

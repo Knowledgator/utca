@@ -2,27 +2,30 @@ from typing import Any, Dict, List, Generator, Optional, Tuple
 
 from utca.core.executable_level_1.actions import Action
 from utca.core.task_level_3.objects.objects import (
-    ClassifiedEntity
+    Entity
 )
 from utca.implementation.tasks.text_processing.utils import sent_tokenizer
 
-class GLiNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+class GLiNERQandAPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     """
-    Create prompts with providied text
+    Preprocess inputs
 
-    Arguments:
+    Args:
         input_data (Dict[str, Any]): Expected keys:
             "text" (str): Text to process;
 
-    Returns:
-        Dict[str, Any]: Expected keys:
-            "inputs" (List[str]): Model inputs;
+            "question" (str): Question to answer;
 
-            "chunks_starts" (List[int]): Chunks start positions. Used by postprocessor;
+        Returns:
+            Dict[str, Any]: Expected keys:
+                "texts" (List[str]): Model inputs;
+
+                "labels" (List[str]): Labels model inputs;
+
+                "chunks_starts" (List[int]): Chunks start positions. Used by postprocessor;
                 
-            "threshold" (float): Minimal score for an entity to put into output;
+                "threshold" (float): Minimal score for an entity to put into output;
     """
-
     def __init__(
         self, 
         sents_batch: int=10,
@@ -62,19 +65,23 @@ class GLiNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
 
             chunks.append(text[start:end])
         return chunks, starts
-
+    
 
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Arguments:
+        Args:
             input_data (Dict[str, Any]): Expected keys:
                 "text" (str): Text to process;
+
+                "question" (str): Question to answer;
 
         Returns:
             Dict[str, Any]: Expected keys:
                 "texts" (List[str]): Model inputs;
+
+                "labels" (List[str]): Labels model inputs;
 
                 "chunks_starts" (List[int]): Chunks start positions. Used by postprocessor;
                 
@@ -84,68 +91,82 @@ class GLiNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
             self.chunkanize(input_data["text"])
         )
         return {
-            "texts": chunks,
+            "texts": [f'{input_data["question"]} {c}' for c in chunks],
+            "labels": ["answer"],
             "chunks_starts": chunks_starts,
             "threshold": self.threshold,
         }
+    
 
-
-class GLiNERPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
+class GLiNERQandAPostprocessor(Action[Dict[str, Any], Dict[str, Any]]):
     """
     Format output
 
-    Arguments:
+    Args:
         input_data (Dict[str, Any]): Expected keys:
             "output" (List[List[Dict[str, Any]]]): Model output;
 
-            "text" (str): Processed text;
-            
             "chunks_starts" (List[int]): Chunks starts;
+
+            "text" (str): Processed text;
+
+            "question" (str): Answered question.
+
     Returns:
         Dict[str, Any]: Expected keys:
             "text" (str): Processed text;
+
+            "question" (str): Answered question.
             
-            "output" (List[ClassifiedEntity]): Classified entities;
+            "output" (List[Entity]): Answers;
     """
     def process_entities(
         self, 
         raw_entities: List[List[Dict[str, Any]]],
-        chunk_starts: List[int]
-    ) -> Generator[ClassifiedEntity, None, None]:
+        chunks_starts: List[int],
+        question_length: int,
+    ) -> Generator[Entity, None, None]:
         for id, output in enumerate(raw_entities):
-            shift = chunk_starts[id]
+            shift = chunks_starts[id] - question_length - 1
             for ent in output:
                 start = ent['start'] + shift
                 end = ent['end'] + shift
-                yield ClassifiedEntity(
+                yield Entity(
                     start=start,
                     end=end,
                     span=ent['text'],
                     score=ent['score'],
-                    entity=ent['label']
                 )
 
-
+    
     def execute(
         self, input_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Arguments:
+        Args:
             input_data (Dict[str, Any]): Expected keys:
                 "output" (List[List[Dict[str, Any]]]): Model output;
 
+                "chunks_starts" (List[int]): Chunks starts;
+
                 "text" (str): Processed text;
 
-                "chunks_starts" (List[int]): Chunks starts;
+                "question" (str): Answered question.
+
         Returns:
             Dict[str, Any]: Expected keys:
                 "text" (str): Processed text;
+
+                "question" (str): Answered question.
                 
-                "output" (List[ClassifiedEntity]): Classified entities;
+                "output" (List[Entity]): Answers;
         """
         return {
-            "text": input_data["text"],
-            "output": list(
-                self.process_entities(input_data["output"], input_data["chunks_starts"])
-            )
+            'text': input_data["text"],
+            'question': input_data["question"],
+            'output': list(self.process_entities(
+                input_data["output"],
+                input_data["chunks_starts"],
+                len(input_data["question"])
+            ))
         }

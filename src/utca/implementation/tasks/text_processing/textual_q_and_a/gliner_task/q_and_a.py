@@ -10,15 +10,15 @@ from utca.core.task_level_3.schema import (
 from utca.core.task_level_3.objects.objects import (
     Entity
 )
-from utca.implementation.predictors.token_searcher.predictor import (
-    TokenSearcherPredictor
+from utca.implementation.predictors.gliner_predictor.predictor import (
+    GLiNERPredictor, GLiNERPredictorConfig
 )
-from utca.implementation.tasks.text_processing.textual_q_and_a.token_searcher.actions import (
-    TokenSearcherQandAPreprocessor,
-    TokenSearcherQandAPostprocessor
+from utca.implementation.tasks.text_processing.textual_q_and_a.gliner_task.actions import (
+    GLiNERQandAPreprocessor,
+    GLiNERQandAPostprocessor
 )
 
-class TokenSearcherQandAInput(IOModel):
+class GLiNERQandAInput(IOModel):
     """
     Arguments:
         text (str): Text to use.
@@ -29,7 +29,7 @@ class TokenSearcherQandAInput(IOModel):
     question: str
 
 
-class TokenSearcherQandAOutput(NEROutput[Entity]):
+class GLiNERQandAOutput(NEROutput[Entity]):
     """
     Arguments:
         text (str): Input text.
@@ -42,19 +42,21 @@ class TokenSearcherQandAOutput(NEROutput[Entity]):
     question: str
 
 
-class TokenSearcherQandA(
+class GLiNERQandA(
     NERTask[Input, NEROutputType]
 ):
     """
     Textual Q&A task
     """
+    default_model: str = "knowledgator/gliner-multitask-large-v0.5"
+
     def __init__(
         self,
         predictor: Optional[Predictor[Any, Any]]=None,
         preprocess: Optional[Component]=None,
         postprocess: Optional[Component]=None,
-        input_class: Type[Input]=TokenSearcherQandAInput,
-        output_class: Type[NEROutputType]=TokenSearcherQandAOutput,
+        input_class: Type[Input]=GLiNERQandAInput,
+        output_class: Type[NEROutputType]=GLiNERQandAOutput,
         name: Optional[str]=None,
     ) -> None:
         """
@@ -66,27 +68,27 @@ class TokenSearcherQandA(
                 before predictor. If equals to None, default component will be used. Defaults to None.
 
                 Default component: 
-                    TokenSearcherQandAPreprocessor
+                    GLiNERQandAPreprocessor
             
             postprocess (Optional[Component], optional): Component executed
                 after predictor. If equals to None, default component will be used. Defaults to None.
 
                 Default component: 
-                    TokenSearcherQandAPostprocessor
+                    GLiNERQandAPostprocessor
             
             input_class (Type[Input], optional): Class for input validation. 
-                Defaults to TokenSearcherQandAInput.
+                Defaults to GLiNERQandAInput.
             
             output_class (Type[NEROutputType], optional): Class for output validation.
-                Defaults to TokenSearcherQandAOutput.
+                Defaults to GLiNERQandAOutput.
             
             name (Optional[str], optional): Name for identification. If equals to None,
                 class name will be used. Defaults to None.
         """
         super().__init__(
-            predictor=predictor or TokenSearcherPredictor(),
-            preprocess=preprocess or TokenSearcherQandAPreprocessor(),
-            postprocess=postprocess or TokenSearcherQandAPostprocessor(),
+            predictor=predictor or GLiNERPredictor(GLiNERPredictorConfig(model_name=self.default_model)),
+            preprocess=preprocess or GLiNERQandAPreprocessor(),
+            postprocess=postprocess or GLiNERQandAPostprocessor(),
             input_class=input_class,
             output_class=output_class,
             name=name,
