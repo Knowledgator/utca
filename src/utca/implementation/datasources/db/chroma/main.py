@@ -60,14 +60,14 @@ class ChromaDBCreateCollection(ChromaDBRetrieveCollectionAction):
     Create collection
 
     Args:
-        input_data: The name of the collection to create.
+        input_data (str): The name of the collection to create.
     Returns:
         Collection: The newly created collection.
     """
     def execute(self, input_data: str) -> Collection:
         """
         Args:
-            input_data: The name of the collection to create.
+            input_data (str): The name of the collection to create.
         Returns:
             Collection: The newly created collection.
         """
@@ -85,14 +85,14 @@ class ChromaDBGetCollection(ChromaDBRetrieveCollectionAction):
     Args:
         input_data: The name of the collection to get.
     Returns:
-        Collection: The newly created collection.
+        Collection: Retrieved collection.
     """
     def execute(self, input_data: str) -> Collection:
         """
         Args:
             input_data: The name of the collection to get.
         Returns:
-            Collection: The newly created collection.
+            Collection: Retrieved collection.
         """
         return self.client.get_collection(
             name=input_data, 
@@ -109,7 +109,7 @@ class ChromaDBGetOrCreateCollection(ChromaDBRetrieveCollectionAction):
         Args:
             input_data: The name of the collection to get or create.
         Returns:
-            Collection: The newly created collection.
+            Collection: Retrieved collection.
         """
         return self.client.get_or_create_collection(
             name=input_data, 
@@ -122,12 +122,12 @@ class ChromaDBDeleteCollection(ChromaDBAction[str, None]):
     Delete collection
 
     Args:
-        input_data (str): Collection name
+        input_data (str): The name of the collection to delete.
     """
     def execute(self, input_data: str) -> None:
         """
         Args:
-            input_data (str): Collection name
+            input_data (str): The name of the collection to delete.
         """
         self.client.delete_collection(
             name=input_data
@@ -139,36 +139,38 @@ class ChromaDBCollectionAdd(Action[Dict[str, Any], None]):
     Add embeddings to the data store.
     
     Args:
-        collection (Collection): Collection to use.
-        
-        ids: The ids of the embeddings you wish to add
+        input_data (Dict[str, Any]): Expected keys:
+            "collection" (Collection): Collection to use.
+            
+            "ids": The ids of the embeddings you wish to add.
 
-        embeddings: The embeddings to add. If None, embeddings will be computed based on the documents or images using the embedding_function set for the Collection. Optional.
-        
-        metadatas: The metadata to associate with the embeddings. When querying, you can filter on this metadata. Optional.
-        
-        documents: The documents to associate with the embeddings. Optional.
-        
-        images: The images to associate with the embeddings. Optional.
-        
-        uris: The uris of the images to associate with the embeddings. Optional.
+            "embeddings": The embeddings to add. If None, embeddings will be computed based on the documents or images using the embedding_function set for the Collection. Optional.
+            
+            "metadatas": The metadata to associate with the embeddings. When querying, you can filter on this metadata. Optional.
+            
+            "documents": The documents to associate with the embeddings. Optional.
+            
+            "images": The images to associate with the embeddings. Optional.
+            
+            "uris": The uris of the images to associate with the embeddings. Optional.
     """
     def execute(self, input_data: Dict[str, Any]) -> None:
         """
         Args:
-            collection (Collection): Collection to use.
-            
-            ids: The ids of the embeddings you wish to add
+            input_data (Dict[str, Any]): Expected keys:
+                "collection" (Collection): Collection to use.
+                
+                "ids": The ids of the embeddings you wish to add.
 
-            embeddings: The embeddings to add. If None, embeddings will be computed based on the documents or images using the embedding_function set for the Collection. Optional.
-            
-            metadatas: The metadata to associate with the embeddings. When querying, you can filter on this metadata. Optional.
-            
-            documents: The documents to associate with the embeddings. Optional.
-            
-            images: The images to associate with the embeddings. Optional.
-            
-            uris: The uris of the images to associate with the embeddings. Optional.
+                "embeddings": The embeddings to add. If None, embeddings will be computed based on the documents or images using the embedding_function set for the Collection. Optional.
+                
+                "metadatas": The metadata to associate with the embeddings. When querying, you can filter on this metadata. Optional.
+                
+                "documents": The documents to associate with the embeddings. Optional.
+                
+                "images": The images to associate with the embeddings. Optional.
+                
+                "uris": The uris of the images to associate with the embeddings. Optional.
         """
         collection: Collection = input_data["collection"]
         collection.add( # type: ignore
@@ -186,36 +188,38 @@ class ChromaDBCollectionUpdate(Action[Dict[str, Any], None]):
     Update the embeddings, metadatas or documents for provided ids.
     
     Args:
-        collection (Collection): Collection to use.
-        
-        ids: The ids of the embeddings you wish to add
+        input_data (Dict[str, Any]): Expected keys:
+            "collection" (Collection): Collection to use.
+            
+            "ids": The ids of the embeddings to update.
 
-        embeddings: The embeddings to add. If None, embeddings will be computed based on the documents or images using the embedding_function set for the Collection. Optional.
-        
-        metadatas: The metadata to associate with the embeddings. When querying, you can filter on this metadata. Optional.
-        
-        documents: The documents to associate with the embeddings. Optional.
-        
-        images: The images to associate with the embeddings. Optional.
-        
-        uris: The uris of the images to associate with the embeddings. Optional.
+            "embeddings": The embeddings to update. If None, embeddings will be computed based on the documents or images using the embedding_function set for the Collection. Optional.
+            
+            "metadatas": The metadata to associate with the embeddings. When querying, you can filter on this metadata. Optional.
+            
+            "documents": The documents to associate with the embeddings. Optional.
+            
+            "images": The images to associate with the embeddings. Optional.
+            
+            "uris": The uris of the images to associate with the embeddings. Optional.
     """
     def execute(self, input_data: Dict[str, Any]) -> None:
         """
         Args:
-            collection (Collection): Collection to use.
-            
-            ids: The ids of the embeddings you wish to add
+            input_data (Dict[str, Any]): Expected keys:
+                "collection" (Collection): Collection to use.
+                
+                "ids": The ids of the embeddings to update.
 
-            embeddings: The embeddings to add. If None, embeddings will be computed based on the documents or images using the embedding_function set for the Collection. Optional.
-            
-            metadatas: The metadata to associate with the embeddings. When querying, you can filter on this metadata. Optional.
-            
-            documents: The documents to associate with the embeddings. Optional.
-            
-            images: The images to associate with the embeddings. Optional.
-            
-            uris: The uris of the images to associate with the embeddings. Optional.
+                "embeddings": The embeddings to update. If None, embeddings will be computed based on the documents or images using the embedding_function set for the Collection. Optional.
+                
+                "metadatas": The metadata to associate with the embeddings. When querying, you can filter on this metadata. Optional.
+                
+                "documents": The documents to associate with the embeddings. Optional.
+                
+                "images": The images to associate with the embeddings. Optional.
+                
+                "uris": The uris of the images to associate with the embeddings. Optional.
         """
         collection: Collection = input_data["collection"]
         collection.update( # type: ignore
@@ -233,21 +237,39 @@ class ChromaDBCollectionUpsert(Action[Dict[str, Any], None]):
     Update the embeddings, metadatas or documents for provided ids, or create them if they don't exist.
     
     Args:
-        collection (Collection): Collection to use.
-        
-        ids: The ids of the embeddings you wish to add
+        input_data (Dict[str, Any]): Expected keys:
+            "collection" (Collection): Collection to use.
+            
+            "ids": The ids of the embeddings to update.
 
-        embeddings: The embeddings to add. If None, embeddings will be computed based on the documents or images using the embedding_function set for the Collection. Optional.
-        
-        metadatas: The metadata to associate with the embeddings. When querying, you can filter on this metadata. Optional.
-        
-        documents: The documents to associate with the embeddings. Optional.
-        
-        images: The images to associate with the embeddings. Optional.
-        
-        uris: The uris of the images to associate with the embeddings. Optional.
+            "embeddings": The embeddings to add. If None, embeddings will be computed based on the documents or images using the embedding_function set for the Collection. Optional.
+            
+            "metadatas": The metadata to associate with the embeddings. When querying, you can filter on this metadata. Optional.
+            
+            "documents": The documents to associate with the embeddings. Optional.
+            
+            "images": The images to associate with the embeddings. Optional.
+            
+            "uris": The uris of the images to associate with the embeddings. Optional.
     """
     def execute(self, input_data: Dict[str, Any]) -> None:
+        """
+        Args:
+            input_data (Dict[str, Any]): Expected keys:
+                "collection" (Collection): Collection to use.
+                
+                "ids": The ids of the embeddings to update.
+
+                "embeddings": The embeddings to add. If None, embeddings will be computed based on the documents or images using the embedding_function set for the Collection. Optional.
+                
+                "metadatas": The metadata to associate with the embeddings. When querying, you can filter on this metadata. Optional.
+                
+                "documents": The documents to associate with the embeddings. Optional.
+                
+                "images": The images to associate with the embeddings. Optional.
+                
+                "uris": The uris of the images to associate with the embeddings. Optional.
+        """
         collection: Collection = input_data["collection"]
         collection.upsert( # type: ignore
             ids=input_data["ids"],
@@ -264,24 +286,49 @@ class ChromaDBCollectionQuery(Action[Dict[str, Any], QueryResult]):
     Get the n_results nearest neighbor embeddings for provided query_embeddings or query_texts.
 
     Args:
-        query_embeddings: The embeddings to get the closes neighbors of. Optional.
-        
-        query_texts: The document texts to get the closes neighbors of. Optional.
-        
-        query_images: The images to get the closes neighbors of. Optional.
-        
-        n_results: The number of neighbors to return for each query_embedding or query_texts. Optional.
-        
-        where: A Where type dict used to filter results by. E.g. {"$and": ["color" : "red", "price": {"$gte": 4.20}]}. Optional.
-        
-        where_document: A WhereDocument type dict used to filter by the documents. E.g. {$contains: {"text": "hello"}}. Optional.
-        
-        include: A list of what to include in the results. Can contain "embeddings", "metadatas", "documents", "distances". Ids are always included. Defaults to ["metadatas", "documents", "distances"]. Optional.
+        input_data (Dict[str, Any]): Expected keys:
+            "collection" (Collection): Collection to use.
+
+            "query_embeddings": The embeddings to get the closes neighbors of. Optional.
+            
+            "query_texts": The document texts to get the closes neighbors of. Optional.
+            
+            "query_images": The images to get the closes neighbors of. Optional.
+            
+            "n_results": The number of neighbors to return for each query_embedding or query_texts. Optional.
+            
+            "where": A Where type dict used to filter results by. E.g. {"$and": ["color" : "red", "price": {"$gte": 4.20}]}. Optional.
+            
+            "where_document": A WhereDocument type dict used to filter by the documents. E.g. {$contains: {"text": "hello"}}. Optional.
+            
+            "include": A list of what to include in the results. Can contain "embeddings", "metadatas", "documents", "distances". Ids are always included. Defaults to ["metadatas", "documents", "distances"]. Optional.
 
     Returns:
         QueryResult: A QueryResult object containing the results.
     """
     def execute(self, input_data: Dict[str, Any]) -> QueryResult:
+        """
+        Args:
+            input_data (Dict[str, Any]): Expected keys:
+                "collection" (Collection): Collection to use.
+
+                "query_embeddings": The embeddings to get the closes neighbors of. Optional.
+                
+                "query_texts": The document texts to get the closes neighbors of. Optional.
+                
+                "query_images": The images to get the closes neighbors of. Optional.
+                
+                "n_results": The number of neighbors to return for each query_embedding or query_texts. Optional.
+                
+                "where": A Where type dict used to filter results by. E.g. {"$and": ["color" : "red", "price": {"$gte": 4.20}]}. Optional.
+                
+                "where_document": A WhereDocument type dict used to filter by the documents. E.g. {$contains: {"text": "hello"}}. Optional.
+                
+                "include": A list of what to include in the results. Can contain "embeddings", "metadatas", "documents", "distances". Ids are always included. Defaults to ["metadatas", "documents", "distances"]. Optional.
+
+        Returns:
+            QueryResult: A QueryResult object containing the results.
+        """
         collection: Collection = input_data["collection"]
         return collection.query( # type: ignore
             query_embeddings=input_data.get("query_embeddings"),
@@ -299,17 +346,20 @@ class ChromaDBCollectionGet(Action[Dict[str, Any], GetResult]):
     Get embeddings and their associate data from the data store. If no ids or where filter is provided returns all embeddings up to limit starting at offset.
 
     Args:
-        ids: The ids of the embeddings to get. Optional.
+        input_data (Dict[str, Any]): Expected keys:
+            "collection" (Collection): Collection to use.
 
-        where: A Where type dict used to filter results by. E.g. {"$and": ["color" : "red", "price": {"$gte": 4.20}]}. Optional.
-        
-        limit: The number of documents to return. Optional.
-        
-        offset: The offset to start returning results from. Useful for paging results with limit. Optional.
-        
-        where_document: A WhereDocument type dict used to filter by the documents. E.g. {$contains: {"text": "hello"}}. Optional.
-        
-        include: A list of what to include in the results. Can contain "embeddings", "metadatas", "documents". Ids are always included. Defaults to ["metadatas", "documents"]. Optional.
+            "ids": The ids of the embeddings to get. Optional.
+
+            "where": A Where type dict used to filter results by. E.g. {"$and": ["color" : "red", "price": {"$gte": 4.20}]}. Optional.
+            
+            "limit": The number of documents to return. Optional.
+            
+            "offset": The offset to start returning results from. Useful for paging results with limit. Optional.
+            
+            "where_document": A WhereDocument type dict used to filter by the documents. E.g. {$contains: {"text": "hello"}}. Optional.
+            
+            "include": A list of what to include in the results. Can contain "embeddings", "metadatas", "documents". Ids are always included. Defaults to ["metadatas", "documents"]. Optional.
 
     Returns:
         GetResult: A GetResult object containing the results.
@@ -317,17 +367,20 @@ class ChromaDBCollectionGet(Action[Dict[str, Any], GetResult]):
     def execute(self, input_data: Dict[str, Any]) -> GetResult:
         """
         Args:
-            ids: The ids of the embeddings to get. Optional.
+            input_data (Dict[str, Any]): Expected keys:
+                "collection" (Collection): Collection to use.
 
-            where: A Where type dict used to filter results by. E.g. {"$and": ["color" : "red", "price": {"$gte": 4.20}]}. Optional.
-            
-            limit: The number of documents to return. Optional.
-            
-            offset: The offset to start returning results from. Useful for paging results with limit. Optional.
-            
-            where_document: A WhereDocument type dict used to filter by the documents. E.g. {$contains: {"text": "hello"}}. Optional.
-            
-            include: A list of what to include in the results. Can contain "embeddings", "metadatas", "documents". Ids are always included. Defaults to ["metadatas", "documents"]. Optional.
+                "ids": The ids of the embeddings to get. Optional.
+
+                "where": A Where type dict used to filter results by. E.g. {"$and": ["color" : "red", "price": {"$gte": 4.20}]}. Optional.
+                
+                "limit": The number of documents to return. Optional.
+                
+                "offset": The offset to start returning results from. Useful for paging results with limit. Optional.
+                
+                "where_document": A WhereDocument type dict used to filter by the documents. E.g. {$contains: {"text": "hello"}}. Optional.
+                
+                "include": A list of what to include in the results. Can contain "embeddings", "metadatas", "documents". Ids are always included. Defaults to ["metadatas", "documents"]. Optional.
 
         Returns:
             GetResult: A GetResult object containing the results.

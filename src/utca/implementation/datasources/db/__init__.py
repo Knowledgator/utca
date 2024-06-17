@@ -18,6 +18,17 @@ from utca.implementation.datasources.db.chroma.main import (
 from utca.implementation.datasources.db.chroma.schema import (
     ChromaDBEmbeddingFunctionComponent,
 )
+from utca.implementation.datasources.db.qdrant.main import (
+    QdrantClient,
+    QdrantCreateCollection,
+    QdrantRecreateCollection,
+    QdrantDeleteCollection,
+    QdrantAdd,
+    QdrantUpsert,
+    QdrantQuery,
+    QdrantSearch,
+    QdrantDelete,
+)
 
 __all__ = [
     "SQLSessionFactory",
@@ -37,4 +48,13 @@ __all__ = [
     "ChromaDBCollectionGet",
     "ChromaDBCollectionQuery",
     "ChromaDBEmbeddingFunctionComponent",
+    "QdrantClient",
+    "QdrantCreateCollection",
+    "QdrantRecreateCollection",
+    "QdrantDeleteCollection",
+    "QdrantAdd",
+    "QdrantUpsert",
+    "QdrantQuery",
+    "QdrantSearch",
+    "QdrantDelete",
 ]

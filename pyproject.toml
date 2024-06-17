@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "utca"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["knowledgator.com"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = ">=3.9,<3.13"
 pydantic = "^2.6.1"
 nltk = "^3.8.1"
 google-api-python-client = "^2.116.0"
@@ -29,6 +29,8 @@ requests = "^2.32.2"
 gliner = "^0.2.2"
 neo4j = "^5.20.0"
 chromadb = "^0.5.0"
+qdrant-client = "^1.9.1"
+fastembed = "^0.3.0"
 
 
 [build-system]
