@@ -31,6 +31,8 @@ neo4j = "^5.20.0"
 chromadb = "^0.5.0"
 qdrant-client = "^1.9.1"
 fastembed = "^0.3.0"
+accelerate = "^0.31.0"
+safetensors = "^0.4.3"
 
 
 [build-system]
