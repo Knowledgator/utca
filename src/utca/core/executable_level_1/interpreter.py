@@ -81,10 +81,7 @@ class Evaluator(Component):
         try:
             return self.schema(input_data, self)
         except Exception as e:
-            e = EvaluatorExecutionFailed(self.name, e)
-            if evaluator:
-                evaluator.log(logging.ERROR, e, exc_info=True)
-            raise e
+            raise EvaluatorExecutionFailed(self.name, e)
         
 
     def run(
