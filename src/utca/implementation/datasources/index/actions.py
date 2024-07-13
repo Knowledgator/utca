@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional
-from utca.core.executable_level_1.actions import Action
+import importlib.util
 
-import faiss # type: ignore
+from utca.core.executable_level_1.actions import Action
 
 class IndexCreate(Action[Any, Dict[str, Any]]):
     """
@@ -26,6 +26,8 @@ class IndexCreate(Action[Any, Dict[str, Any]]):
             name (Optional[str], optional): name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
         """
+        if not importlib.util.find_spec("faiss"):
+            raise ImportError("To use index FAISS required. To install faiss package use:\npip install faiss-cpu\nOR\npip install faiss-gpu")
         super().__init__(name)
         self.dataset_dimensions = dataset_dimensions
 
@@ -39,6 +41,7 @@ class IndexCreate(Action[Any, Dict[str, Any]]):
             Dict[str, Any]: Expected keys:
                 'index' (faiss.IndexFlatL2): Created index.
         """
+        import faiss # type: ignore
         return {
             "index": faiss.IndexFlatL2(self.dataset_dimensions)
         }
