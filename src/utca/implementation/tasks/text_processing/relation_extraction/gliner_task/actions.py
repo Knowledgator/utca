@@ -46,19 +46,6 @@ class GLiNERRelationExtractionPreprocessor(Action[Dict[str, Any], Dict[str, Any]
         ]
 
 
-    def get_relations(
-        self,
-        expected_starts: Dict[str, Optional[Set[str]]],
-        entities: List[Dict[str, Any]],
-    ) -> List[str]:
-        return [
-            rel
-            for rel, starts in expected_starts.items()
-            for e in entities
-            if not starts or e["entity"] in starts
-        ]
-
-
     def prepare_inputs(
         self, 
         relations: List[Dict[str, Any]],

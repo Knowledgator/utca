@@ -1,7 +1,7 @@
 from typing import Any, Dict, Type, Optional
 from gliner import GLiNER # type: ignore
 
-from utca.core.executable_level_1.schema import Input, Output
+from utca.core.executable_level_1.schema import Output
 from utca.core.predictor_level_2.predictor import Predictor
 from utca.core.executable_level_1.interpreter import Evaluator
 
@@ -13,7 +13,7 @@ from utca.implementation.predictors.gliner_predictor.schema import (
 from utca.implementation.predictors.utils import ensure_dict
 
 class GLiNERPredictor(
-    Predictor[Input, Output]
+    Predictor[GLiNERPredictorInput, Output]
 ):
     """
     GLiNER predictor. This predictor is specifically build to use GLiNER approach - https://github.com/urchade/GLiNER. 
@@ -21,7 +21,7 @@ class GLiNERPredictor(
     def __init__(
         self, 
         cfg: Optional[GLiNERPredictorConfig]=None,
-        input_class: Type[Input]=GLiNERPredictorInput,
+        input_class: Type[GLiNERPredictorInput]=GLiNERPredictorInput,
         output_class: Type[Output]=GLiNERPredictorOutput,
         name: Optional[str]=None,
     ) -> None:
@@ -50,7 +50,7 @@ class GLiNERPredictor(
         )
 
 
-    def invoke(self, input_data: Input, evaluator: Evaluator) -> Dict[str, Any]:
+    def invoke(self, input_data: GLiNERPredictorInput, evaluator: Evaluator) -> Dict[str, Any]:
         """
         Call pipeline
 
@@ -62,8 +62,11 @@ class GLiNERPredictor(
         Returns:
             Dict[str, Any]: Result of execution.
         """
-        inputs = input_data.extract()
-        outputs = self.model.batch_predict_entities(**inputs) # type: ignore
+        if not input_data.labels:
+            return {"output": [[]]*len(input_data.texts)}
+        labels = set(input_data.labels)
+        texts = input_data.texts
+        outputs = self.model.batch_predict_entities(texts=texts, labels=labels) # type: ignore
         return ensure_dict(outputs)
 
 
