@@ -127,4 +127,4 @@ class SemanticCondition(Condition):
             bool: Result of evaluation. Define that condition is fulfilled or not.
         """
         self.semantic_schema.drop_index()
-        return super()(input_data, evaluator)
+        return super().__call__(input_data, evaluator)
