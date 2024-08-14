@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
 pydantic = "^2.6.1"
-nltk = "^3.8.1"
+nltk = "^3.8.2"
 google-api-python-client = "^2.116.0"
 google-auth-httplib2 = "^0.2.0"
 google-auth-oauthlib = "^1.2.0"
