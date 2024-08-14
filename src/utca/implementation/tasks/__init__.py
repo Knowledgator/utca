@@ -202,6 +202,15 @@ from utca.implementation.tasks.text_processing.textual_q_and_a.gliner_task.actio
     GLiNERQandAPostprocessor,
 )
 
+from utca.implementation.tasks.text_processing.function_call.transformers_task.main import (
+    TransformersFunctionCallInput,
+    TransformersFunctionCall,
+)
+from utca.implementation.tasks.text_processing.function_call.transformers_task.main import (
+    TransformersFunctionCallPreprocessor,
+    TransformersFunctionCallPostprocessor,
+)
+
 __all__ = [
     # Audio processing
     "TransformersTextToSpeech",
@@ -319,4 +328,9 @@ __all__ = [
     "GLiNERQandA",
     "GLiNERQandAPreprocessor",
     "GLiNERQandAPostprocessor",
+
+    "TransformersFunctionCallInput",
+    "TransformersFunctionCall",
+    "TransformersFunctionCallPreprocessor",
+    "TransformersFunctionCallPostprocessor",
 ]

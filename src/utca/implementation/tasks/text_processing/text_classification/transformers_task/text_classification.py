@@ -37,10 +37,10 @@ class TransformersTextClassification(
             predictor (Optional[Predictor[Any, Any]]): Predictor that will be used in task. 
                 If equals to None, default ComprehendItPredictor will be used. Defaults to None.
 
-            preprocess (Optional[Component]): Chain of actions executed 
+            preprocess (Optional[Component]): Component executed 
                 before predictor. Defaults to None.
             
-            postprocess (Optional[Component]): Chain of actions executed
+            postprocess (Optional[Component]): Component executed
                 after predictor. Defaults to None.
             
             input_class (Type[Input]): Class for input validation. Defaults to ComprehendItPredictorInput.

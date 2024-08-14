@@ -281,3 +281,10 @@ class TransformersBasicOutput(IOModel):
 class TransformersDETROutput(IOModel):
     pred_boxes: Any
     logits: Any
+
+
+class TransformersIdsInput(IOModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    input_ids: Any
+    attention_mask: Any
