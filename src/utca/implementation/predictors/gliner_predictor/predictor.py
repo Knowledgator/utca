@@ -42,7 +42,13 @@ class GLiNERPredictor(
         """
         if cfg is None:
             cfg = GLiNERPredictorConfig()
-        self.model = GLiNER.from_pretrained(cfg.model_name).to(cfg.device) # type: ignore
+        self.model = GLiNER.from_pretrained(
+            cfg.model_name,
+            local_files_only=cfg.local_files_only,
+            load_tokenizer=cfg.load_tokenizer,
+            load_onnx_model=cfg.load_onnx_model,
+            onnx_model_file=cfg.onnx_model_file,
+        ).to(cfg.device)  # type: ignore
         super().__init__(
             input_class=input_class,
             output_class=output_class,
