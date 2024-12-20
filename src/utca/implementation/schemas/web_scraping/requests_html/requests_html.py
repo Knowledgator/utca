@@ -1,6 +1,8 @@
 from typing import  Any, Dict, List, Optional, Type
+import logging
 
-from requests_html import HTMLSession # type: ignore
+import requests
+from pyquery import PyQuery as pq # type: ignore
 
 from utca.core.executable_level_1.interpreter import Evaluator
 from utca.core.executable_level_1.executable import Executable
@@ -42,20 +44,18 @@ class RequestsHTML(Executable[RequestsHTMLInput, RequestsHTMLOutput]):
             name (Optional[str], optional): Name for identification.
                 If equals to None, class name will be used. Defaults to None.
         """
+        if js_rendering:
+            logging.warning("The 'js_rendering' parameter is depricated and ignored.")
         super().__init__(
             input_class=input_class,
             output_class=output_class,
             name=name,
         )
-        self.session = HTMLSession()
-        self.js_rendering = js_rendering
 
 
     def invoke(self, input_data: RequestsHTMLInput, evaluator: Evaluator) -> Dict[str, Any]:
-        r = self.session.get(input_data.url)
-        if self.js_rendering:
-            r.html.render() # type: ignore
+        d = pq(url=input_data.url, opener=lambda url, **_: requests.get(url).text) # type: ignore
         return {
-            "text": r.html.text, # type: ignore
-            "links": r.html.links # type: ignore
+            "text": d.text(), # type: ignore
+            "links": list({a.attrib['href'] for a in d("a") if 'href' in a.attrib}) # type: ignore
         }
