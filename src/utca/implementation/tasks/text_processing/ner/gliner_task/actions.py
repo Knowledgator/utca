@@ -20,27 +20,39 @@ class GLiNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
 
             "chunks_starts" (List[int]): Chunks start positions. Used by postprocessor;
                 
+            "flat_ner" (bool): Whether to use flat NER;
+
             "threshold" (float): Minimal score for an entity to put into output;
+        
+            "multi_label" (bool): Whether to allow multiple labels per input;
     """
 
     def __init__(
         self, 
         sents_batch: int=10,
+        flat_ner: bool=True,
         threshold: float=0.5,
+        multi_label: bool=False,
         name: Optional[str]=None,
     ) -> None:
         """
         Args:
             sents_batch (int): Chunks size in sentences. Defaults to 10.
 
-            threshold (float): Minimial score to put entities into the output.
+            flat_ner (bool): Whether to use flat NER. Defaults to True.
+
+            threshold (float): Minimial score to put entities into the output. Defaults to 0.5.
+            
+            multi_label (bool): Whether to allow multiple labels per input. Defaults to False.
 
             name (Optional[str], optional): Name for identification. If equals to None,
                 class name will be used. Defaults to None.
         """
         super().__init__(name)
-        self.threshold = threshold
         self.sents_batch = sents_batch
+        self.flat_ner = flat_ner
+        self.threshold = threshold
+        self.multi_label = multi_label
 
     
     def get_last_sentence_id(self, i: int, sentences_len: int) -> int:
@@ -78,7 +90,11 @@ class GLiNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
 
                 "chunks_starts" (List[int]): Chunks start positions. Used by postprocessor;
                 
+                "flat_ner" (bool): Whether to use flat NER;
+
                 "threshold" (float): Minimal score for an entity to put into output;
+            
+                "multi_label" (bool): Whether to allow multiple labels per input;
         """
         chunks, chunks_starts = (
             self.chunkanize(input_data["text"])
@@ -86,7 +102,9 @@ class GLiNERPreprocessor(Action[Dict[str, Any], Dict[str, Any]]):
         return {
             "texts": chunks,
             "chunks_starts": chunks_starts,
+            "flat_ner": self.flat_ner,
             "threshold": self.threshold,
+            "multi_label": self.multi_label,
         }
 
 

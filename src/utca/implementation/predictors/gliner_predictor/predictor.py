@@ -70,9 +70,12 @@ class GLiNERPredictor(
         """
         if not input_data.labels:
             return {"output": [[]]*len(input_data.texts)}
-        labels = set(input_data.labels)
         texts = input_data.texts
-        outputs = self.model.batch_predict_entities(texts=texts, labels=labels) # type: ignore
+        labels = set(input_data.labels)
+        flat_ner = input_data.flat_ner
+        threshold = input_data.threshold
+        multi_label = input_data.multi_label
+        outputs = self.model.batch_predict_entities(texts=texts, labels=labels, flat_ner=flat_ner, threshold=threshold, multi_label=multi_label) # type: ignore
         return ensure_dict(outputs)
 
 

@@ -35,8 +35,9 @@ class GLiNERPredictorInput(IOModel):
     """
     texts: List[str]
     labels: List[str]
+    flat_ner: bool = True
     threshold: float = 0.5
-
+    multi_label: bool = False
 
 
 class GLiNERPredictorOutput(IOModel):
